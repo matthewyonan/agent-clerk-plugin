@@ -60,11 +60,11 @@ jQuery(function($) {
 
     $('#lifetime-license-cta').on('click', function() {
         $.post(agentclerk.ajaxUrl, {
-            action: 'agentclerk_get_license_checkout',
+            action: 'agentclerk_lifetime_checkout',
             nonce: agentclerk.nonce
         }, function(resp) {
-            if (resp.success && resp.data.url) {
-                window.location.href = resp.data.url;
+            if (resp.success && resp.data.checkoutUrl) {
+                window.location.href = resp.data.checkoutUrl;
             }
         });
     });
