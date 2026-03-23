@@ -82,14 +82,14 @@ jQuery(function($) {
     $('#period-all').on('click', function() { period = 'all'; loadSales(); });
 
     $('#lifetime-cta').on('click', function() {
-        $.post(agentclerk.ajaxUrl, { action: 'agentclerk_get_license_checkout', nonce: agentclerk.nonce }, function(r) {
-            if (r.success && r.data.url) window.location.href = r.data.url;
+        $.post(agentclerk.ajaxUrl, { action: 'agentclerk_lifetime_checkout', nonce: agentclerk.nonce }, function(r) {
+            if (r.success && r.data.checkoutUrl) window.location.href = r.data.checkoutUrl;
         });
     });
 
     $('#update-card').on('click', function() {
-        $.post(agentclerk.ajaxUrl, { action: 'agentclerk_get_billing_portal', nonce: agentclerk.nonce }, function(r) {
-            if (r.success && r.data.url) window.location.href = r.data.url;
+        $.post(agentclerk.ajaxUrl, { action: 'agentclerk_card_update', nonce: agentclerk.nonce }, function(r) {
+            if (r.success && r.data.portalUrl) window.location.href = r.data.portalUrl;
         });
     });
 });

@@ -173,7 +173,7 @@ class AgentClerk_Admin {
         }
 
         $tier       = isset( $_POST['tier'] ) ? sanitize_text_field( wp_unslash( $_POST['tier'] ) ) : '';
-        $payment_id = isset( $_POST['payment_method_id'] ) ? sanitize_text_field( wp_unslash( $_POST['payment_method_id'] ) ) : '';
+        $payment_id = isset( $_POST['stripe_payment_method_id'] ) ? sanitize_text_field( wp_unslash( $_POST['stripe_payment_method_id'] ) ) : '';
         $api_key    = isset( $_POST['api_key'] ) ? sanitize_text_field( wp_unslash( $_POST['api_key'] ) ) : '';
 
         if ( ! in_array( $tier, [ 'byok', 'turnkey' ], true ) ) {
@@ -213,20 +213,27 @@ class AgentClerk_Admin {
         if ( ! empty( $result['stripeCustomerId'] ) ) {
             update_option( 'agentclerk_stripe_customer_id', $result['stripeCustomerId'] );
         }
+        if ( ! empty( $result['cardLast4'] ) ) {
+            update_option( 'agentclerk_billing_card_last4', $result['cardLast4'] );
+        }
 
         if ( $tier === 'turnkey' ) {
-            $checkout = AgentClerk::backend_request( '/billing/turnkey-checkout', [
-                'method' => 'POST',
-                'body'   => [
-                    'successUrl' => admin_url( 'admin.php?page=agentclerk-onboarding&turnkey_success=1' ),
-                    'cancelUrl'  => admin_url( 'admin.php?page=agentclerk-onboarding&turnkey_cancel=1' ),
+            $checkout = wp_remote_post( AGENTCLERK_BACKEND_URL . '/billing/turnkey-checkout', [
+                'headers' => [
+                    'X-AgentClerk-Secret' => $result['installSecret'],
+                    'X-AgentClerk-Site'   => home_url(),
+                    'Content-Type'        => 'application/json',
                 ],
+                'body' => wp_json_encode( [
+                    'successUrl' => admin_url( 'admin.php?page=agentclerk&step=2&turnkey_success=1' ),
+                    'cancelUrl'  => admin_url( 'admin.php?page=agentclerk&step=1&turnkey_cancelled=1' ),
+                ] ),
             ] );
 
             if ( ! is_wp_error( $checkout ) ) {
                 $checkout_body = json_decode( wp_remote_retrieve_body( $checkout ), true );
-                if ( ! empty( $checkout_body['url'] ) ) {
-                    wp_send_json_success( [ 'redirect' => $checkout_body['url'] ] );
+                if ( ! empty( $checkout_body['checkoutUrl'] ) ) {
+                    wp_send_json_success( [ 'redirect' => $checkout_body['checkoutUrl'] ] );
                     return;
                 }
             }

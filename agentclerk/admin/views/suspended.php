@@ -27,11 +27,11 @@ jQuery(function($) {
     $('#update-payment').on('click', function() {
         $(this).prop('disabled', true).text('Loading...');
         $.post(agentclerk.ajaxUrl, {
-            action: 'agentclerk_get_billing_portal',
+            action: 'agentclerk_card_update',
             nonce: agentclerk.nonce
         }, function(r) {
-            if (r.success && r.data.url) {
-                window.location.href = r.data.url;
+            if (r.success && r.data.portalUrl) {
+                window.location.href = r.data.portalUrl;
             } else {
                 alert('Could not load billing portal. Please try again.');
                 $('#update-payment').prop('disabled', false).text('Update Payment Card');

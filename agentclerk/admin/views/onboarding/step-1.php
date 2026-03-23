@@ -3,7 +3,7 @@
     <h1>AgentClerk Setup — Step 1: Choose Your Plan</h1>
     <p>Select how you'd like to power your AI agent.</p>
 
-    <?php if ( isset( $_GET['turnkey_cancel'] ) ) : ?>
+    <?php if ( isset( $_GET['turnkey_cancelled'] ) ) : ?>
         <div class="notice notice-warning"><p>Payment was cancelled. Please try again.</p></div>
     <?php endif; ?>
 
@@ -147,7 +147,7 @@ jQuery(function($) {
             action: 'agentclerk_register_install',
             nonce: agentclerk.nonce,
             tier: tier,
-            payment_method_id: paymentMethodId,
+            stripe_payment_method_id: paymentMethodId,
             api_key: apiKey
         }, function(resp) {
             if (resp.success) {
