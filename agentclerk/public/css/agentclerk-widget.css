@@ -1,0 +1,309 @@
+/* AgentClerk Widget Styles */
+
+/* Floating Button */
+.agentclerk-widget-btn {
+    position: fixed;
+    bottom: 20px;
+    z-index: 99999;
+    background: #4f46e5;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.agentclerk-widget-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.5);
+}
+
+/* Widget Panel */
+.agentclerk-widget-panel {
+    position: fixed;
+    bottom: 80px;
+    z-index: 99999;
+    width: 380px;
+    max-height: 520px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow: hidden;
+}
+
+.agentclerk-widget-header {
+    background: #4f46e5;
+    color: #fff;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.agentclerk-widget-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+}
+
+.agentclerk-widget-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    min-height: 200px;
+    max-height: 340px;
+}
+
+.agentclerk-widget-input-wrap {
+    display: flex;
+    border-top: 1px solid #e5e7eb;
+    padding: 8px;
+    gap: 8px;
+}
+
+.agentclerk-widget-input-wrap input {
+    flex: 1;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    outline: none;
+}
+.agentclerk-widget-input-wrap input:focus {
+    border-color: #4f46e5;
+}
+
+.agentclerk-widget-input-wrap button {
+    background: #4f46e5;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+}
+.agentclerk-widget-input-wrap button:hover {
+    background: #4338ca;
+}
+
+/* Escalation Panel */
+.agentclerk-widget-escalation {
+    padding: 12px;
+    border-top: 1px solid #e5e7eb;
+    background: #fffbeb;
+}
+.agentclerk-widget-escalation p {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: #92400e;
+}
+.agentclerk-widget-escalation input {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    box-sizing: border-box;
+}
+.agentclerk-widget-escalation button {
+    background: #f59e0b;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Messages */
+.agentclerk-msg {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.4;
+    max-width: 85%;
+    word-wrap: break-word;
+}
+.agentclerk-msg-user {
+    background: #4f46e5;
+    color: #fff;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+}
+.agentclerk-msg-assistant {
+    background: #f3f4f6;
+    color: #1f2937;
+    border-bottom-left-radius: 4px;
+}
+
+/* Product Page Embed */
+.agentclerk-embed {
+    margin-top: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 400px;
+}
+.agentclerk-embed-header {
+    background: #4f46e5;
+    color: #fff;
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 14px;
+}
+.agentclerk-embed-messages {
+    min-height: 120px;
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 10px;
+}
+.agentclerk-embed-input {
+    display: flex;
+    border-top: 1px solid #e5e7eb;
+    padding: 6px;
+    gap: 6px;
+}
+.agentclerk-embed-input input {
+    flex: 1;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    outline: none;
+}
+.agentclerk-embed-input button {
+    background: #4f46e5;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Full Page */
+.agentclerk-fullpage {
+    max-width: 700px;
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.agentclerk-fullpage-header {
+    background: #4f46e5;
+    color: #fff;
+    padding: 16px 20px;
+    border-radius: 12px 12px 0 0;
+}
+.agentclerk-fullpage-header h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #fff;
+}
+.agentclerk-fullpage-messages {
+    min-height: 400px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-top: none;
+    background: #fafafa;
+}
+.agentclerk-fullpage-input {
+    display: flex;
+    border: 1px solid #e5e7eb;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    padding: 10px;
+    gap: 8px;
+    background: #fff;
+}
+.agentclerk-fullpage-input input {
+    flex: 1;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 15px;
+    outline: none;
+}
+.agentclerk-fullpage-input input:focus {
+    border-color: #4f46e5;
+}
+.agentclerk-fullpage-input button {
+    background: #4f46e5;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+#agentclerk-escalation {
+    margin-top: 12px;
+    padding: 12px;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+}
+#agentclerk-escalation input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    margin: 8px 0;
+    box-sizing: border-box;
+}
+#agentclerk-escalation button {
+    background: #f59e0b;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Support embed */
+.agentclerk-support-chat {
+    margin-top: 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+    max-width: 600px;
+}
+.agentclerk-support-chat .agentclerk-input-wrap {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+.agentclerk-support-chat input[type="text"] {
+    flex: 1;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 8px;
+}
+.agentclerk-support-chat button {
+    background: #4f46e5;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    cursor: pointer;
+}
