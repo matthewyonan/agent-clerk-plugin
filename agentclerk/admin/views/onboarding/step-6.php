@@ -87,4 +87,5 @@ if ( ! function_exists( 'ac_readiness_color' ) ) {
             </div>
         </div>
     </div>
+    <div style="text-align:right;padding:20px 0 4px;font-size:11px;color:var(--ac-text3)">&copy; 2026 &mdash; A Brilliant Way</div>
 </div>

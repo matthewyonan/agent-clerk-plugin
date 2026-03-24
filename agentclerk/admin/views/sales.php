@@ -63,4 +63,5 @@ $fee_rate = ( $tier === 'turnkey' ) ? '1.5% or $1.99 min' : '1% or $1.00 min';
             </tbody>
         </table>
     </div>
+    <div style="text-align:right;padding:20px 0 4px;font-size:11px;color:var(--ac-text3)">&copy; 2026 &mdash; A Brilliant Way</div>
 </div>

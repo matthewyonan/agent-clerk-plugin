@@ -90,4 +90,5 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <button class="ac-btn ac-btn-e ac-btn-lg" id="ac-submit-byok"><?php echo esc_html( 'Scan my site and start setup' ); ?> &rarr;</button>
         <span style="font-size:12px;color:var(--text3)"><?php echo esc_html( 'Takes 1–2 minutes' ); ?></span>
     </div>
+    <div style="text-align:right;padding:20px 0 4px;font-size:11px;color:var(--ac-text3)">&copy; 2026 &mdash; A Brilliant Way</div>
 </div>
