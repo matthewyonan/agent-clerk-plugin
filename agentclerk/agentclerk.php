@@ -3,7 +3,7 @@
  * Plugin Name: AgentClerk
  * Plugin URI: https://agentclerk.io
  * Description: AI seller agent for WooCommerce. Answers buyers, closes sales, handles support automatically.
- * Version: 1.0.1
+ * Version: 1.1.0
  * Author: AgentClerk
  * Author URI: https://agentclerk.io
  * License: GPL-2.0+
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'AGENTCLERK_VERSION', '1.0.1' );
+define( 'AGENTCLERK_VERSION', '1.1.0' );
 define( 'AGENTCLERK_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'AGENTCLERK_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'AGENTCLERK_BACKEND_URL', 'https://app.agentclerk.io/api' );
@@ -68,6 +68,7 @@ final class AgentClerk {
 		require_once AGENTCLERK_PLUGIN_DIR . 'includes/class-woocommerce.php';
 		require_once AGENTCLERK_PLUGIN_DIR . 'includes/class-conversations.php';
 		require_once AGENTCLERK_PLUGIN_DIR . 'includes/class-support.php';
+		require_once AGENTCLERK_PLUGIN_DIR . 'includes/class-updater.php';
 
 		if ( is_admin() ) {
 			require_once AGENTCLERK_PLUGIN_DIR . 'admin/class-admin.php';
@@ -98,6 +99,9 @@ final class AgentClerk {
 		}
 
 		AgentClerk_Widget::instance();
+
+		// Self-hosted update checker.
+		new AgentClerk_Updater();
 	}
 
 	/**
