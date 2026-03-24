@@ -500,13 +500,13 @@ class AgentClerk_Agent {
 			$data['tools'] = $tools;
 		}
 
-		$response = AgentClerk::backend_request( '/agent/chat', $data );
+		$response = AgentClerk::backend_request( '/agent/chat', array( 'method' => 'POST', 'body' => $data ) );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
 
-		$code = $response['code'] ?? 0;
+		$code = wp_remote_retrieve_response_code( $response );
 
 		if ( 402 === $code ) {
 			update_option( 'agentclerk_plugin_status', 'suspended' );
@@ -517,7 +517,7 @@ class AgentClerk_Agent {
 			return new WP_Error( 'backend_error', 'Backend returned status ' . $code );
 		}
 
-		return $response['body'] ?? array();
+		return json_decode( wp_remote_retrieve_body( $response ), true );
 	}
 
 	/**

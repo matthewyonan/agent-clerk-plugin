@@ -255,15 +255,18 @@ class AgentClerk_Support {
 			"Do not answer questions about the seller's own products or customers -- only about AgentClerk plugin functionality.";
 
 		$response = AgentClerk::backend_request( '/support/chat', array(
-			'system'   => $system,
-			'messages' => $history,
+			'method' => 'POST',
+			'body'   => array(
+				'system'   => $system,
+				'messages' => $history,
+			),
 		) );
 
 		if ( is_wp_error( $response ) ) {
 			wp_send_json_error( array( 'message' => $response->get_error_message() ) );
 		}
 
-		$body = $response['body'] ?? array();
+		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 		$text = '';
 
 		// Handle standard Anthropic response format.

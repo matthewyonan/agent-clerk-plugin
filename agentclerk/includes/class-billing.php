@@ -53,13 +53,13 @@ class AgentClerk_Billing {
 	 * Poll the backend for current billing status (cron hook).
 	 */
 	public function poll_status() {
-		$response = AgentClerk::backend_request( '/billing/status', array(), 'GET' );
+		$response = AgentClerk::backend_request( '/billing/status', array( 'method' => 'GET' ) );
 
 		if ( is_wp_error( $response ) ) {
 			return;
 		}
 
-		$data = $response['body'] ?? array();
+		$data = json_decode( wp_remote_retrieve_body( $response ), true );
 		if ( empty( $data ) ) {
 			return;
 		}
@@ -138,15 +138,18 @@ class AgentClerk_Billing {
 		}
 
 		$response = AgentClerk::backend_request( '/license/checkout', array(
-			'successUrl' => admin_url( 'admin.php?page=agentclerk-sales&license_success=1&nonce=' . wp_create_nonce( 'agentclerk_license' ) ),
-			'cancelUrl'  => admin_url( 'admin.php?page=agentclerk-sales' ),
+			'method' => 'POST',
+			'body'   => array(
+				'successUrl' => admin_url( 'admin.php?page=agentclerk-sales&license_success=1&nonce=' . wp_create_nonce( 'agentclerk_license' ) ),
+				'cancelUrl'  => admin_url( 'admin.php?page=agentclerk-sales' ),
+			),
 		) );
 
 		if ( is_wp_error( $response ) ) {
 			wp_send_json_error( array( 'message' => $response->get_error_message() ) );
 		}
 
-		$data = $response['body'] ?? array();
+		$data = json_decode( wp_remote_retrieve_body( $response ), true );
 		wp_send_json_success( array( 'checkoutUrl' => $data['checkoutUrl'] ?? '' ) );
 	}
 
@@ -161,14 +164,17 @@ class AgentClerk_Billing {
 		}
 
 		$response = AgentClerk::backend_request( '/billing/card-update', array(
-			'returnUrl' => admin_url( 'admin.php?page=agentclerk-sales' ),
+			'method' => 'POST',
+			'body'   => array(
+				'returnUrl' => admin_url( 'admin.php?page=agentclerk-sales' ),
+			),
 		) );
 
 		if ( is_wp_error( $response ) ) {
 			wp_send_json_error( array( 'message' => $response->get_error_message() ) );
 		}
 
-		$data = $response['body'] ?? array();
+		$data = json_decode( wp_remote_retrieve_body( $response ), true );
 		wp_send_json_success( array( 'portalUrl' => $data['portalUrl'] ?? '' ) );
 	}
 
@@ -196,13 +202,13 @@ class AgentClerk_Billing {
 	 * Activate the lifetime license via the backend.
 	 */
 	private function activate_license() {
-		$response = AgentClerk::backend_request( '/license/activate', array() );
+		$response = AgentClerk::backend_request( '/license/activate', array( 'method' => 'POST', 'body' => array() ) );
 
 		if ( is_wp_error( $response ) ) {
 			return;
 		}
 
-		$data = $response['body'] ?? array();
+		$data = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		if ( ! empty( $data['licenseKey'] ) ) {
 			update_option( 'agentclerk_license_status', 'active' );

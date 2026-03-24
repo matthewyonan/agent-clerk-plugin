@@ -180,12 +180,15 @@ class AgentClerk_WooCommerce {
 		$buyer_type = $this->get_buyer_type_for_order( $order_id );
 
 		AgentClerk::backend_request( '/fees', array(
-			'wcOrderId'   => $order_id,
-			'productName' => $product_name,
-			'productId'   => $product_id,
-			'saleAmount'  => $sale_amount,
-			'feeAmount'   => $fee,
-			'buyerType'   => $buyer_type,
+			'method' => 'POST',
+			'body'   => array(
+				'wcOrderId'   => $order_id,
+				'productName' => $product_name,
+				'productId'   => $product_id,
+				'saleAmount'  => $sale_amount,
+				'feeAmount'   => $fee,
+				'buyerType'   => $buyer_type,
+			),
 		) );
 
 		// Update local accrued fees.

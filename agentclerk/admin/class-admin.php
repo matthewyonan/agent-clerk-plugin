@@ -98,6 +98,7 @@ class AgentClerk_Admin {
 	public function register_menus() {
 		$status = get_option( 'agentclerk_plugin_status', 'onboarding' );
 
+		// Top-level menu. Renders onboarding or dashboard based on status.
 		add_menu_page(
 			'AgentClerk',
 			'AgentClerk',
@@ -108,38 +109,19 @@ class AgentClerk_Admin {
 			56
 		);
 
-		// Suspended — replace everything with the suspended view.
+		// Suspended: only show Overview (which renders the suspended view).
 		if ( 'suspended' === $status ) {
-			remove_submenu_page( 'agentclerk', 'agentclerk' );
-			add_submenu_page(
-				'agentclerk',
-				'Suspended',
-				'Account Suspended',
-				'manage_options',
-				'agentclerk',
-				array( $this, 'render_suspended' )
-			);
+			add_submenu_page( 'agentclerk', 'Overview', 'Overview', 'manage_options', 'agentclerk' );
 			return;
 		}
 
-		// Onboarding — show Setup plus all other menus.
-		if ( 'onboarding' === $status ) {
-			add_submenu_page(
-				'agentclerk',
-				'Setup',
-				'Setup',
-				'manage_options',
-				'agentclerk-onboarding',
-				array( $this, 'render_onboarding' )
-			);
-		}
-
-		// Active & onboarding — full navigation.
-		add_submenu_page( 'agentclerk', 'Dashboard', 'Dashboard', 'manage_options', 'agentclerk' );
+		// Standard sidebar: Overview, Conversations, Settings, Sales, Support.
+		// The first submenu with the same slug as the parent replaces the auto-generated duplicate.
+		add_submenu_page( 'agentclerk', 'Overview', 'Overview', 'manage_options', 'agentclerk' );
 		add_submenu_page( 'agentclerk', 'Conversations', 'Conversations', 'manage_options', 'agentclerk-conversations', array( $this, 'render_conversations' ) );
 		add_submenu_page( 'agentclerk', 'Settings', 'Settings', 'manage_options', 'agentclerk-settings', array( $this, 'render_settings' ) );
 		add_submenu_page( 'agentclerk', 'Sales', 'Sales', 'manage_options', 'agentclerk-sales', array( $this, 'render_sales' ) );
-		add_submenu_page( 'agentclerk', 'AgentClerk Help', 'Support', 'manage_options', 'agentclerk-support', array( $this, 'render_support' ) );
+		add_submenu_page( 'agentclerk', 'Support', 'Support', 'manage_options', 'agentclerk-support', array( $this, 'render_support' ) );
 	}
 
 	/* ───────────────────────────────────────────────
@@ -283,8 +265,8 @@ class AgentClerk_Admin {
 	/**
 	 * 1. Register a new install with the AgentClerk backend.
 	 *
-	 * Sends site_url, admin_email, tier, wp_version, wc_version, php_version.
-	 * Saves install_secret and stripe_publishable_key from the response.
+	 * Sends siteUrl, adminEmail, tier, wpVersion, wcVersion, phpVersion.
+	 * Saves installSecret and stripePublishableKey from the response.
 	 */
 	public function register_install() {
 		check_ajax_referer( 'agentclerk_nonce', 'nonce' );
@@ -308,43 +290,43 @@ class AgentClerk_Admin {
 		$wc_version = defined( 'WC_VERSION' ) ? WC_VERSION : '';
 
 		$body = array(
-			'site_url'                 => get_site_url(),
-			'admin_email'              => sanitize_email( get_option( 'admin_email' ) ),
-			'tier'                     => $tier,
-			'wp_version'               => get_bloginfo( 'version' ),
-			'wc_version'               => $wc_version,
-			'php_version'              => phpversion(),
-			'stripe_payment_method_id' => $payment_id,
+			'siteUrl'              => get_site_url(),
+			'adminEmail'           => sanitize_email( get_option( 'admin_email' ) ),
+			'tier'                 => $tier,
+			'wpVersion'            => get_bloginfo( 'version' ),
+			'wcVersion'            => $wc_version,
+			'phpVersion'           => phpversion(),
+			'stripePaymentMethodId' => $payment_id,
 		);
 
-		$response = AgentClerk::backend_request( '/installs', $body, 'POST' );
+		$response = AgentClerk::backend_request( '/installs/register', array( 'method' => 'POST', 'body' => $body ) );
 
 		if ( is_wp_error( $response ) ) {
 			wp_send_json_error( array( 'message' => $response->get_error_message() ) );
 		}
 
-		$code   = $response['code'] ?? 0;
-		$result = $response['body'] ?? array();
+		$code   = wp_remote_retrieve_response_code( $response );
+		$result = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		if ( $code < 200 || $code >= 300 ) {
 			wp_send_json_error( array( 'message' => 'Backend registration failed. Status: ' . $code ) );
 		}
 
-		if ( empty( $result['install_secret'] ) ) {
+		if ( empty( $result['installSecret'] ) ) {
 			wp_send_json_error( array( 'message' => 'Registration failed. No install secret returned.' ) );
 		}
 
-		update_option( 'agentclerk_install_secret', sanitize_text_field( $result['install_secret'] ) );
+		update_option( 'agentclerk_install_secret', sanitize_text_field( $result['installSecret'] ) );
 		update_option( 'agentclerk_tier', $tier );
 
-		if ( ! empty( $result['stripe_publishable_key'] ) ) {
-			update_option( 'agentclerk_stripe_publishable_key', sanitize_text_field( $result['stripe_publishable_key'] ) );
+		if ( ! empty( $result['stripePublishableKey'] ) ) {
+			update_option( 'agentclerk_stripe_publishable_key', sanitize_text_field( $result['stripePublishableKey'] ) );
 		}
-		if ( ! empty( $result['stripe_customer_id'] ) ) {
-			update_option( 'agentclerk_stripe_customer_id', sanitize_text_field( $result['stripe_customer_id'] ) );
+		if ( ! empty( $result['stripeCustomerId'] ) ) {
+			update_option( 'agentclerk_stripe_customer_id', sanitize_text_field( $result['stripeCustomerId'] ) );
 		}
-		if ( ! empty( $result['card_last4'] ) ) {
-			update_option( 'agentclerk_billing_card_last4', sanitize_text_field( $result['card_last4'] ) );
+		if ( ! empty( $result['cardLast4'] ) ) {
+			update_option( 'agentclerk_billing_card_last4', sanitize_text_field( $result['cardLast4'] ) );
 		}
 
 		// Turnkey tier — redirect to Stripe checkout.
@@ -354,10 +336,10 @@ class AgentClerk_Admin {
 				'cancelUrl'  => admin_url( 'admin.php?page=agentclerk&step=1&turnkey_cancelled=1' ),
 			);
 
-			$checkout = AgentClerk::backend_request( '/billing/turnkey-checkout', $checkout_data, 'POST' );
+			$checkout = AgentClerk::backend_request( '/billing/turnkey-checkout', array( 'method' => 'POST', 'body' => $checkout_data ) );
 
 			if ( ! is_wp_error( $checkout ) ) {
-				$checkout_body = $checkout['body'] ?? array();
+				$checkout_body = json_decode( wp_remote_retrieve_body( $checkout ), true );
 				if ( ! empty( $checkout_body['checkoutUrl'] ) ) {
 					wp_send_json_success( array( 'redirect' => $checkout_body['checkoutUrl'] ) );
 					return;
@@ -695,19 +677,22 @@ class AgentClerk_Admin {
 
 		// Post summary to backend.
 		AgentClerk::backend_request( '/installs/summary', array(
-			'business_overview'     => $business_overview,
-			'product_catalog'       => $products,
-			'config'                => $config,
-			'placement'             => $placement,
-			'quality_scores'        => array(
-				'context_completeness'      => $context_completeness,
-				'catalog_completeness'      => $catalog_completeness,
-				'policy_completeness'       => $policy_completeness,
-				'support_file_completeness' => $support_file_completeness,
+			'method' => 'POST',
+			'body'   => array(
+				'business_overview'     => $business_overview,
+				'product_catalog'       => $products,
+				'config'                => $config,
+				'placement'             => $placement,
+				'quality_scores'        => array(
+					'context_completeness'      => $context_completeness,
+					'catalog_completeness'      => $catalog_completeness,
+					'policy_completeness'       => $policy_completeness,
+					'support_file_completeness' => $support_file_completeness,
+				),
+				'friction_observations' => $friction_observations,
+				'tier'                  => get_option( 'agentclerk_tier', '' ),
 			),
-			'friction_observations' => $friction_observations,
-			'tier'                  => get_option( 'agentclerk_tier', '' ),
-		), 'POST' );
+		) );
 
 		// Schedule billing status poll.
 		if ( ! wp_next_scheduled( 'agentclerk_poll_billing_status' ) ) {
@@ -1000,20 +985,23 @@ class AgentClerk_Admin {
 		$system = 'You are the AgentClerk plugin support assistant. Help the seller with questions about configuring and using the AgentClerk WordPress plugin. Do not answer questions about the seller\'s own products or customers — only about AgentClerk plugin functionality.';
 
 		$response = AgentClerk::backend_request( '/agent/chat', array(
-			'system'   => $system,
-			'messages' => $history,
-		), 'POST' );
+			'method' => 'POST',
+			'body'   => array(
+				'system'   => $system,
+				'messages' => $history,
+			),
+		) );
 
 		if ( is_wp_error( $response ) ) {
 			wp_send_json_error( array( 'message' => $response->get_error_message() ) );
 		}
 
-		$code = $response['code'] ?? 0;
+		$code = wp_remote_retrieve_response_code( $response );
 		if ( $code < 200 || $code >= 300 ) {
 			wp_send_json_error( array( 'message' => 'Support service unavailable. Status: ' . $code ) );
 		}
 
-		$body = $response['body'] ?? array();
+		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 		$text = $body['content'][0]['text'] ?? $body['message'] ?? '';
 
 		wp_send_json_success( array( 'message' => $text ) );
@@ -1029,20 +1017,23 @@ class AgentClerk_Admin {
 		}
 
 		$response = AgentClerk::backend_request( '/license/checkout', array(
-			'successUrl' => admin_url( 'admin.php?page=agentclerk-sales&license_success=1&nonce=' . wp_create_nonce( 'agentclerk_license' ) ),
-			'cancelUrl'  => admin_url( 'admin.php?page=agentclerk-sales' ),
-		), 'POST' );
+			'method' => 'POST',
+			'body'   => array(
+				'successUrl' => admin_url( 'admin.php?page=agentclerk-sales&license_success=1&nonce=' . wp_create_nonce( 'agentclerk_license' ) ),
+				'cancelUrl'  => admin_url( 'admin.php?page=agentclerk-sales' ),
+			),
+		) );
 
 		if ( is_wp_error( $response ) ) {
 			wp_send_json_error( array( 'message' => $response->get_error_message() ) );
 		}
 
-		$code = $response['code'] ?? 0;
+		$code = wp_remote_retrieve_response_code( $response );
 		if ( $code < 200 || $code >= 300 ) {
 			wp_send_json_error( array( 'message' => 'Could not create checkout session. Status: ' . $code ) );
 		}
 
-		$data = $response['body'] ?? array();
+		$data = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		if ( empty( $data['checkoutUrl'] ) ) {
 			wp_send_json_error( array( 'message' => 'No checkout URL returned.' ) );
@@ -1061,19 +1052,22 @@ class AgentClerk_Admin {
 		}
 
 		$response = AgentClerk::backend_request( '/billing/card-update', array(
-			'returnUrl' => admin_url( 'admin.php?page=agentclerk-sales' ),
-		), 'POST' );
+			'method' => 'POST',
+			'body'   => array(
+				'returnUrl' => admin_url( 'admin.php?page=agentclerk-sales' ),
+			),
+		) );
 
 		if ( is_wp_error( $response ) ) {
 			wp_send_json_error( array( 'message' => $response->get_error_message() ) );
 		}
 
-		$code = $response['code'] ?? 0;
+		$code = wp_remote_retrieve_response_code( $response );
 		if ( $code < 200 || $code >= 300 ) {
 			wp_send_json_error( array( 'message' => 'Could not initiate card update. Status: ' . $code ) );
 		}
 
-		$data = $response['body'] ?? array();
+		$data = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		if ( empty( $data['portalUrl'] ) ) {
 			wp_send_json_error( array( 'message' => 'No portal URL returned.' ) );
@@ -1091,18 +1085,18 @@ class AgentClerk_Admin {
 			wp_send_json_error( array( 'message' => 'Unauthorized.' ), 403 );
 		}
 
-		$response = AgentClerk::backend_request( '/license/activate', array(), 'POST' );
+		$response = AgentClerk::backend_request( '/license/activate', array( 'method' => 'POST', 'body' => array() ) );
 
 		if ( is_wp_error( $response ) ) {
 			wp_send_json_error( array( 'message' => $response->get_error_message() ) );
 		}
 
-		$code = $response['code'] ?? 0;
+		$code = wp_remote_retrieve_response_code( $response );
 		if ( $code < 200 || $code >= 300 ) {
 			wp_send_json_error( array( 'message' => 'License activation failed. Status: ' . $code ) );
 		}
 
-		$data = $response['body'] ?? array();
+		$data = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		if ( ! empty( $data['licenseKey'] ) ) {
 			update_option( 'agentclerk_license_status', 'active' );
