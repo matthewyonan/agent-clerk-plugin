@@ -108,19 +108,6 @@ class AgentClerk_Admin {
 			56
 		);
 
-		// Onboarding — only the setup submenu.
-		if ( 'onboarding' === $status ) {
-			add_submenu_page(
-				'agentclerk',
-				'Setup',
-				'Setup',
-				'manage_options',
-				'agentclerk-onboarding',
-				array( $this, 'render_onboarding' )
-			);
-			return;
-		}
-
 		// Suspended — replace everything with the suspended view.
 		if ( 'suspended' === $status ) {
 			remove_submenu_page( 'agentclerk', 'agentclerk' );
@@ -135,14 +122,24 @@ class AgentClerk_Admin {
 			return;
 		}
 
-		// Active — full navigation.
-		if ( 'active' === $status ) {
-			add_submenu_page( 'agentclerk', 'Dashboard', 'Dashboard', 'manage_options', 'agentclerk' );
-			add_submenu_page( 'agentclerk', 'Conversations', 'Conversations', 'manage_options', 'agentclerk-conversations', array( $this, 'render_conversations' ) );
-			add_submenu_page( 'agentclerk', 'Settings', 'Settings', 'manage_options', 'agentclerk-settings', array( $this, 'render_settings' ) );
-			add_submenu_page( 'agentclerk', 'Sales', 'Sales', 'manage_options', 'agentclerk-sales', array( $this, 'render_sales' ) );
-			add_submenu_page( 'agentclerk', 'AgentClerk Help', 'Support', 'manage_options', 'agentclerk-support', array( $this, 'render_support' ) );
+		// Onboarding — show Setup plus all other menus.
+		if ( 'onboarding' === $status ) {
+			add_submenu_page(
+				'agentclerk',
+				'Setup',
+				'Setup',
+				'manage_options',
+				'agentclerk-onboarding',
+				array( $this, 'render_onboarding' )
+			);
 		}
+
+		// Active & onboarding — full navigation.
+		add_submenu_page( 'agentclerk', 'Dashboard', 'Dashboard', 'manage_options', 'agentclerk' );
+		add_submenu_page( 'agentclerk', 'Conversations', 'Conversations', 'manage_options', 'agentclerk-conversations', array( $this, 'render_conversations' ) );
+		add_submenu_page( 'agentclerk', 'Settings', 'Settings', 'manage_options', 'agentclerk-settings', array( $this, 'render_settings' ) );
+		add_submenu_page( 'agentclerk', 'Sales', 'Sales', 'manage_options', 'agentclerk-sales', array( $this, 'render_sales' ) );
+		add_submenu_page( 'agentclerk', 'AgentClerk Help', 'Support', 'manage_options', 'agentclerk-support', array( $this, 'render_support' ) );
 	}
 
 	/* ───────────────────────────────────────────────
