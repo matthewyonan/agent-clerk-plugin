@@ -51,7 +51,7 @@ class AgentClerk_Activator {
 			buyer_type ENUM('human','agent') NOT NULL DEFAULT 'human',
 			first_message TEXT,
 			product_name VARCHAR(255) DEFAULT NULL,
-			product_ids JSON,
+			product_ids LONGTEXT,
 			outcome ENUM('browsing','quote','purchased','setup','support','abandoned','escalated') NOT NULL DEFAULT 'browsing',
 			quote_link_id VARCHAR(64) DEFAULT NULL,
 			sale_amount DECIMAL(10,2) DEFAULT NULL,
