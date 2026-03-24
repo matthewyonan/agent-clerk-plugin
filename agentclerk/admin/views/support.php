@@ -1,21 +1,27 @@
 <?php if ( ! defined( 'ABSPATH' ) ) exit; ?>
-<div class="wrap agentclerk-support">
-    <h1>Support</h1>
+<div class="wrap ac-wrap">
+    <div class="ac-pt">Support</div>
+    <div class="ac-ps">Manage escalated conversations and get help with the plugin.</div>
 
-    <div class="agentclerk-two-col">
-        <div class="agentclerk-col-left">
-            <h2>Escalated Conversations</h2>
-            <div id="escalation-list"></div>
+    <div class="ac-g2">
+        <div>
+            <div class="ac-card">
+                <div class="ac-card-head"><h2>Escalated Conversations</h2></div>
+                <div class="ac-card-body" id="escalation-list">
+                    <div class="ac-co sl"><span class="ac-co-i">&#8987;</span><span>Loading&hellip;</span></div>
+                </div>
+            </div>
         </div>
 
-        <div class="agentclerk-col-right">
-            <div class="agentclerk-card">
-                <h2>AgentClerk Plugin Help</h2>
-                <p>Need help with the plugin? Chat with our support assistant.</p>
-                <div id="support-chat-messages" class="agentclerk-chat-messages"></div>
-                <div class="agentclerk-chat-input">
-                    <input type="text" id="support-chat-input" placeholder="Ask about AgentClerk..." />
-                    <button class="button button-primary" id="support-chat-send">Send</button>
+        <div>
+            <div class="ac-card" style="display:flex;flex-direction:column">
+                <div class="ac-card-head"><h2>AgentClerk Plugin Help</h2></div>
+                <div class="ac-chat-shell" style="border:none;border-radius:0;flex:1">
+                    <div class="ac-msgs" id="support-msgs" style="height:320px"></div>
+                    <div class="ac-chat-inp-row">
+                        <input type="text" class="ac-chat-inp" id="support-input" placeholder="Ask about AgentClerk&hellip;">
+                        <button class="ac-send-btn" id="support-send">&#10148;</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -24,7 +30,7 @@
 
 <script>
 jQuery(function($) {
-    // Load escalations
+    // Escalations
     function loadEscalations() {
         $.get(agentclerk.ajaxUrl, {
             action: 'agentclerk_get_escalations',
@@ -33,68 +39,65 @@ jQuery(function($) {
             if (!r.success) return;
             var html = '';
             $.each(r.data.escalations, function(i, e) {
-                var readCls = e.read ? 'agentclerk-escalation-read' : 'agentclerk-escalation-unread';
-                html += '<div class="agentclerk-card ' + readCls + '" data-id="' + e.id + '">';
-                html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
-                html += '<strong>' + (e.email || 'No email') + '</strong>';
-                html += '<button class="button toggle-read" data-id="' + e.id + '">' + (e.read ? 'Mark Unread' : 'Mark Read') + '</button>';
+                var readCls = e.read ? 'read' : '';
+                html += '<div class="ac-escalation-card ' + readCls + '" data-id="' + e.id + '">';
+                html += '<div class="ac-fb" style="margin-bottom:6px">';
+                html += '<strong style="font-size:13px">' + (e.email || 'No email') + '</strong>';
+                html += '<button class="ac-btn ac-btn-g ac-btn-sm toggle-read" data-id="' + e.id + '">' + (e.read ? 'Mark Unread' : 'Mark Read') + '</button>';
                 html += '</div>';
-                html += '<p>' + $('<span>').text(e.first_message || '(no message)').html() + '</p>';
-                html += '<small>' + e.created_at + '</small>';
-                html += ' | <a href="#" class="view-transcript" data-id="' + e.id + '">View Transcript</a>';
+                html += '<div style="font-size:12px;color:var(--ac-text2);margin-bottom:4px">' + $('<span>').text(e.first_message || '(no message)').html() + '</div>';
+                html += '<div style="font-size:11px;color:var(--ac-text3)">' + e.created_at + '</div>';
                 html += '</div>';
             });
-            $('#escalation-list').html(html || '<p>No escalated conversations.</p>');
+            $('#escalation-list').html(html || '<div style="color:var(--ac-text3);font-size:13px;padding:10px 0">No escalated conversations.</div>');
         });
     }
 
     loadEscalations();
 
-    $(document).on('click', '.toggle-read', function() {
-        var id = $(this).data('id');
+    $(document).on('click', '.toggle-read', function(e) {
+        e.stopPropagation();
         $.post(agentclerk.ajaxUrl, {
             action: 'agentclerk_toggle_read',
             nonce: agentclerk.nonce,
-            conversation_id: id
+            conversation_id: $(this).data('id')
         }, function() { loadEscalations(); });
     });
 
-    // Plugin support chat
+    // Support chat
     var supportHistory = [];
-    var $msgs = $('#support-chat-messages');
-    var $input = $('#support-chat-input');
-
-    function addSupportMsg(role, text) {
-        var cls = role === 'user' ? 'agentclerk-msg-user' : 'agentclerk-msg-assistant';
-        $msgs.append('<div class="' + cls + '">' + $('<span>').text(text).html() + '</div>');
-        $msgs.scrollTop($msgs[0].scrollHeight);
+    function addMsg(role, text) {
+        var cls = role === 'assistant' ? 'ag' : 'us';
+        var av = role === 'assistant' ? 'AC' : 'You';
+        $('#support-msgs').append('<div class="ac-msg ' + cls + '"><div class="ac-mav">' + av + '</div><div class="ac-mbub">' + text + '</div></div>');
+        $('#support-msgs').scrollTop($('#support-msgs')[0].scrollHeight);
     }
 
-    addSupportMsg('assistant', 'Hi! I can help with AgentClerk plugin questions. What do you need help with?');
+    addMsg('assistant', 'Hi! I can help with AgentClerk plugin questions. What do you need help with?');
 
-    function sendSupportMsg() {
-        var text = $input.val().trim();
-        if (!text) return;
-        $input.val('');
-        addSupportMsg('user', text);
-        supportHistory.push({ role: 'user', content: text });
+    function sendSupport() {
+        var txt = $.trim($('#support-input').val());
+        if (!txt) return;
+        addMsg('user', txt);
+        supportHistory.push({ role: 'user', content: txt });
+        $('#support-input').val('');
 
         $.post(agentclerk.ajaxUrl, {
             action: 'agentclerk_support_chat',
             nonce: agentclerk.nonce,
-            message: text,
+            message: txt,
             history: JSON.stringify(supportHistory)
         }, function(r) {
             if (r.success) {
-                addSupportMsg('assistant', r.data.message);
+                addMsg('assistant', r.data.message);
                 supportHistory.push({ role: 'assistant', content: r.data.message });
             } else {
-                addSupportMsg('assistant', 'Error: ' + (r.data.message || 'Something went wrong.'));
+                addMsg('assistant', 'Error: ' + (r.data ? r.data.message : 'Something went wrong.'));
             }
         });
     }
 
-    $('#support-chat-send').on('click', sendSupportMsg);
-    $input.on('keypress', function(e) { if (e.which === 13) sendSupportMsg(); });
+    $('#support-send').on('click', sendSupport);
+    $('#support-input').on('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); sendSupport(); } });
 });
 </script>
