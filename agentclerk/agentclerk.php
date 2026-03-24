@@ -202,7 +202,9 @@ final class AgentClerk {
 	}
 }
 
-// Activation/deactivation hooks (must be registered before the class is instantiated).
+// Load activator early so it's available for activation hook.
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-activator.php';
+
 register_activation_hook( __FILE__, array( 'AgentClerk_Activator', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'AgentClerk_Activator', 'deactivate' ) );
 
