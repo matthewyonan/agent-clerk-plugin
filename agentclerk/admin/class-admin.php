@@ -43,6 +43,16 @@ class AgentClerk_Admin {
                 'agentclerk-onboarding',
                 [ $this, 'render_onboarding' ]
             );
+        } else {
+            // Register as hidden page so direct URL access never triggers "not allowed".
+            add_submenu_page(
+                null,
+                'Setup',
+                'Setup',
+                'manage_options',
+                'agentclerk-onboarding',
+                [ $this, 'render_onboarding' ]
+            );
         }
 
         if ( $status === 'suspended' ) {
@@ -105,6 +115,11 @@ class AgentClerk_Admin {
     }
 
     public function render_onboarding() {
+        $status = get_option( 'agentclerk_plugin_status', 'onboarding' );
+        if ( $status !== 'onboarding' ) {
+            wp_safe_redirect( admin_url( 'admin.php?page=agentclerk' ) );
+            exit;
+        }
         $step = (int) get_option( 'agentclerk_onboarding_step', 1 );
         $step = max( 1, min( 6, $step ) );
         include AGENTCLERK_PLUGIN_DIR . 'admin/views/onboarding/step-' . $step . '.php';
