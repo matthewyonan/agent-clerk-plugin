@@ -98,6 +98,7 @@ class AgentClerk_Admin {
 	public function register_menus() {
 		$status = get_option( 'agentclerk_plugin_status', 'onboarding' );
 
+		// Top-level menu. Renders onboarding or dashboard based on status.
 		add_menu_page(
 			'AgentClerk',
 			'AgentClerk',
@@ -108,38 +109,19 @@ class AgentClerk_Admin {
 			56
 		);
 
-		// Suspended — replace everything with the suspended view.
+		// Suspended: only show Overview (which renders the suspended view).
 		if ( 'suspended' === $status ) {
-			remove_submenu_page( 'agentclerk', 'agentclerk' );
-			add_submenu_page(
-				'agentclerk',
-				'Suspended',
-				'Account Suspended',
-				'manage_options',
-				'agentclerk',
-				array( $this, 'render_suspended' )
-			);
+			add_submenu_page( 'agentclerk', 'Overview', 'Overview', 'manage_options', 'agentclerk' );
 			return;
 		}
 
-		// Onboarding — show Setup plus all other menus.
-		if ( 'onboarding' === $status ) {
-			add_submenu_page(
-				'agentclerk',
-				'Setup',
-				'Setup',
-				'manage_options',
-				'agentclerk-onboarding',
-				array( $this, 'render_onboarding' )
-			);
-		}
-
-		// Active & onboarding — full navigation.
-		add_submenu_page( 'agentclerk', 'Dashboard', 'Dashboard', 'manage_options', 'agentclerk' );
+		// Standard sidebar: Overview, Conversations, Settings, Sales, Support.
+		// The first submenu with the same slug as the parent replaces the auto-generated duplicate.
+		add_submenu_page( 'agentclerk', 'Overview', 'Overview', 'manage_options', 'agentclerk' );
 		add_submenu_page( 'agentclerk', 'Conversations', 'Conversations', 'manage_options', 'agentclerk-conversations', array( $this, 'render_conversations' ) );
 		add_submenu_page( 'agentclerk', 'Settings', 'Settings', 'manage_options', 'agentclerk-settings', array( $this, 'render_settings' ) );
 		add_submenu_page( 'agentclerk', 'Sales', 'Sales', 'manage_options', 'agentclerk-sales', array( $this, 'render_sales' ) );
-		add_submenu_page( 'agentclerk', 'AgentClerk Help', 'Support', 'manage_options', 'agentclerk-support', array( $this, 'render_support' ) );
+		add_submenu_page( 'agentclerk', 'Support', 'Support', 'manage_options', 'agentclerk-support', array( $this, 'render_support' ) );
 	}
 
 	/* ───────────────────────────────────────────────
