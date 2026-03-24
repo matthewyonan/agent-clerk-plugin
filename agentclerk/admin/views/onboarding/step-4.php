@@ -16,94 +16,100 @@ if ( function_exists( 'wc_get_products' ) ) {
 $config     = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
 $visibility = $config['product_visibility'] ?? [];
 ?>
-<div class="wrap agentclerk-onboarding">
-    <h1>AgentClerk Setup — Step 4: Catalog Confirmation</h1>
-    <p>Choose which products your AI agent can sell. Toggle off any products you don't want the agent to handle.</p>
-
-    <table class="wp-list-table widefat fixed striped" id="catalog-table">
-        <thead>
-            <tr>
-                <th>Product Name</th>
-                <th>Type</th>
-                <th>Price</th>
-                <th>WC Status</th>
-                <th>Agent Can Sell</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ( $products as $p ) :
-                $checked = ! isset( $visibility[ $p['id'] ] ) || $visibility[ $p['id'] ];
-            ?>
-                <tr>
-                    <td><?php echo esc_html( $p['name'] ); ?></td>
-                    <td><?php echo esc_html( $p['type'] ); ?></td>
-                    <td>$<?php echo esc_html( $p['price'] ); ?></td>
-                    <td><?php echo esc_html( $p['status'] ); ?></td>
-                    <td><input type="checkbox" class="product-toggle" data-id="<?php echo esc_attr( $p['id'] ); ?>" <?php checked( $checked ); ?> /></td>
-                </tr>
-            <?php endforeach; ?>
-            <?php if ( empty( $products ) ) : ?>
-                <tr><td colspan="5">No WooCommerce products found.</td></tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
-
-    <div class="agentclerk-card" style="margin-top:20px;">
-        <h3>Add a Product Manually</h3>
-        <div class="agentclerk-field">
-            <label>Name</label>
-            <input type="text" id="new-product-name" class="regular-text" />
-        </div>
-        <div class="agentclerk-field">
-            <label>Type</label>
-            <select id="new-product-type">
-                <option value="simple">Simple</option>
-                <option value="variable">Variable</option>
-            </select>
-        </div>
-        <div class="agentclerk-field">
-            <label>Price</label>
-            <input type="number" id="new-product-price" step="0.01" class="small-text" />
-        </div>
-        <div class="agentclerk-field">
-            <label>Description</label>
-            <textarea id="new-product-desc" rows="3" class="large-text"></textarea>
-        </div>
-        <button class="button" id="add-product">Add Product</button>
+<div class="wrap ac-wrap">
+    <div class="ac-steps">
+        <div class="ac-step done"><div class="ac-step-n">&#10003;</div><span>Choose tier</span></div><div class="ac-step-line"></div>
+        <div class="ac-step done"><div class="ac-step-n">&#10003;</div><span>Scan site</span></div><div class="ac-step-line"></div>
+        <div class="ac-step done"><div class="ac-step-n">&#10003;</div><span>Review</span></div><div class="ac-step-line"></div>
+        <div class="ac-step cur"><div class="ac-step-n">4</div><span>Catalog</span></div><div class="ac-step-line"></div>
+        <div class="ac-step"><div class="ac-step-n">5</div><span>Placement</span></div><div class="ac-step-line"></div>
+        <div class="ac-step"><div class="ac-step-n">6</div><span>Go live</span></div>
     </div>
 
-    <p style="margin-top:20px;">
-        <button class="button button-primary button-hero" id="step4-continue">Continue to Placement</button>
-    </p>
+    <div class="ac-fb ac-mb">
+        <div>
+            <div class="ac-pt">Your product catalog</div>
+            <div class="ac-ps"><?php echo count( $products ); ?> products imported from WooCommerce. Control which ones your agent can sell.</div>
+        </div>
+        <button class="ac-btn ac-btn-g ac-btn-sm" id="show-add-product">+ Add product</button>
+    </div>
+
+    <div class="ac-co bl ac-mb"><span class="ac-co-i">&#8505;</span><span>Product names, prices, and descriptions are managed in WooCommerce &mdash; changes sync to the agent automatically. Here you only control which products the agent can sell.</span></div>
+
+    <div class="ac-card">
+        <table class="ac-dt">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Type</th>
+                    <th>Price</th>
+                    <th>WooCommerce</th>
+                    <th>Agent can sell this</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ( $products as $p ) :
+                    $checked = ! isset( $visibility[ $p['id'] ] ) || $visibility[ $p['id'] ];
+                    $type_class = $p['type'] === 'simple' ? 'ac-b-e' : 'ac-b-a';
+                ?>
+                    <tr>
+                        <td style="font-weight:500"><?php echo esc_html( $p['name'] ); ?></td>
+                        <td><span class="ac-b <?php echo esc_attr( $type_class ); ?>"><?php echo esc_html( ucfirst( $p['type'] ) ); ?></span></td>
+                        <td class="ac-mono">$<?php echo esc_html( number_format( (float) $p['price'], 2 ) ); ?></td>
+                        <td><span class="ac-b ac-b-g">Published</span></td>
+                        <td><div class="ac-tog <?php echo $checked ? 'on' : ''; ?>" data-id="<?php echo esc_attr( $p['id'] ); ?>"></div></td>
+                    </tr>
+                <?php endforeach; ?>
+                <?php if ( empty( $products ) ) : ?>
+                    <tr><td colspan="5" style="color:var(--ac-text3)">No WooCommerce products found.</td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="ac-card" id="add-product-form" style="display:none">
+        <div class="ac-card-head"><h2>Add a Product Manually</h2></div>
+        <div class="ac-card-body">
+            <div class="ac-g2">
+                <div class="ac-fg"><label class="ac-fl">Product Name</label><input type="text" id="new-product-name"></div>
+                <div class="ac-fg"><label class="ac-fl">Price</label><input type="number" id="new-product-price" step="0.01"></div>
+            </div>
+            <div class="ac-fg"><label class="ac-fl">Description</label><textarea id="new-product-desc" rows="3"></textarea></div>
+            <button class="ac-btn ac-btn-p" id="add-product">Add Product</button>
+        </div>
+    </div>
+
+    <div class="ac-mt">
+        <button class="ac-btn ac-btn-e ac-btn-lg" id="step4-continue">Continue to placement &rarr;</button>
+    </div>
 </div>
 
 <script>
 jQuery(function($) {
-    $('#add-product').on('click', function() {
-        var name = $('#new-product-name').val().trim();
-        if (!name) { alert('Product name is required.'); return; }
+    // Toggle switches
+    $('.ac-tog').on('click', function() { $(this).toggleClass('on'); });
 
+    $('#show-add-product').on('click', function() { $('#add-product-form').toggle(); });
+
+    $('#add-product').on('click', function() {
+        var name = $.trim($('#new-product-name').val());
+        if (!name) { alert('Product name is required.'); return; }
         $.post(agentclerk.ajaxUrl, {
             action: 'agentclerk_add_product',
             nonce: agentclerk.nonce,
             name: name,
-            type: $('#new-product-type').val(),
+            type: 'simple',
             price: $('#new-product-price').val(),
             description: $('#new-product-desc').val()
         }, function(resp) {
-            if (resp.success) {
-                location.reload();
-            } else {
-                alert(resp.data.message || 'Failed to add product.');
-            }
+            if (resp.success) location.reload();
+            else alert(resp.data.message || 'Failed to add product.');
         });
     });
 
     $('#step4-continue').on('click', function() {
         var visibility = {};
-        $('.product-toggle').each(function() {
-            visibility[$(this).data('id')] = $(this).is(':checked');
-        });
+        $('.ac-tog').each(function() { visibility[$(this).data('id')] = $(this).hasClass('on'); });
 
         $.post(agentclerk.ajaxUrl, {
             action: 'agentclerk_save_catalog',

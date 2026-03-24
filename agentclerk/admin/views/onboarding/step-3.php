@@ -1,134 +1,160 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
-$scan_cache = json_decode( get_option( 'agentclerk_scan_cache', '{}' ), true );
-$config     = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
-$products   = $scan_cache['products'] ?? [];
-$policies   = $scan_cache['policies'] ?? [];
-$gaps       = $scan_cache['gaps'] ?? [];
+$scan_cache   = json_decode( get_option( 'agentclerk_scan_cache', '{}' ), true );
+$config       = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
+$products     = $scan_cache['products'] ?? [];
+$policies     = $scan_cache['policies'] ?? [];
+$gaps         = $scan_cache['gaps'] ?? [];
 $support_file = $config['support_file'] ?? '';
 
 if ( empty( $support_file ) && ! empty( $scan_cache ) ) {
     $support_file = AgentClerk_Scanner::build_support_file( $scan_cache );
 }
 ?>
-<div class="wrap agentclerk-onboarding">
-    <h1>AgentClerk Setup — Step 3: Review &amp; Gap Fill</h1>
+<div class="wrap ac-wrap">
+    <div class="ac-steps">
+        <div class="ac-step done"><div class="ac-step-n">&#10003;</div><span>Choose tier</span></div><div class="ac-step-line"></div>
+        <div class="ac-step done"><div class="ac-step-n">&#10003;</div><span>Scan site</span></div><div class="ac-step-line"></div>
+        <div class="ac-step cur"><div class="ac-step-n">3</div><span>Review</span></div><div class="ac-step-line"></div>
+        <div class="ac-step"><div class="ac-step-n">4</div><span>Catalog</span></div><div class="ac-step-line"></div>
+        <div class="ac-step"><div class="ac-step-n">5</div><span>Placement</span></div><div class="ac-step-line"></div>
+        <div class="ac-step"><div class="ac-step-n">6</div><span>Go live</span></div>
+    </div>
 
-    <div class="agentclerk-two-col">
-        <div class="agentclerk-col-left">
-            <div class="agentclerk-card">
-                <h2>Scan Results</h2>
+    <div class="ac-pt">Review and fill any gaps</div>
+    <div class="ac-ps">The scan found most of what's needed. The agent will ask about what it couldn't find automatically.</div>
 
-                <?php if ( ! empty( $products ) ) : ?>
-                    <h3>Products Found</h3>
-                    <ul>
-                        <?php foreach ( $products as $p ) : ?>
-                            <li><strong><?php echo esc_html( $p['name'] ); ?></strong> — $<?php echo esc_html( $p['price'] ); ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php endif; ?>
-
-                <h3>Policies</h3>
-                <ul>
-                    <li>Refund: <?php echo ! empty( $policies['refund'] ) ? '<span style="color:green;">Found</span>' : '<span style="color:#e67e22;">Not found</span>'; ?></li>
-                    <li>License: <?php echo ! empty( $policies['license'] ) ? '<span style="color:green;">Found</span>' : '<span style="color:#e67e22;">Not found</span>'; ?></li>
-                    <li>Delivery: <?php echo ! empty( $policies['delivery'] ) ? '<span style="color:green;">Found</span>' : '<span style="color:#e67e22;">Not found</span>'; ?></li>
-                </ul>
-
-                <?php if ( ! empty( $gaps ) ) : ?>
-                    <h3>Gaps Identified</h3>
-                    <ul>
-                        <?php foreach ( $gaps as $gap ) : ?>
-                            <li style="color:#e67e22;">&#9888; <?php echo esc_html( $gap ); ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php endif; ?>
+    <div class="ac-g2">
+        <div>
+            <div class="ac-card">
+                <div class="ac-card-head"><h2>What the scan found</h2></div>
+                <div class="ac-card-body">
+                    <?php if ( ! empty( $products ) ) : ?>
+                        <div class="ac-finding"><span class="ac-finding-ok">&#10003;</span><div><strong><?php echo count( $products ); ?> products</strong> &mdash;
+                            <?php
+                            $names = array_map( function( $p ) { return $p['name'] . ' $' . number_format( (float) $p['price'], 0 ); }, array_slice( $products, 0, 3 ) );
+                            echo esc_html( implode( ', ', $names ) );
+                            ?>
+                        </div></div>
+                    <?php endif; ?>
+                    <div class="ac-finding">
+                        <?php if ( ! empty( $policies['refund'] ) ) : ?>
+                            <span class="ac-finding-ok">&#10003;</span><div><strong>Refund policy</strong> &mdash; <?php echo esc_html( wp_trim_words( $policies['refund'], 10 ) ); ?></div>
+                        <?php else : ?>
+                            <span class="ac-finding-warn">&#9888;</span><div><strong>Refund policy</strong> &mdash; not found</div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="ac-finding">
+                        <?php if ( ! empty( $policies['license'] ) ) : ?>
+                            <span class="ac-finding-ok">&#10003;</span><div><strong>License terms</strong> &mdash; <?php echo esc_html( wp_trim_words( $policies['license'], 10 ) ); ?></div>
+                        <?php else : ?>
+                            <span class="ac-finding-warn">&#9888;</span><div><strong>License terms</strong> &mdash; not found</div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="ac-finding">
+                        <?php if ( ! empty( $policies['delivery'] ) ) : ?>
+                            <span class="ac-finding-ok">&#10003;</span><div><strong>Delivery</strong> &mdash; <?php echo esc_html( wp_trim_words( $policies['delivery'], 10 ) ); ?></div>
+                        <?php else : ?>
+                            <span class="ac-finding-warn">&#9888;</span><div><strong>Delivery method</strong> &mdash; not found</div>
+                        <?php endif; ?>
+                    </div>
+                    <?php foreach ( $gaps as $gap ) : ?>
+                        <div class="ac-finding"><span class="ac-finding-warn">&#9888;</span><div><strong><?php echo esc_html( $gap ); ?></strong> &mdash; asking now &rarr;</div></div>
+                    <?php endforeach; ?>
+                </div>
             </div>
 
-            <div class="agentclerk-card">
-                <h3>Support Knowledge File</h3>
-                <p>This is what your AI agent will know. Edit as needed — the chat assistant can also update it.</p>
-                <textarea id="support-file" rows="15" class="large-text"><?php echo esc_textarea( $support_file ); ?></textarea>
+            <div class="ac-card">
+                <div class="ac-card-head"><h2>Auto-drafted support file</h2><span class="ac-b ac-b-a">Draft</span></div>
+                <div class="ac-card-body">
+                    <div class="ac-co sl" style="margin-bottom:10px"><span class="ac-co-i">&#8505;</span><span>Built from your product pages and site content. Edit directly, or tell the agent what to change in the chat.</span></div>
+                    <textarea id="support-file" style="min-height:150px;font-size:12px;font-family:'DM Mono',monospace;line-height:1.65"><?php echo esc_textarea( $support_file ); ?></textarea>
+                    <div class="ac-fn">Refine this any time in Settings &rarr; Support &amp; Escalation.</div>
+                </div>
             </div>
         </div>
 
-        <div class="agentclerk-col-right">
-            <div class="agentclerk-card">
-                <h2>Setup Chat</h2>
-                <p>I'll help you fill in the gaps. Let's get started!</p>
-                <div id="onboarding-chat-messages" class="agentclerk-chat-messages"></div>
-                <div class="agentclerk-chat-input">
-                    <input type="text" id="onboarding-chat-input" placeholder="Type your response..." />
-                    <button class="button button-primary" id="onboarding-chat-send">Send</button>
+        <div>
+            <div class="ac-card" style="display:flex;flex-direction:column;min-height:500px">
+                <div class="ac-card-head"><h2>Fill the gaps</h2><?php if ( ! empty( $gaps ) ) : ?><span class="ac-b ac-b-a"><?php echo count( $gaps ); ?> questions</span><?php endif; ?></div>
+                <div class="ac-chat-shell" style="border:none;border-radius:0;flex:1">
+                    <div class="ac-msgs" id="chat-messages" style="height:360px"></div>
+                    <div class="ac-chips-row" id="chat-chips"></div>
+                    <div class="ac-chat-inp-row">
+                        <input type="text" class="ac-chat-inp" id="chat-input" placeholder="Type or choose above&hellip;">
+                        <button class="ac-send-btn" id="chat-send">&#10148;</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <p style="margin-top:20px;">
-        <button class="button button-primary button-hero" id="step3-continue">Continue to Catalog</button>
-    </p>
+    <div class="ac-fr ac-mt">
+        <button class="ac-btn ac-btn-e ac-btn-lg" id="step3-continue">Continue to catalog &rarr;</button>
+    </div>
 </div>
 
 <script>
 jQuery(function($) {
     var chatHistory = [];
-    var $messages = $('#onboarding-chat-messages');
-    var $input = $('#onboarding-chat-input');
-
-    function addMessage(role, text) {
-        var cls = role === 'user' ? 'agentclerk-msg-user' : 'agentclerk-msg-assistant';
-        $messages.append('<div class="' + cls + '">' + $('<span>').text(text).html() + '</div>');
-        $messages.scrollTop($messages[0].scrollHeight);
-    }
-
-    // Auto-start with gap fill opening
     var gaps = <?php echo wp_json_encode( $gaps ); ?>;
-    if (gaps.length > 0) {
-        var opening = "I found some gaps in your store information: " + gaps.join(', ') + ". Let me ask you about each one. First — how would you like escalations to be handled? (email notification, etc.)";
-        addMessage('assistant', opening);
-    } else {
-        addMessage('assistant', "Your site looks well-configured! Let me ask a couple of quick questions. How should customer escalations be handled?");
+
+    function addMsg(role, text) {
+        var cls = role === 'assistant' ? 'ag' : 'us';
+        var av = role === 'assistant' ? 'AC' : 'You';
+        $('#chat-messages').append('<div class="ac-msg ' + cls + '"><div class="ac-mav">' + av + '</div><div class="ac-mbub">' + text + '</div></div>');
+        $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
     }
 
-    $('#onboarding-chat-send').on('click', sendMessage);
-    $input.on('keypress', function(e) { if (e.which === 13) sendMessage(); });
+    function setChips(chips) {
+        var row = $('#chat-chips').empty();
+        chips.forEach(function(c) {
+            $('<span class="ac-chip">' + c + '</span>').on('click', function() {
+                $('#chat-input').val(c);
+                sendMessage();
+            }).appendTo(row);
+        });
+    }
+
+    if (gaps.length > 0) {
+        addMsg('assistant', 'The scan went well &mdash; I found your products, pricing, and policies. Just a few things I couldn\'t find automatically.<br><br>First: <strong>how do you want me to notify you when a buyer has a question I can\'t resolve?</strong>');
+        setChips(['Both email and WP notification', 'Email only', 'WP admin only']);
+    } else {
+        addMsg('assistant', 'Your site looks well-configured! I found everything I need. You can edit the support file on the left, or continue to the catalog.');
+    }
 
     function sendMessage() {
-        var text = $input.val().trim();
-        if (!text) return;
-        $input.val('');
-        addMessage('user', text);
-        chatHistory.push({ role: 'user', content: text });
+        var txt = $.trim($('#chat-input').val());
+        if (!txt) return;
+        addMsg('user', txt);
+        chatHistory.push({ role: 'user', content: txt });
+        $('#chat-input').val('');
+        $('#chat-chips').empty();
 
         $.post(agentclerk.ajaxUrl, {
             action: 'agentclerk_onboarding_chat',
             nonce: agentclerk.nonce,
-            message: text,
+            message: txt,
             context: 'gap_fill',
             history: JSON.stringify(chatHistory)
         }, function(resp) {
-            if (resp.success) {
-                addMessage('assistant', resp.data.message);
+            if (resp.success && resp.data.message) {
+                addMsg('assistant', resp.data.message);
                 chatHistory.push({ role: 'assistant', content: resp.data.message });
-
-                // Check if response contains support file updates
-                if (resp.data.message.toLowerCase().indexOf('updated') !== -1 ||
-                    resp.data.message.toLowerCase().indexOf('support file') !== -1) {
-                    // Agent may have suggested updates — user can manually update
-                }
-            } else {
-                addMessage('assistant', 'Error: ' + (resp.data.message || 'Something went wrong.'));
+                if (resp.data.chips) setChips(resp.data.chips);
             }
         });
     }
 
+    $('#chat-send').on('click', sendMessage);
+    $('#chat-input').on('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
+
     $('#step3-continue').on('click', function() {
-        var supportFile = $('#support-file').val();
+        $(this).prop('disabled', true).text('Saving...');
         $.post(agentclerk.ajaxUrl, {
             action: 'agentclerk_save_agent_config',
             nonce: agentclerk.nonce,
-            support_file: supportFile
+            support_file: $('#support-file').val()
         }, function() {
             $.post(agentclerk.ajaxUrl, {
                 action: 'agentclerk_save_onboarding_step',

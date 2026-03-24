@@ -1,94 +1,105 @@
 <?php if ( ! defined( 'ABSPATH' ) ) exit; ?>
-<div class="wrap agentclerk-conversations">
-    <h1>Conversations</h1>
-
-    <div class="agentclerk-stat-grid" id="convo-stats">
-        <div class="agentclerk-stat-card"><h3>Total</h3><div class="agentclerk-stat-value" id="cs-total">—</div></div>
-        <div class="agentclerk-stat-card"><h3>Setup Helped</h3><div class="agentclerk-stat-value" id="cs-setup">—</div></div>
-        <div class="agentclerk-stat-card"><h3>Support Resolved</h3><div class="agentclerk-stat-value" id="cs-support">—</div></div>
-        <div class="agentclerk-stat-card" style="background:#fff3cd;"><h3>In Cart</h3><div class="agentclerk-stat-value" id="cs-cart">—</div></div>
-        <div class="agentclerk-stat-card"><h3>Escalated</h3><div class="agentclerk-stat-value"><a href="<?php echo esc_url( admin_url( 'admin.php?page=agentclerk-support' ) ); ?>" id="cs-escalated">—</a></div></div>
-    </div>
-
-    <div style="margin:15px 0;">
-        <label>Filter:
-            <select id="convo-filter">
-                <option value="">All</option>
+<div class="wrap ac-wrap">
+    <div class="ac-fb ac-mb">
+        <div>
+            <div class="ac-pt">Conversations</div>
+            <div class="ac-ps">Every seller agent conversation. Click a row to review the transcript.</div>
+        </div>
+        <div class="ac-fr">
+            <select id="convo-filter" style="width:auto">
+                <option value="">All conversations</option>
                 <option value="browsing">Browsing</option>
-                <option value="quote">Quote</option>
+                <option value="quote">Quote sent</option>
                 <option value="purchased">Purchased</option>
-                <option value="setup">Setup</option>
-                <option value="support">Support</option>
+                <option value="setup">Setup helped</option>
+                <option value="support">Support resolved</option>
                 <option value="abandoned">Abandoned</option>
                 <option value="escalated">Escalated</option>
             </select>
-        </label>
+            <input type="text" id="convo-search" placeholder="Search&hellip;" style="width:150px">
+        </div>
     </div>
 
-    <table class="wp-list-table widefat fixed striped" id="convo-table">
-        <thead>
-            <tr>
-                <th>Session</th>
-                <th>Buyer Type</th>
-                <th>Outcome</th>
-                <th>Sale</th>
-                <th>Started</th>
-                <th>Updated</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="convo-tbody"></tbody>
-    </table>
+    <div class="ac-stat-grid ac-stat-grid-5">
+        <div class="ac-stat-box"><div class="ac-stat-val" id="cs-total">&mdash;</div><div class="ac-stat-lbl">Total conversations</div></div>
+        <div class="ac-stat-box"><div class="ac-stat-val" id="cs-setup">&mdash;</div><div class="ac-stat-lbl">Helped with install / setup</div><div class="ac-stat-sub">no human needed</div></div>
+        <div class="ac-stat-box"><div class="ac-stat-val" id="cs-support">&mdash;</div><div class="ac-stat-lbl">Handled support</div><div class="ac-stat-sub">no human needed</div></div>
+        <div class="ac-stat-box"><div class="ac-stat-val" id="cs-cart">&mdash;</div><div class="ac-stat-lbl">In cart</div><div class="ac-stat-sub" style="color:var(--ac-amber)">quote sent, unpaid</div></div>
+        <div class="ac-stat-box"><div class="ac-stat-val" id="cs-escalated">&mdash;</div><div class="ac-stat-lbl">Escalated to you</div></div>
+    </div>
+
+    <div class="ac-card">
+        <table class="ac-dt">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Buyer type</th>
+                    <th>Started with</th>
+                    <th>Outcome</th>
+                    <th>Product</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody id="convo-tbody"></tbody>
+        </table>
+    </div>
 
     <div id="convo-pagination" style="margin-top:10px;"></div>
 
     <!-- Transcript Modal -->
-    <div id="transcript-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:100000;">
-        <div style="background:#fff;max-width:600px;margin:50px auto;padding:20px;border-radius:8px;max-height:80vh;overflow-y:auto;">
-            <h2>Conversation Transcript <button class="button" id="close-modal" style="float:right;">Close</button></h2>
-            <div id="transcript-content"></div>
+    <div class="ac-modal-ov" id="transcript-modal">
+        <div class="ac-modal-box" style="width:600px">
+            <div class="ac-modal-hd">
+                <h3>Conversation Transcript</h3>
+                <button class="ac-modal-x" id="close-modal">&times;</button>
+            </div>
+            <div class="ac-modal-body" id="transcript-content" style="max-height:60vh;overflow-y:auto"></div>
         </div>
     </div>
 </div>
 
 <script>
 jQuery(function($) {
-    var currentPage = 1;
-
     function loadStats() {
         $.post(agentclerk.ajaxUrl, { action: 'agentclerk_get_stats', nonce: agentclerk.nonce }, function(r) {
-            if (r.success) {
-                $('#cs-total').text(r.data.total);
-                $('#cs-setup').text(r.data.setup);
-                $('#cs-support').text(r.data.support);
-                $('#cs-cart').text(r.data.in_cart);
-                $('#cs-escalated').text(r.data.escalated);
-            }
+            if (!r.success) return;
+            $('#cs-total').text(r.data.total);
+            $('#cs-setup').text(r.data.setup);
+            $('#cs-support').text(r.data.support);
+            $('#cs-cart').text(r.data.in_cart);
+            $('#cs-escalated').text(r.data.escalated);
         });
     }
 
+    function badgeCls(val) {
+        var map = { purchased: 'ac-b-g', 'setup helped': 'ac-b-g', 'support resolved': 'ac-b-g', escalated: 'ac-b-a', browsing: 'ac-b-s', quote: 'ac-b-e', abandoned: 'ac-b-s' };
+        return map[val] || 'ac-b-s';
+    }
+
+    function buyerBadge(type) {
+        return type === 'ai_agent' ? '<span class="ac-b ac-b-e">AI agent</span>' : '<span class="ac-b ac-b-s">Human</span>';
+    }
+
     function loadConversations(page) {
-        var filter = $('#convo-filter').val();
         $.get(agentclerk.ajaxUrl, {
             action: 'agentclerk_get_conversations',
             nonce: agentclerk.nonce,
-            outcome: filter,
+            outcome: $('#convo-filter').val(),
             paged: page || 1
         }, function(r) {
             if (!r.success) return;
             var html = '';
             $.each(r.data.conversations, function(i, c) {
-                html += '<tr>';
-                html += '<td>' + c.session_id.substring(0, 12) + '...</td>';
-                html += '<td>' + c.buyer_type + '</td>';
-                html += '<td>' + c.outcome + '</td>';
-                html += '<td>' + (c.sale_amount ? '$' + parseFloat(c.sale_amount).toFixed(2) : '—') + '</td>';
-                html += '<td>' + c.started_at + '</td>';
-                html += '<td>' + c.updated_at + '</td>';
-                html += '<td><button class="button view-transcript" data-id="' + c.id + '">View</button></td>';
+                html += '<tr style="cursor:pointer" data-id="' + c.id + '">';
+                html += '<td class="ac-mono" style="font-size:11px;color:var(--ac-text3)">' + (c.started_at || '') + '</td>';
+                html += '<td>' + buyerBadge(c.buyer_type) + '</td>';
+                html += '<td style="color:var(--ac-text2);font-size:12px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (c.first_message || '') + '</td>';
+                html += '<td><span class="ac-b ' + badgeCls(c.outcome) + '">' + (c.outcome || 'browsing') + '</span></td>';
+                html += '<td style="font-size:12px">' + (c.product_name || '&mdash;') + '</td>';
+                html += '<td class="ac-mono" style="font-weight:500">' + (c.sale_amount ? '$' + parseFloat(c.sale_amount).toFixed(0) : '&mdash;') + '</td>';
                 html += '</tr>';
             });
-            $('#convo-tbody').html(html || '<tr><td colspan="7">No conversations found.</td></tr>');
+            $('#convo-tbody').html(html || '<tr><td colspan="6" style="color:var(--ac-text3)">No conversations found.</td></tr>');
         });
     }
 
@@ -97,27 +108,27 @@ jQuery(function($) {
 
     $('#convo-filter').on('change', function() { loadConversations(1); });
 
-    $(document).on('click', '.view-transcript', function() {
+    $(document).on('click', '#convo-tbody tr', function() {
         var id = $(this).data('id');
+        if (!id) return;
         $.get(agentclerk.ajaxUrl, {
             action: 'agentclerk_get_conversation_messages',
             nonce: agentclerk.nonce,
             conversation_id: id
         }, function(r) {
-            if (r.success) {
-                var html = '';
-                $.each(r.data.messages, function(i, m) {
-                    html += '<div style="margin:8px 0;padding:8px;background:' + (m.role === 'user' ? '#e3f2fd' : '#f5f5f5') + ';border-radius:6px;">';
-                    html += '<strong>' + m.role + '</strong> <small>' + m.created_at + '</small><br>' + $('<span>').text(m.content).html();
-                    html += '</div>';
-                });
-                $('#transcript-content').html(html || '<p>No messages.</p>');
-                $('#transcript-modal').show();
-            }
+            if (!r.success) return;
+            var html = '';
+            $.each(r.data.messages, function(i, m) {
+                var cls = m.role === 'user' ? 'us' : 'ag';
+                var av = m.role === 'user' ? 'You' : 'AC';
+                html += '<div class="ac-msg ' + cls + '" style="max-width:95%"><div class="ac-mav">' + av + '</div><div class="ac-mbub">' + $('<span>').text(m.content).html() + '</div></div>';
+            });
+            $('#transcript-content').html('<div style="display:flex;flex-direction:column;gap:10px">' + (html || '<p style="color:var(--ac-text3)">No messages.</p>') + '</div>');
+            $('#transcript-modal').addClass('open');
         });
     });
 
-    $('#close-modal').on('click', function() { $('#transcript-modal').hide(); });
-    $('#transcript-modal').on('click', function(e) { if (e.target === this) $(this).hide(); });
+    $('#close-modal').on('click', function() { $('#transcript-modal').removeClass('open'); });
+    $('#transcript-modal').on('click', function(e) { if (e.target === this) $(this).removeClass('open'); });
 });
 </script>

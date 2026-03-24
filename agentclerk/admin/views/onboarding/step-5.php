@@ -1,63 +1,78 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 $placement = json_decode( get_option( 'agentclerk_placement', '{}' ), true );
+$site_url  = get_site_url();
 ?>
-<div class="wrap agentclerk-onboarding">
-    <h1>AgentClerk Setup — Step 5: Placement</h1>
-    <p>Choose where your AI agent appears on your site.</p>
+<div class="wrap ac-wrap">
+    <div class="ac-steps">
+        <div class="ac-step done"><div class="ac-step-n">&#10003;</div><span>Choose tier</span></div><div class="ac-step-line"></div>
+        <div class="ac-step done"><div class="ac-step-n">&#10003;</div><span>Scan site</span></div><div class="ac-step-line"></div>
+        <div class="ac-step done"><div class="ac-step-n">&#10003;</div><span>Review</span></div><div class="ac-step-line"></div>
+        <div class="ac-step done"><div class="ac-step-n">&#10003;</div><span>Catalog</span></div><div class="ac-step-line"></div>
+        <div class="ac-step cur"><div class="ac-step-n">5</div><span>Placement</span></div><div class="ac-step-line"></div>
+        <div class="ac-step"><div class="ac-step-n">6</div><span>Go live</span></div>
+    </div>
 
-    <div class="agentclerk-placement-cards">
-        <div class="agentclerk-card">
-            <h3>Floating Widget</h3>
-            <p>A chat button that appears on every page of your store.</p>
-            <label><input type="checkbox" id="placement-widget" <?php checked( $placement['widget'] ?? true ); ?> /> Enable</label>
+    <div class="ac-pt">Where should your agent appear?</div>
+    <div class="ac-ps">All three on by default. Change any time in Settings.</div>
+
+    <div class="ac-pl-grid ac-mb">
+        <div class="ac-pl-card <?php echo ( $placement['widget'] ?? true ) ? 'on' : ''; ?>" id="pl-widget">
+            <div class="ac-pl-card-icon">&#128172;</div>
+            <div class="ac-pl-card-title">Floating widget</div>
+            <div class="ac-pl-card-desc">Chat button on every page</div>
         </div>
-
-        <div class="agentclerk-card">
-            <h3>Product Page Embed</h3>
-            <p>Inline chat panel below the Add to Cart button on product pages.</p>
-            <label><input type="checkbox" id="placement-product-page" <?php checked( $placement['product_page'] ?? true ); ?> /> Enable</label>
+        <div class="ac-pl-card <?php echo ( $placement['product_page'] ?? true ) ? 'on' : ''; ?>" id="pl-product">
+            <div class="ac-pl-card-icon">&#128230;</div>
+            <div class="ac-pl-card-title">Product pages</div>
+            <div class="ac-pl-card-desc">Below Add to Cart</div>
         </div>
-
-        <div class="agentclerk-card">
-            <h3>Dedicated /clerk Page</h3>
-            <p>A full-page chat experience at your-store.com/clerk.</p>
-            <label><input type="checkbox" id="placement-clerk-page" <?php checked( $placement['clerk_page'] ?? true ); ?> /> Enable</label>
+        <div class="ac-pl-card <?php echo ( $placement['clerk_page'] ?? true ) ? 'on' : ''; ?>" id="pl-clerk">
+            <div class="ac-pl-card-icon">&#128279;</div>
+            <div class="ac-pl-card-title">Dedicated page</div>
+            <div class="ac-pl-card-desc"><?php echo esc_html( parse_url( $site_url, PHP_URL_HOST ) ); ?>/clerk</div>
         </div>
     </div>
 
-    <div class="agentclerk-card" style="margin-top:20px;">
-        <div class="agentclerk-field">
-            <label for="button-label">Button Label</label>
-            <input type="text" id="button-label" class="regular-text" value="<?php echo esc_attr( $placement['button_label'] ?? 'Get Help' ); ?>" />
-        </div>
-        <div class="agentclerk-field">
-            <label for="agent-name">Agent Name</label>
-            <input type="text" id="agent-name" class="regular-text" value="<?php echo esc_attr( $placement['agent_name'] ?? 'AgentClerk' ); ?>" />
-        </div>
-        <div class="agentclerk-field">
-            <label for="widget-position">Widget Position</label>
-            <select id="widget-position">
-                <option value="bottom-right" <?php selected( $placement['position'] ?? 'bottom-right', 'bottom-right' ); ?>>Bottom Right</option>
-                <option value="bottom-left" <?php selected( $placement['position'] ?? 'bottom-right', 'bottom-left' ); ?>>Bottom Left</option>
-            </select>
+    <div class="ac-card ac-mb">
+        <div class="ac-card-head"><h2>Widget appearance</h2></div>
+        <div class="ac-card-body">
+            <div class="ac-g2">
+                <div class="ac-fg">
+                    <label class="ac-fl">Button label</label>
+                    <input type="text" id="button-label" value="<?php echo esc_attr( $placement['button_label'] ?? 'Ask AgentClerk' ); ?>">
+                </div>
+                <div class="ac-fg">
+                    <label class="ac-fl">Agent name (visible to buyers)</label>
+                    <input type="text" id="agent-name" value="<?php echo esc_attr( $placement['agent_name'] ?? 'AgentClerk' ); ?>">
+                </div>
+            </div>
+            <div class="ac-fg">
+                <label class="ac-fl">Position</label>
+                <select id="widget-position">
+                    <option value="bottom-right" <?php selected( $placement['position'] ?? 'bottom-right', 'bottom-right' ); ?>>Bottom right</option>
+                    <option value="bottom-left" <?php selected( $placement['position'] ?? 'bottom-right', 'bottom-left' ); ?>>Bottom left</option>
+                </select>
+            </div>
         </div>
     </div>
 
-    <p style="margin-top:20px;">
-        <button class="button button-primary button-hero" id="step5-continue">Continue to Test</button>
-    </p>
+    <div class="ac-co gn ac-mb"><span class="ac-co-i">&#10003;</span><div>Always discoverable at <code style="font-family:'DM Mono',monospace;font-size:11px;background:var(--ac-elec-lt);padding:1px 5px;border-radius:3px"><?php echo esc_html( $site_url ); ?>/ai-manifest.json</code> &mdash; active regardless of widget placement.</div></div>
+
+    <button class="ac-btn ac-btn-e ac-btn-lg" id="step5-continue">Test and go live &rarr;</button>
 </div>
 
 <script>
 jQuery(function($) {
+    $('.ac-pl-card').on('click', function() { $(this).toggleClass('on'); });
+
     $('#step5-continue').on('click', function() {
         $.post(agentclerk.ajaxUrl, {
             action: 'agentclerk_save_placement',
             nonce: agentclerk.nonce,
-            widget: $('#placement-widget').is(':checked') ? 1 : 0,
-            product_page: $('#placement-product-page').is(':checked') ? 1 : 0,
-            clerk_page: $('#placement-clerk-page').is(':checked') ? 1 : 0,
+            widget: $('#pl-widget').hasClass('on') ? 1 : 0,
+            product_page: $('#pl-product').hasClass('on') ? 1 : 0,
+            clerk_page: $('#pl-clerk').hasClass('on') ? 1 : 0,
             button_label: $('#button-label').val(),
             agent_name: $('#agent-name').val(),
             position: $('#widget-position').val()
