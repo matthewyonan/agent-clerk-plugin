@@ -18,26 +18,26 @@ $visibility = $config['product_visibility'] ?? [];
 ?>
 <div class="wrap ac-wrap">
     <div class="ac-steps">
-        <div class="ac-step done"><div class="ac-step-n">&#10003;</div><span>Choose tier</span></div><div class="ac-step-line"></div>
-        <div class="ac-step done"><div class="ac-step-n">&#10003;</div><span>Scan site</span></div><div class="ac-step-line"></div>
-        <div class="ac-step done"><div class="ac-step-n">&#10003;</div><span>Review</span></div><div class="ac-step-line"></div>
-        <div class="ac-step cur"><div class="ac-step-n">4</div><span>Catalog</span></div><div class="ac-step-line"></div>
-        <div class="ac-step"><div class="ac-step-n">5</div><span>Placement</span></div><div class="ac-step-line"></div>
-        <div class="ac-step"><div class="ac-step-n">6</div><span>Go live</span></div>
+        <div class="ac-step done"><div class="ac-step-num">&#10003;</div><span>Choose tier</span></div><div class="ac-step-line"></div>
+        <div class="ac-step done"><div class="ac-step-num">&#10003;</div><span>Scan site</span></div><div class="ac-step-line"></div>
+        <div class="ac-step done"><div class="ac-step-num">&#10003;</div><span>Review</span></div><div class="ac-step-line"></div>
+        <div class="ac-step current"><div class="ac-step-num">4</div><span>Catalog</span></div><div class="ac-step-line"></div>
+        <div class="ac-step"><div class="ac-step-num">5</div><span>Placement</span></div><div class="ac-step-line"></div>
+        <div class="ac-step"><div class="ac-step-num">6</div><span>Go live</span></div>
     </div>
 
-    <div class="ac-fb ac-mb">
+    <div class="ac-flex-between ac-mb">
         <div>
-            <div class="ac-pt">Your product catalog</div>
-            <div class="ac-ps"><?php echo count( $products ); ?> products imported from WooCommerce. Control which ones your agent can sell.</div>
+            <div class="ac-page-title">Your product catalog</div>
+            <div class="ac-page-subtitle"><?php echo count( $products ); ?> products imported from WooCommerce. Control which ones your agent can sell.</div>
         </div>
-        <button class="ac-btn ac-btn-g ac-btn-sm" id="show-add-product">+ Add product</button>
+        <button class="ac-btn ac-btn-ghost ac-btn-sm" id="show-add-product">+ Add product</button>
     </div>
 
-    <div class="ac-co bl ac-mb"><span class="ac-co-i">&#8505;</span><span>Product names, prices, and descriptions are managed in WooCommerce &mdash; changes sync to the agent automatically. Here you only control which products the agent can sell.</span></div>
+    <div class="ac-callout ac-callout-blue ac-mb"><span class="ac-callout-icon">&#8505;</span><span>Product names, prices, and descriptions are managed in WooCommerce &mdash; changes sync to the agent automatically. Here you only control which products the agent can sell.</span></div>
 
     <div class="ac-card">
-        <table class="ac-dt">
+        <table class="ac-table">
             <thead>
                 <tr>
                     <th>Product</th>
@@ -50,14 +50,14 @@ $visibility = $config['product_visibility'] ?? [];
             <tbody>
                 <?php foreach ( $products as $p ) :
                     $checked = ! isset( $visibility[ $p['id'] ] ) || $visibility[ $p['id'] ];
-                    $type_class = $p['type'] === 'simple' ? 'ac-b-e' : 'ac-b-a';
+                    $type_class = $p['type'] === 'simple' ? 'ac-badge-electric' : 'ac-badge-amber';
                 ?>
                     <tr>
                         <td style="font-weight:500"><?php echo esc_html( $p['name'] ); ?></td>
-                        <td><span class="ac-b <?php echo esc_attr( $type_class ); ?>"><?php echo esc_html( ucfirst( $p['type'] ) ); ?></span></td>
+                        <td><span class="ac-badge <?php echo esc_attr( $type_class ); ?>"><?php echo esc_html( ucfirst( $p['type'] ) ); ?></span></td>
                         <td class="ac-mono">$<?php echo esc_html( number_format( (float) $p['price'], 2 ) ); ?></td>
-                        <td><span class="ac-b ac-b-g">Published</span></td>
-                        <td><div class="ac-tog <?php echo $checked ? 'on' : ''; ?>" data-id="<?php echo esc_attr( $p['id'] ); ?>"></div></td>
+                        <td><span class="ac-badge ac-badge-green">Published</span></td>
+                        <td><div class="ac-toggle <?php echo $checked ? 'on' : ''; ?>" data-id="<?php echo esc_attr( $p['id'] ); ?>"></div></td>
                     </tr>
                 <?php endforeach; ?>
                 <?php if ( empty( $products ) ) : ?>
@@ -70,24 +70,24 @@ $visibility = $config['product_visibility'] ?? [];
     <div class="ac-card" id="add-product-form" style="display:none">
         <div class="ac-card-head"><h2>Add a Product Manually</h2></div>
         <div class="ac-card-body">
-            <div class="ac-g2">
-                <div class="ac-fg"><label class="ac-fl">Product Name</label><input type="text" id="new-product-name"></div>
-                <div class="ac-fg"><label class="ac-fl">Price</label><input type="number" id="new-product-price" step="0.01"></div>
+            <div class="ac-grid-2">
+                <div class="ac-field-group"><label class="ac-label">Product Name</label><input type="text" id="new-product-name"></div>
+                <div class="ac-field-group"><label class="ac-label">Price</label><input type="number" id="new-product-price" step="0.01"></div>
             </div>
-            <div class="ac-fg"><label class="ac-fl">Description</label><textarea id="new-product-desc" rows="3"></textarea></div>
-            <button class="ac-btn ac-btn-p" id="add-product">Add Product</button>
+            <div class="ac-field-group"><label class="ac-label">Description</label><textarea id="new-product-desc" rows="3"></textarea></div>
+            <button class="ac-btn ac-btn-primary" id="add-product">Add Product</button>
         </div>
     </div>
 
     <div class="ac-mt">
-        <button class="ac-btn ac-btn-e ac-btn-lg" id="step4-continue">Continue to placement &rarr;</button>
+        <button class="ac-btn ac-btn-electric ac-btn-lg" id="step4-continue">Continue to placement &rarr;</button>
     </div>
 </div>
 
 <script>
 jQuery(function($) {
     // Toggle switches
-    $('.ac-tog').on('click', function() { $(this).toggleClass('on'); });
+    $('.ac-toggle').on('click', function() { $(this).toggleClass('on'); });
 
     $('#show-add-product').on('click', function() { $('#add-product-form').toggle(); });
 
@@ -109,7 +109,7 @@ jQuery(function($) {
 
     $('#step4-continue').on('click', function() {
         var visibility = {};
-        $('.ac-tog').each(function() { visibility[$(this).data('id')] = $(this).hasClass('on'); });
+        $('.ac-toggle').each(function() { visibility[$(this).data('id')] = $(this).hasClass('on'); });
 
         $.post(agentclerk.ajaxUrl, {
             action: 'agentclerk_save_catalog',

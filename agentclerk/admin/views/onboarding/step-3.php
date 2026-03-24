@@ -13,18 +13,18 @@ if ( empty( $support_file ) && ! empty( $scan_cache ) ) {
 ?>
 <div class="wrap ac-wrap">
     <div class="ac-steps">
-        <div class="ac-step done"><div class="ac-step-n">&#10003;</div><span>Choose tier</span></div><div class="ac-step-line"></div>
-        <div class="ac-step done"><div class="ac-step-n">&#10003;</div><span>Scan site</span></div><div class="ac-step-line"></div>
-        <div class="ac-step cur"><div class="ac-step-n">3</div><span>Review</span></div><div class="ac-step-line"></div>
-        <div class="ac-step"><div class="ac-step-n">4</div><span>Catalog</span></div><div class="ac-step-line"></div>
-        <div class="ac-step"><div class="ac-step-n">5</div><span>Placement</span></div><div class="ac-step-line"></div>
-        <div class="ac-step"><div class="ac-step-n">6</div><span>Go live</span></div>
+        <div class="ac-step done"><div class="ac-step-num">&#10003;</div><span>Choose tier</span></div><div class="ac-step-line"></div>
+        <div class="ac-step done"><div class="ac-step-num">&#10003;</div><span>Scan site</span></div><div class="ac-step-line"></div>
+        <div class="ac-step current"><div class="ac-step-num">3</div><span>Review</span></div><div class="ac-step-line"></div>
+        <div class="ac-step"><div class="ac-step-num">4</div><span>Catalog</span></div><div class="ac-step-line"></div>
+        <div class="ac-step"><div class="ac-step-num">5</div><span>Placement</span></div><div class="ac-step-line"></div>
+        <div class="ac-step"><div class="ac-step-num">6</div><span>Go live</span></div>
     </div>
 
-    <div class="ac-pt">Review and fill any gaps</div>
-    <div class="ac-ps">The scan found most of what's needed. The agent will ask about what it couldn't find automatically.</div>
+    <div class="ac-page-title">Review and fill any gaps</div>
+    <div class="ac-page-subtitle">The scan found most of what's needed. The agent will ask about what it couldn't find automatically.</div>
 
-    <div class="ac-g2">
+    <div class="ac-grid-2">
         <div>
             <div class="ac-card">
                 <div class="ac-card-head"><h2>What the scan found</h2></div>
@@ -65,23 +65,23 @@ if ( empty( $support_file ) && ! empty( $scan_cache ) ) {
             </div>
 
             <div class="ac-card">
-                <div class="ac-card-head"><h2>Auto-drafted support file</h2><span class="ac-b ac-b-a">Draft</span></div>
+                <div class="ac-card-head"><h2>Auto-drafted support file</h2><span class="ac-badge ac-badge-amber">Draft</span></div>
                 <div class="ac-card-body">
-                    <div class="ac-co sl" style="margin-bottom:10px"><span class="ac-co-i">&#8505;</span><span>Built from your product pages and site content. Edit directly, or tell the agent what to change in the chat.</span></div>
+                    <div class="ac-callout ac-callout-slate" style="margin-bottom:10px"><span class="ac-callout-icon">&#8505;</span><span>Built from your product pages and site content. Edit directly, or tell the agent what to change in the chat.</span></div>
                     <textarea id="support-file" style="min-height:150px;font-size:12px;font-family:'DM Mono',monospace;line-height:1.65"><?php echo esc_textarea( $support_file ); ?></textarea>
-                    <div class="ac-fn">Refine this any time in Settings &rarr; Support &amp; Escalation.</div>
+                    <div class="ac-note">Refine this any time in Settings &rarr; Support &amp; Escalation.</div>
                 </div>
             </div>
         </div>
 
         <div>
             <div class="ac-card" style="display:flex;flex-direction:column;min-height:500px">
-                <div class="ac-card-head"><h2>Fill the gaps</h2><?php if ( ! empty( $gaps ) ) : ?><span class="ac-b ac-b-a"><?php echo count( $gaps ); ?> questions</span><?php endif; ?></div>
+                <div class="ac-card-head"><h2>Fill the gaps</h2><?php if ( ! empty( $gaps ) ) : ?><span class="ac-badge ac-badge-amber"><?php echo count( $gaps ); ?> questions</span><?php endif; ?></div>
                 <div class="ac-chat-shell" style="border:none;border-radius:0;flex:1">
-                    <div class="ac-msgs" id="chat-messages" style="height:360px"></div>
+                    <div class="ac-messages" id="chat-messages" style="height:360px"></div>
                     <div class="ac-chips-row" id="chat-chips"></div>
-                    <div class="ac-chat-inp-row">
-                        <input type="text" class="ac-chat-inp" id="chat-input" placeholder="Type or choose above&hellip;">
+                    <div class="ac-chat-input-row">
+                        <input type="text" class="ac-chat-input" id="chat-input" placeholder="Type or choose above&hellip;">
                         <button class="ac-send-btn" id="chat-send">&#10148;</button>
                     </div>
                 </div>
@@ -89,8 +89,8 @@ if ( empty( $support_file ) && ! empty( $scan_cache ) ) {
         </div>
     </div>
 
-    <div class="ac-fr ac-mt">
-        <button class="ac-btn ac-btn-e ac-btn-lg" id="step3-continue">Continue to catalog &rarr;</button>
+    <div class="ac-flex ac-mt">
+        <button class="ac-btn ac-btn-electric ac-btn-lg" id="step3-continue">Continue to catalog &rarr;</button>
     </div>
 </div>
 
@@ -100,9 +100,9 @@ jQuery(function($) {
     var gaps = <?php echo wp_json_encode( $gaps ); ?>;
 
     function addMsg(role, text) {
-        var cls = role === 'assistant' ? 'ag' : 'us';
+        var cls = role === 'assistant' ? 'ac-msg-agent' : 'ac-msg-user';
         var av = role === 'assistant' ? 'AC' : 'You';
-        $('#chat-messages').append('<div class="ac-msg ' + cls + '"><div class="ac-mav">' + av + '</div><div class="ac-mbub">' + text + '</div></div>');
+        $('#chat-messages').append('<div class="ac-msg ' + cls + '"><div class="ac-msg-avatar">' + av + '</div><div class="ac-msg-bubble">' + text + '</div></div>');
         $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
     }
 

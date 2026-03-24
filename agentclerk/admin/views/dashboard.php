@@ -1,49 +1,64 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
+
 $status       = get_option( 'agentclerk_plugin_status', 'active' );
 $tier         = get_option( 'agentclerk_tier', 'byok' );
 $license      = get_option( 'agentclerk_license_status', 'none' );
 $accrued_fees = (float) get_option( 'agentclerk_accrued_fees', 0 );
 ?>
 <div class="wrap ac-wrap">
-    <div class="ac-fb ac-mb">
+    <div class="ac-flex-between ac-mb">
         <div>
-            <div class="ac-pt">Dashboard</div>
-            <div class="ac-ps">Overview of your AI seller agent's performance.</div>
+            <h1 class="ac-page-title"><?php echo esc_html( 'AgentClerk' ); ?></h1>
+            <p class="ac-page-subtitle"><?php echo esc_html( 'Overview of your AI seller agent\'s performance.' ); ?></p>
         </div>
-        <div class="ac-fr">
-            <span class="ac-b ac-b-g">&#9679; Live</span>
-            <span class="ac-b ac-b-s"><?php echo esc_html( strtoupper( $tier ) ); ?></span>
+        <div class="ac-flex">
+            <span class="ac-badge ac-badge-green">&#9679; <?php echo esc_html( 'Live' ); ?></span>
+            <span class="ac-badge ac-badge-slate"><?php echo esc_html( strtoupper( $tier ) ); ?></span>
             <?php if ( $license === 'active' ) : ?>
-                <span class="ac-b ac-b-e">Lifetime</span>
+                <span class="ac-badge ac-badge-electric"><?php echo esc_html( 'Lifetime' ); ?></span>
             <?php endif; ?>
         </div>
     </div>
 
-    <div class="ac-stat-grid ac-stat-grid-4" id="dashboard-stats">
+    <div class="ac-stat-grid ac-stat-grid-4">
         <div class="ac-stat-box">
-            <div class="ac-stat-val" id="stat-today">&mdash;</div>
-            <div class="ac-stat-lbl">Conversations today</div>
+            <div class="ac-stat-val" id="ac-dash-convos-today">&mdash;</div>
+            <div class="ac-stat-lbl"><?php echo esc_html( 'Conversations today' ); ?></div>
         </div>
         <div class="ac-stat-box">
-            <div class="ac-stat-val" id="stat-sales-today">&mdash;</div>
-            <div class="ac-stat-lbl">Sales today</div>
+            <div class="ac-stat-val" id="ac-dash-sales-today">&mdash;</div>
+            <div class="ac-stat-lbl"><?php echo esc_html( 'Sales today' ); ?></div>
+            <div class="ac-stat-sub">$</div>
         </div>
         <div class="ac-stat-box">
-            <div class="ac-stat-val" id="stat-total">&mdash;</div>
-            <div class="ac-stat-lbl">Total conversations</div>
+            <div class="ac-stat-val" id="ac-dash-total-convos">&mdash;</div>
+            <div class="ac-stat-lbl"><?php echo esc_html( 'Total conversations' ); ?></div>
         </div>
         <div class="ac-stat-box">
-            <div class="ac-stat-val" id="stat-escalated">&mdash;</div>
-            <div class="ac-stat-lbl">Escalated</div>
+            <div class="ac-stat-val" id="ac-dash-escalated">&mdash;</div>
+            <div class="ac-stat-lbl"><?php echo esc_html( 'Escalated' ); ?></div>
         </div>
     </div>
 
     <?php if ( $license !== 'active' && $accrued_fees > 0 ) : ?>
-        <div class="ac-ltm-cta" id="lifetime-cta-bar">
+        <div class="ac-lifetime-cta" id="ac-lifetime-cta-bar">
             <span style="font-size:16px">&#9889;</span>
-            <span style="flex:1;color:var(--ac-text)">You've accrued <strong>$<?php echo esc_html( number_format( $accrued_fees, 2 ) ); ?></strong> in fees. <strong style="color:var(--ac-elec-dk)">Lifetime license &mdash; $49</strong> eliminates all per-sale fees permanently.</span>
-            <span class="ac-ltm-btn" id="lifetime-license-cta">Upgrade &rarr;</span>
+            <span style="flex:1;color:var(--ac-text)">
+                <?php
+                printf(
+                    /* translators: %s: accrued fee amount */
+                    wp_kses(
+                        __( 'You\'ve accrued <strong>$%s</strong> in fees. <strong style="color:var(--ac-electric-dk)">Lifetime license &mdash; $49</strong> eliminates all per-sale fees permanently.', 'agentclerk' ),
+                        array(
+                            'strong' => array( 'style' => array() ),
+                        )
+                    ),
+                    esc_html( number_format( $accrued_fees, 2 ) )
+                );
+                ?>
+            </span>
+            <span class="ac-lifetime-btn" id="ac-lifetime-license-cta"><?php echo esc_html( 'Upgrade' ); ?> &rarr;</span>
         </div>
     <?php endif; ?>
 </div>
@@ -51,24 +66,26 @@ $accrued_fees = (float) get_option( 'agentclerk_accrued_fees', 0 );
 <script>
 jQuery(function($) {
     $.post(agentclerk.ajaxUrl, {
-        action: 'agentclerk_get_stats',
+        action: 'agentclerk_get_conversation_stats',
         nonce: agentclerk.nonce
     }, function(resp) {
         if (resp.success) {
             var d = resp.data;
-            $('#stat-today').text(d.today);
-            $('#stat-sales-today').text('$' + parseFloat(d.sales_today).toFixed(2));
-            $('#stat-total').text(d.total);
-            $('#stat-escalated').text(d.escalated);
+            $('#ac-dash-convos-today').text(d.today);
+            $('#ac-dash-sales-today').text('$' + parseFloat(d.sales_today || 0).toFixed(2));
+            $('#ac-dash-total-convos').text(d.total);
+            $('#ac-dash-escalated').text(d.escalated);
         }
     });
 
-    $('#lifetime-license-cta, #lifetime-cta-bar').on('click', function() {
+    $('#ac-lifetime-license-cta, #ac-lifetime-cta-bar').on('click', function() {
         $.post(agentclerk.ajaxUrl, {
-            action: 'agentclerk_lifetime_checkout',
+            action: 'agentclerk_purchase_lifetime',
             nonce: agentclerk.nonce
         }, function(resp) {
-            if (resp.success && resp.data.checkoutUrl) window.location.href = resp.data.checkoutUrl;
+            if (resp.success && resp.data.checkoutUrl) {
+                window.location.href = resp.data.checkoutUrl;
+            }
         });
     });
 });
