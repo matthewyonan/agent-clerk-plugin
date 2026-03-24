@@ -57,4 +57,5 @@ $accrued_fees = (float) get_option( 'agentclerk_accrued_fees', 0 );
             <span class="ac-ltm-btn" id="ac-lifetime-license-cta"><?php echo esc_html( 'Upgrade' ); ?> &rarr;</span>
         </div>
     <?php endif; ?>
+    <div style="text-align:right;padding:20px 0 4px;font-size:11px;color:var(--ac-text3)">&copy; 2026 &mdash; A Brilliant Way</div>
 </div>

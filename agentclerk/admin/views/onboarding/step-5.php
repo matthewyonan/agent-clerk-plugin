@@ -47,4 +47,5 @@ $site_url  = get_site_url();
     <div class="ac-co gn ac-mb"><span class="ac-co-i">&#10003;</span><div><?php printf( wp_kses( 'Always discoverable at <code style="font-family:\'DM Mono\',monospace;font-size:11px;background:var(--elec-lt);padding:1px 5px;border-radius:3px">%s/ai-manifest.json</code> — active regardless of widget placement.', array( 'code' => array( 'style' => array() ) ) ), esc_html( $site_url ) ); ?></div></div>
 
     <button class="ac-btn ac-btn-e ac-btn-lg" id="ac-step5-continue"><?php echo esc_html( 'Test and go live' ); ?> &rarr;</button>
+    <div style="text-align:right;padding:20px 0 4px;font-size:11px;color:var(--ac-text3)">&copy; 2026 &mdash; A Brilliant Way</div>
 </div>

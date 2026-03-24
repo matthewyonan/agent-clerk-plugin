@@ -76,4 +76,5 @@ $visibility = $config['product_visibility'] ?? array();
     </div>
 
     <button class="ac-btn ac-btn-e ac-btn-lg" id="ac-step4-continue"><?php echo esc_html( 'Continue to placement' ); ?> &rarr;</button>
+    <div style="text-align:right;padding:20px 0 4px;font-size:11px;color:var(--ac-text3)">&copy; 2026 &mdash; A Brilliant Way</div>
 </div>

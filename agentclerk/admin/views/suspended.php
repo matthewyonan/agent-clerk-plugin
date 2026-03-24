@@ -26,4 +26,5 @@ $grace_days   = (int) get_option( 'agentclerk_grace_days_remaining', 0 );
             <div style="margin-top:12px"><a href="<?php echo esc_url( admin_url( 'admin.php?page=agentclerk-support' ) ); ?>" style="font-size:12px;color:var(--text3)"><?php echo esc_html( 'Contact support' ); ?></a></div>
         </div>
     </div>
+    <div style="text-align:right;padding:20px 0 4px;font-size:11px;color:var(--ac-text3)">&copy; 2026 &mdash; A Brilliant Way</div>
 </div>

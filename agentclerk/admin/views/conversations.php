@@ -64,4 +64,5 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             <div class="ac-modal-body" id="ac-transcript-content" style="max-height:60vh;overflow-y:auto"></div>
         </div>
     </div>
+    <div style="text-align:right;padding:20px 0 4px;font-size:11px;color:var(--ac-text3)">&copy; 2026 &mdash; A Brilliant Way</div>
 </div>

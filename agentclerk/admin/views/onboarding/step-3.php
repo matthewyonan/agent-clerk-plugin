@@ -81,4 +81,5 @@ if ( empty( $support_file ) && ! empty( $scan_cache ) && class_exists( 'AgentCle
     <div class="ac-fr ac-mt">
         <button class="ac-btn ac-btn-e ac-btn-lg" id="ac-step3-continue"><?php echo esc_html( 'Continue to catalog' ); ?> &rarr;</button>
     </div>
+    <div style="text-align:right;padding:20px 0 4px;font-size:11px;color:var(--ac-text3)">&copy; 2026 &mdash; A Brilliant Way</div>
 </div>
