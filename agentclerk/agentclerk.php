@@ -140,37 +140,33 @@ final class AgentClerk {
 	/**
 	 * Make an authenticated request to the AgentClerk backend.
 	 *
+	 * Uses X-AgentClerk-Secret and X-AgentClerk-Site headers for authentication.
+	 * Returns the raw wp_remote_request() response (WP_Error or response array).
+	 *
 	 * @param string $endpoint API endpoint (relative).
-	 * @param array  $data     Request body data.
-	 * @param string $method   HTTP method.
-	 * @return array|WP_Error Response array with 'code' and 'body', or WP_Error.
+	 * @param array  $args     wp_remote_request() args (method, body, etc.).
+	 * @return array|WP_Error Raw wp_remote_request() response.
 	 */
-	public static function backend_request( $endpoint, $data = array(), $method = 'POST' ) {
+	public static function backend_request( $endpoint, $args = array() ) {
 		$install_secret = get_option( 'agentclerk_install_secret', '' );
 
-		$args = array(
-			'method'  => $method,
-			'headers' => array(
-				'Content-Type'  => 'application/json',
-				'Authorization' => 'Bearer ' . $install_secret,
-			),
+		$args = wp_parse_args( $args, array(
+			'method'  => 'POST',
+			'headers' => array(),
 			'timeout' => 30,
-			'body'    => 'GET' !== $method ? wp_json_encode( $data ) : null,
-		);
+		) );
 
-		$response = wp_remote_request( AGENTCLERK_BACKEND_URL . '/' . ltrim( $endpoint, '/' ), $args );
+		$args['headers'] = array_merge( $args['headers'], array(
+			'Content-Type'        => 'application/json',
+			'X-AgentClerk-Secret' => $install_secret,
+			'X-AgentClerk-Site'   => get_site_url(),
+		) );
 
-		if ( is_wp_error( $response ) ) {
-			return $response;
+		if ( isset( $args['body'] ) && is_array( $args['body'] ) ) {
+			$args['body'] = wp_json_encode( $args['body'] );
 		}
 
-		$body = wp_remote_retrieve_body( $response );
-		$code = wp_remote_retrieve_response_code( $response );
-
-		return array(
-			'code' => $code,
-			'body' => json_decode( $body, true ),
-		);
+		return wp_remote_request( AGENTCLERK_BACKEND_URL . '/' . ltrim( $endpoint, '/' ), $args );
 	}
 
 	/**
