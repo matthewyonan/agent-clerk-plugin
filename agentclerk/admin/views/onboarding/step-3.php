@@ -127,6 +127,7 @@ jQuery(function($) {
         var txt = $.trim($('#chat-input').val());
         if (!txt) return;
         addMsg('user', txt);
+        var historyToSend = JSON.stringify(chatHistory);
         chatHistory.push({ role: 'user', content: txt });
         $('#chat-input').val('');
         $('#chat-chips').empty();
@@ -136,13 +137,17 @@ jQuery(function($) {
             nonce: agentclerk.nonce,
             message: txt,
             context: 'gap_fill',
-            history: JSON.stringify(chatHistory)
+            history: historyToSend
         }, function(resp) {
             if (resp.success && resp.data.message) {
                 addMsg('assistant', resp.data.message);
                 chatHistory.push({ role: 'assistant', content: resp.data.message });
                 if (resp.data.chips) setChips(resp.data.chips);
+            } else {
+                addMsg('assistant', 'Something went wrong — please try again.');
             }
+        }).fail(function() {
+            addMsg('assistant', 'Connection error — please try again.');
         });
     }
 
