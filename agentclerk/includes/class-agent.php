@@ -174,6 +174,10 @@ class AgentClerk_Agent {
 
 		$text = $this->extract_response_text( $response );
 
+		if ( empty( $text ) ) {
+			wp_send_json_error( array( 'message' => 'AI returned an empty response. Please try again.' ) );
+		}
+
 		wp_send_json_success( array( 'message' => $text ) );
 	}
 
@@ -444,9 +448,14 @@ class AgentClerk_Agent {
 	 * @return array|WP_Error API response.
 	 */
 	private function call_anthropic_direct( $system_prompt, $messages, $tools = array() ) {
-		$api_key = AgentClerk::decrypt( get_option( 'agentclerk_api_key', '' ) );
+		$encrypted_key = get_option( 'agentclerk_api_key', '' );
+		if ( empty( $encrypted_key ) ) {
+			return new WP_Error( 'no_api_key', 'No API key stored. Please re-enter your Anthropic API key in Settings.' );
+		}
+
+		$api_key = AgentClerk::decrypt( $encrypted_key );
 		if ( ! $api_key ) {
-			return new WP_Error( 'no_api_key', 'Anthropic API key not configured.' );
+			return new WP_Error( 'decrypt_failed', 'Could not decrypt API key. Please re-enter your Anthropic API key in Settings.' );
 		}
 
 		$body = array(
@@ -471,15 +480,24 @@ class AgentClerk_Agent {
 		) );
 
 		if ( is_wp_error( $response ) ) {
-			return $response;
+			return new WP_Error( 'connection_failed', 'Could not reach Anthropic: ' . $response->get_error_message() );
 		}
 
 		$code = wp_remote_retrieve_response_code( $response );
+		$body_raw = wp_remote_retrieve_body( $response );
+
 		if ( 200 !== $code ) {
-			return new WP_Error( 'anthropic_error', 'Anthropic API returned status ' . $code );
+			$error_data = json_decode( $body_raw, true );
+			$api_msg    = isset( $error_data['error']['message'] ) ? $error_data['error']['message'] : $body_raw;
+			return new WP_Error( 'anthropic_error', 'Anthropic API error (' . $code . '): ' . $api_msg );
 		}
 
-		return json_decode( wp_remote_retrieve_body( $response ), true );
+		$decoded = json_decode( $body_raw, true );
+		if ( null === $decoded ) {
+			return new WP_Error( 'json_error', 'Invalid JSON from Anthropic API.' );
+		}
+
+		return $decoded;
 	}
 
 	/**
