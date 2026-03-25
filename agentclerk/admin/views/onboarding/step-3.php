@@ -92,15 +92,15 @@ jQuery(function($) {
     function addMsg(role, text) {
         var cls = role === 'assistant' ? 'ag' : 'us';
         var av = role === 'assistant' ? 'AC' : 'You';
-        $('#chat-messages').append('<div class="ac-msg ' + cls + '"><div class="ac-mav">' + av + '</div><div class="ac-mbub">' + text + '</div></div>');
-        $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+        $('#ac-chat-messages').append('<div class="ac-msg ' + cls + '"><div class="ac-mav">' + av + '</div><div class="ac-mbub">' + text + '</div></div>');
+        $('#ac-chat-messages').scrollTop($('#ac-chat-messages')[0].scrollHeight);
     }
 
     function setChips(chips) {
-        var row = $('#chat-chips').empty();
+        var row = $('#ac-chat-chips').empty();
         chips.forEach(function(c) {
             $('<span class="ac-chip">' + c + '</span>').on('click', function() {
-                $('#chat-input').val(c);
+                $('#ac-chat-input').val(c);
                 sendMessage();
             }).appendTo(row);
         });
@@ -114,13 +114,13 @@ jQuery(function($) {
     }
 
     function sendMessage() {
-        var txt = $.trim($('#chat-input').val());
+        var txt = $.trim($('#ac-chat-input').val());
         if (!txt) return;
         addMsg('user', txt);
         var historyToSend = JSON.stringify(chatHistory);
         chatHistory.push({ role: 'user', content: txt });
-        $('#chat-input').val('');
-        $('#chat-chips').empty();
+        $('#ac-chat-input').val('');
+        $('#ac-chat-chips').empty();
 
         $.post(agentclerk.ajaxUrl, {
             action: 'agentclerk_onboarding_chat',
@@ -141,15 +141,15 @@ jQuery(function($) {
         });
     }
 
-    $('#chat-send').on('click', sendMessage);
-    $('#chat-input').on('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
+    $('#ac-chat-send').on('click', sendMessage);
+    $('#ac-chat-input').on('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
 
-    $('#step3-continue').on('click', function() {
+    $('#ac-step3-continue').on('click', function() {
         $(this).prop('disabled', true).text('Saving...');
         $.post(agentclerk.ajaxUrl, {
             action: 'agentclerk_save_agent_config',
             nonce: agentclerk.nonce,
-            support_file: $('#support-file').val()
+            support_file: $('#ac-support-file').val()
         }, function() {
             $.post(agentclerk.ajaxUrl, {
                 action: 'agentclerk_save_onboarding_step',
