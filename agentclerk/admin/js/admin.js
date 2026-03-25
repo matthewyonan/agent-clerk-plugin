@@ -366,21 +366,40 @@
                 'Your site looks well-configured! I found everything I need. You can edit the support file on the left, or continue to the catalog.');
         }
 
+        var sending = false;
+
+        function setSending(active) {
+            sending = active;
+            $('#ac-chat-send').prop('disabled', active);
+            $('#ac-chat-input').prop('disabled', active);
+            if (active) {
+                addChatMessage('#ac-chat-messages', 'assistant', '<em>Thinking\u2026</em>');
+            }
+        }
+
+        function removeThinking() {
+            $('#ac-chat-messages .ac-msg.ag:last-child .ac-mbub:contains("Thinking")').closest('.ac-msg').remove();
+        }
+
         function sendMessage() {
             var txt = $.trim($('#ac-chat-input').val());
-            if (!txt) return;
+            if (!txt || sending) return;
+
             addChatMessage('#ac-chat-messages', 'user', escHtml(txt));
             var historyToSend = JSON.stringify(chatHistory);
             chatHistory.push({ role: 'user', content: txt });
             $('#ac-chat-input').val('');
             $('#ac-chat-chips').empty();
+            setSending(true);
 
             acAjax('onboarding_chat', {
                 message: txt,
                 context: 'gap_fill',
                 history: historyToSend
             }).then(function(data) {
-                if (data.message) {
+                removeThinking();
+                setSending(false);
+                if (data && data.message) {
                     addChatMessage('#ac-chat-messages', 'assistant', data.message);
                     chatHistory.push({ role: 'assistant', content: data.message });
                     if (data.chips) {
@@ -389,9 +408,16 @@
                             sendMessage();
                         });
                     }
+                } else {
+                    console.error('AgentClerk: empty response from onboarding_chat', data);
+                    addChatMessage('#ac-chat-messages', 'assistant', 'No response received \u2014 please try again.');
                 }
-            }).catch(function() {
-                addChatMessage('#ac-chat-messages', 'assistant', 'Something went wrong \u2014 please try again.');
+            }).catch(function(err) {
+                removeThinking();
+                setSending(false);
+                var msg = (err && err.message) ? err.message : 'Unknown error';
+                console.error('AgentClerk: onboarding_chat failed', err);
+                addChatMessage('#ac-chat-messages', 'assistant', 'Error: ' + escHtml(msg) + ' \u2014 please try again.');
             });
         }
 
