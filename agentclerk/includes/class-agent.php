@@ -317,6 +317,11 @@ class AgentClerk_Agent {
 			$gaps = $scan_cache['gaps'] ?? array();
 
 			// Show what's already configured so the AI skips those.
+			if ( ! empty( $config['business_desc'] ) ) {
+				$prompt .= "Already configured — Business description: {$config['business_desc']}\n";
+			} else {
+				$prompt .= "MISSING — Business description: Ask the seller to describe their business.\n";
+			}
 			$policies = $config['policies'] ?? array();
 			$has_config = false;
 			if ( ! empty( $policies['refund'] ) ) {
@@ -390,6 +395,10 @@ class AgentClerk_Agent {
 				'input_schema' => array(
 					'type'       => 'object',
 					'properties' => array(
+						'business_desc'      => array(
+							'type'        => 'string',
+							'description' => 'Business description — what the store sells and who it serves.',
+						),
 						'policies'            => array(
 							'type'        => 'object',
 							'description' => 'Store policies. Include only the keys being set.',
@@ -432,6 +441,11 @@ class AgentClerk_Agent {
 	private function process_onboarding_tool_call( $input ) {
 		$config = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
 		$saved  = array();
+
+		if ( isset( $input['business_desc'] ) && '' !== $input['business_desc'] ) {
+			$config['business_desc'] = sanitize_textarea_field( $input['business_desc'] );
+			$saved[] = 'business_desc';
+		}
 
 		if ( ! empty( $input['policies'] ) && is_array( $input['policies'] ) ) {
 			if ( ! isset( $config['policies'] ) ) {
