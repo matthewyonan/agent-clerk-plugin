@@ -257,7 +257,7 @@
 
         // Lifetime CTA
         $('#ac-lifetime-cta-bar').on('click', function() {
-            acAjax('purchase_lifetime').then(function(data) {
+            acAjax('lifetime_checkout').then(function(data) {
                 if (data.checkoutUrl) window.location.href = data.checkoutUrl;
             });
         });
@@ -609,7 +609,7 @@
         // Sync WooCommerce
         $('#ac-sync-wc').on('click', function() {
             $(this).text('Syncing...').prop('disabled', true);
-            acAjax('rescan').then(function() { location.reload(); });
+            acAjax('start_scan').then(function() { location.reload(); });
         });
 
         // Add product modal (settings)
@@ -665,7 +665,7 @@
         // Rescan
         $('#ac-rescan-btn').on('click', function() {
             $(this).text('Scanning...').prop('disabled', true);
-            acAjax('rescan').then(function() { location.reload(); });
+            acAjax('start_scan').then(function() { location.reload(); });
         });
 
         // Catalog count
@@ -681,7 +681,7 @@
         if (!$('#ac-convo-tbody').length) return;
 
         function loadStats() {
-            acAjax('get_conversation_stats').then(function(d) {
+            acAjax('get_stats').then(function(d) {
                 $('#ac-cs-total').text(d.total || 0);
                 $('#ac-cs-setup').text(d.setup || 0);
                 $('#ac-cs-support').text(d.support || 0);
@@ -821,7 +821,7 @@
 
         // Lifetime CTA
         $('#ac-sales-lifetime-btn, #ac-sales-lifetime-cta').on('click', function() {
-            acAjax('purchase_lifetime').then(function(data) {
+            acAjax('lifetime_checkout').then(function(data) {
                 if (data.checkoutUrl) window.location.href = data.checkoutUrl;
             });
         });
@@ -878,7 +878,7 @@
 
         $(document).on('click', '.ac-toggle-read', function(e) {
             e.stopPropagation();
-            acAjax('toggle_escalation_read', { conversation_id: $(this).data('id') }).then(function() {
+            acAjax('toggle_read', { conversation_id: $(this).data('id') }).then(function() {
                 loadEscalations();
             });
         });
@@ -895,7 +895,7 @@
             supportHistory.push({ role: 'user', content: txt });
             $('#ac-support-input').val('');
 
-            acAjax('send_plugin_support', {
+            acAjax('support_chat', {
                 message: txt,
                 history: JSON.stringify(supportHistory)
             }).then(function(data) {
@@ -923,7 +923,7 @@
     (function initDashboard() {
         if (!$('#ac-dash-convos-today').length) return;
 
-        acAjax('get_conversation_stats').then(function(d) {
+        acAjax('get_stats').then(function(d) {
             $('#ac-dash-convos-today').text(d.today || 0);
             $('#ac-dash-sales-today').text('$' + parseFloat(d.sales_today || 0).toFixed(2));
             $('#ac-dash-total-convos').text(d.total || 0);
@@ -932,7 +932,7 @@
 
         // Lifetime CTA
         $('#ac-lifetime-license-cta, #ac-lifetime-cta-bar').on('click', function() {
-            acAjax('purchase_lifetime').then(function(data) {
+            acAjax('lifetime_checkout').then(function(data) {
                 if (data.checkoutUrl) window.location.href = data.checkoutUrl;
             });
         });
@@ -947,7 +947,7 @@
 
         $('#ac-update-payment').on('click', function() {
             $(this).prop('disabled', true).text('Loading...');
-            acAjax('update_card').then(function(data) {
+            acAjax('card_update').then(function(data) {
                 if (data.portalUrl) window.location.href = data.portalUrl;
                 else {
                     alert('Could not load billing portal. Please try again.');
