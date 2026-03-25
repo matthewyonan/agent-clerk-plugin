@@ -511,16 +511,34 @@
         addChatMessage('#ac-test-msgs', 'assistant',
             'Hi! I can help you find the right product. What are you looking for?');
 
+        var sending = false;
+
         function sendTest() {
             var txt = $.trim($('#ac-test-input').val());
-            if (!txt) return;
+            if (!txt || sending) return;
             addChatMessage('#ac-test-msgs', 'user', escHtml(txt));
             $('#ac-test-input').val('');
+            sending = true;
+            $('#ac-test-send').prop('disabled', true);
+            addChatMessage('#ac-test-msgs', 'assistant', '<em>Thinking\u2026</em>');
 
-            acAjax('start_scan', { message: txt, test_mode: '1' }).then(function(data) {
-                addChatMessage('#ac-test-msgs', 'assistant', data.message);
+            acAjax('chat', { message: txt, test_mode: '1' }).then(function(data) {
+                $('#ac-test-msgs .ac-msg.ag:last-child .ac-mbub:contains("Thinking")').closest('.ac-msg').remove();
+                sending = false;
+                $('#ac-test-send').prop('disabled', false);
+                if (data && data.message) {
+                    addChatMessage('#ac-test-msgs', 'assistant', data.message);
+                } else {
+                    console.error('AgentClerk: empty test chat response', data);
+                    addChatMessage('#ac-test-msgs', 'assistant', 'No response received \u2014 please try again.');
+                }
             }).catch(function(err) {
-                addChatMessage('#ac-test-msgs', 'assistant', 'Error: ' + escHtml(err.message || 'Something went wrong.'));
+                $('#ac-test-msgs .ac-msg.ag:last-child .ac-mbub:contains("Thinking")').closest('.ac-msg').remove();
+                sending = false;
+                $('#ac-test-send').prop('disabled', false);
+                var msg = (err && err.message) ? err.message : 'Unknown error';
+                console.error('AgentClerk: test chat failed', err);
+                addChatMessage('#ac-test-msgs', 'assistant', 'Error: ' + escHtml(msg));
             });
         }
 
