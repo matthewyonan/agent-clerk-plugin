@@ -257,7 +257,7 @@
 
         // Lifetime CTA
         $('#ac-lifetime-cta-bar').on('click', function() {
-            acAjax('purchase_lifetime').then(function(data) {
+            acAjax('lifetime_checkout').then(function(data) {
                 if (data.checkoutUrl) window.location.href = data.checkoutUrl;
             });
         });
@@ -511,16 +511,34 @@
         addChatMessage('#ac-test-msgs', 'assistant',
             'Hi! I can help you find the right product. What are you looking for?');
 
+        var sending = false;
+
         function sendTest() {
             var txt = $.trim($('#ac-test-input').val());
-            if (!txt) return;
+            if (!txt || sending) return;
             addChatMessage('#ac-test-msgs', 'user', escHtml(txt));
             $('#ac-test-input').val('');
+            sending = true;
+            $('#ac-test-send').prop('disabled', true);
+            addChatMessage('#ac-test-msgs', 'assistant', '<em>Thinking\u2026</em>');
 
-            acAjax('start_scan', { message: txt, test_mode: '1' }).then(function(data) {
-                addChatMessage('#ac-test-msgs', 'assistant', data.message);
+            acAjax('chat', { message: txt, test_mode: '1' }).then(function(data) {
+                $('#ac-test-msgs .ac-msg.ag:last-child .ac-mbub:contains("Thinking")').closest('.ac-msg').remove();
+                sending = false;
+                $('#ac-test-send').prop('disabled', false);
+                if (data && data.message) {
+                    addChatMessage('#ac-test-msgs', 'assistant', data.message);
+                } else {
+                    console.error('AgentClerk: empty test chat response', data);
+                    addChatMessage('#ac-test-msgs', 'assistant', 'No response received \u2014 please try again.');
+                }
             }).catch(function(err) {
-                addChatMessage('#ac-test-msgs', 'assistant', 'Error: ' + escHtml(err.message || 'Something went wrong.'));
+                $('#ac-test-msgs .ac-msg.ag:last-child .ac-mbub:contains("Thinking")').closest('.ac-msg').remove();
+                sending = false;
+                $('#ac-test-send').prop('disabled', false);
+                var msg = (err && err.message) ? err.message : 'Unknown error';
+                console.error('AgentClerk: test chat failed', err);
+                addChatMessage('#ac-test-msgs', 'assistant', 'Error: ' + escHtml(msg));
             });
         }
 
@@ -591,7 +609,7 @@
         // Sync WooCommerce
         $('#ac-sync-wc').on('click', function() {
             $(this).text('Syncing...').prop('disabled', true);
-            acAjax('rescan').then(function() { location.reload(); });
+            acAjax('start_scan').then(function() { location.reload(); });
         });
 
         // Add product modal (settings)
@@ -647,7 +665,7 @@
         // Rescan
         $('#ac-rescan-btn').on('click', function() {
             $(this).text('Scanning...').prop('disabled', true);
-            acAjax('rescan').then(function() { location.reload(); });
+            acAjax('start_scan').then(function() { location.reload(); });
         });
 
         // Catalog count
@@ -663,7 +681,7 @@
         if (!$('#ac-convo-tbody').length) return;
 
         function loadStats() {
-            acAjax('get_conversation_stats').then(function(d) {
+            acAjax('get_stats').then(function(d) {
                 $('#ac-cs-total').text(d.total || 0);
                 $('#ac-cs-setup').text(d.setup || 0);
                 $('#ac-cs-support').text(d.support || 0);
@@ -803,7 +821,7 @@
 
         // Lifetime CTA
         $('#ac-sales-lifetime-btn, #ac-sales-lifetime-cta').on('click', function() {
-            acAjax('purchase_lifetime').then(function(data) {
+            acAjax('lifetime_checkout').then(function(data) {
                 if (data.checkoutUrl) window.location.href = data.checkoutUrl;
             });
         });
@@ -860,7 +878,7 @@
 
         $(document).on('click', '.ac-toggle-read', function(e) {
             e.stopPropagation();
-            acAjax('toggle_escalation_read', { conversation_id: $(this).data('id') }).then(function() {
+            acAjax('toggle_read', { conversation_id: $(this).data('id') }).then(function() {
                 loadEscalations();
             });
         });
@@ -877,7 +895,7 @@
             supportHistory.push({ role: 'user', content: txt });
             $('#ac-support-input').val('');
 
-            acAjax('send_plugin_support', {
+            acAjax('support_chat', {
                 message: txt,
                 history: JSON.stringify(supportHistory)
             }).then(function(data) {
@@ -905,7 +923,7 @@
     (function initDashboard() {
         if (!$('#ac-dash-convos-today').length) return;
 
-        acAjax('get_conversation_stats').then(function(d) {
+        acAjax('get_stats').then(function(d) {
             $('#ac-dash-convos-today').text(d.today || 0);
             $('#ac-dash-sales-today').text('$' + parseFloat(d.sales_today || 0).toFixed(2));
             $('#ac-dash-total-convos').text(d.total || 0);
@@ -914,7 +932,7 @@
 
         // Lifetime CTA
         $('#ac-lifetime-license-cta, #ac-lifetime-cta-bar').on('click', function() {
-            acAjax('purchase_lifetime').then(function(data) {
+            acAjax('lifetime_checkout').then(function(data) {
                 if (data.checkoutUrl) window.location.href = data.checkoutUrl;
             });
         });
@@ -929,7 +947,7 @@
 
         $('#ac-update-payment').on('click', function() {
             $(this).prop('disabled', true).text('Loading...');
-            acAjax('update_card').then(function(data) {
+            acAjax('card_update').then(function(data) {
                 if (data.portalUrl) window.location.href = data.portalUrl;
                 else {
                     alert('Could not load billing portal. Please try again.');
