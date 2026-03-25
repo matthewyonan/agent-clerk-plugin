@@ -408,6 +408,10 @@
                             sendMessage();
                         });
                     }
+                    // Show confirmation when config was saved
+                    if (data.saved_fields && data.saved_fields.length) {
+                        showToast('Saved: ' + data.saved_fields.join(', '), 'success');
+                    }
                 } else {
                     console.error('AgentClerk: empty response from onboarding_chat', data);
                     addChatMessage('#ac-chat-messages', 'assistant', 'No response received \u2014 please try again.');
