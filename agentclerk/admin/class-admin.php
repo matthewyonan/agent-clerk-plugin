@@ -14,7 +14,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class AgentClerk_Admin {
 
-    public function __construct() {
+    private static $instance = null;
+
+    public static function instance() {
+        if ( null === self::$instance ) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    private function __construct() {
         add_action( 'admin_menu', [ $this, 'register_menus' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
         add_action( 'wp_ajax_agentclerk_save_settings', [ $this, 'save_settings' ] );
