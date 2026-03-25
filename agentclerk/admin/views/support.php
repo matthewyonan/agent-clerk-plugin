@@ -1,103 +1,53 @@
-<?php if ( ! defined( 'ABSPATH' ) ) exit; ?>
+<?php
+if ( ! defined( 'ABSPATH' ) ) exit;
+?>
 <div class="wrap ac-wrap">
-    <div class="ac-pt">Support</div>
-    <div class="ac-ps">Manage escalated conversations and get help with the plugin.</div>
-
-    <div class="ac-g2">
+    <div class="ac-fb ac-mb">
         <div>
-            <div class="ac-card">
-                <div class="ac-card-head"><h2>Escalated Conversations</h2></div>
-                <div class="ac-card-body" id="escalation-list">
-                    <div class="ac-co sl"><span class="ac-co-i">&#8987;</span><span>Loading&hellip;</span></div>
-                </div>
+            <div class="ac-pt"><?php echo esc_html( 'Support' ); ?></div>
+            <div class="ac-ps"><?php echo esc_html( 'Buyer escalations on the left. Ask us about the plugin on the right.' ); ?></div>
+        </div>
+        <span class="ac-b ac-b-a" id="ac-open-count"><?php echo esc_html( '0 open' ); ?></span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+
+        <!-- LEFT: Buyer Escalation Log -->
+        <div>
+            <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:10px"><?php echo esc_html( 'Buyer escalations' ); ?></div>
+            <div id="ac-escalation-list">
+                <div class="ac-co sl"><span class="ac-co-i">&#8987;</span><span><?php echo esc_html( 'Loading...' ); ?></span></div>
+            </div>
+            <div style="font-size:12px;color:var(--text3);text-align:center;padding:8px 0">
+                <a href="#" id="ac-view-resolved" style="display:none;color:var(--elec-dk)"><?php echo esc_html( 'View resolved escalations' ); ?> &rarr;</a>
             </div>
         </div>
 
+        <!-- RIGHT: AgentClerk Plugin Help -->
         <div>
-            <div class="ac-card" style="display:flex;flex-direction:column">
-                <div class="ac-card-head"><h2>AgentClerk Plugin Help</h2></div>
-                <div class="ac-chat-shell" style="border:none;border-radius:0;flex:1">
-                    <div class="ac-msgs" id="support-msgs" style="height:320px"></div>
-                    <div class="ac-chat-inp-row">
-                        <input type="text" class="ac-chat-inp" id="support-input" placeholder="Ask about AgentClerk&hellip;">
-                        <button class="ac-send-btn" id="support-send">&#10148;</button>
+            <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:10px"><?php echo esc_html( 'AgentClerk help' ); ?></div>
+            <div class="ac-chat-shell" style="height:580px">
+                <div class="ac-chat-hd">
+                    <div class="ac-chat-av" style="background:var(--elec-lt);color:var(--elec-dk);font-size:11px;font-weight:700">AC</div>
+                    <div>
+                        <div class="ac-chat-nm"><?php echo esc_html( 'AgentClerk Support' ); ?></div>
+                        <div class="ac-chat-st">&#9679; <?php echo esc_html( 'Ask us anything about the plugin' ); ?></div>
                     </div>
                 </div>
+                <div class="ac-msgs" id="ac-support-msgs" style="flex:1"></div>
+                <div style="display:flex;flex-wrap:wrap;gap:4px;padding:6px 12px 2px;background:var(--white)">
+                    <span class="ac-chip" data-q="<?php echo esc_attr( 'How do I update my support file?' ); ?>"><?php echo esc_html( 'How do I update my support file?' ); ?></span>
+                    <span class="ac-chip" data-q="<?php echo esc_attr( 'Why did a transaction not get billed?' ); ?>"><?php echo esc_html( 'Why did a transaction not get billed?' ); ?></span>
+                    <span class="ac-chip" data-q="<?php echo esc_attr( 'How do I handle the refund request?' ); ?>"><?php echo esc_html( 'How do I handle the refund request?' ); ?></span>
+                    <span class="ac-chip" data-q="<?php echo esc_attr( 'Re-send a download link to a buyer' ); ?>"><?php echo esc_html( 'Re-send a download link to a buyer' ); ?></span>
+                </div>
+                <div class="ac-chat-inp-row">
+                    <textarea class="ac-chat-inp" id="ac-support-input" rows="1" placeholder="<?php echo esc_attr( 'Ask about the plugin…' ); ?>"></textarea>
+                    <button class="ac-send-btn" id="ac-support-send">&#10148;</button>
+                </div>
             </div>
         </div>
+
     </div>
+    <div style="text-align:right;padding:20px 0 4px;font-size:11px;color:var(--ac-text3)">&copy; 2026 &mdash; A Brilliant Way</div>
 </div>
-
-<script>
-jQuery(function($) {
-    // Escalations
-    function loadEscalations() {
-        $.get(agentclerk.ajaxUrl, {
-            action: 'agentclerk_get_escalations',
-            nonce: agentclerk.nonce
-        }, function(r) {
-            if (!r.success) return;
-            var html = '';
-            $.each(r.data.escalations, function(i, e) {
-                var readCls = e.read ? 'read' : '';
-                html += '<div class="ac-escalation-card ' + readCls + '" data-id="' + e.id + '">';
-                html += '<div class="ac-fb" style="margin-bottom:6px">';
-                html += '<strong style="font-size:13px">' + (e.email || 'No email') + '</strong>';
-                html += '<button class="ac-btn ac-btn-g ac-btn-sm toggle-read" data-id="' + e.id + '">' + (e.read ? 'Mark Unread' : 'Mark Read') + '</button>';
-                html += '</div>';
-                html += '<div style="font-size:12px;color:var(--ac-text2);margin-bottom:4px">' + $('<span>').text(e.first_message || '(no message)').html() + '</div>';
-                html += '<div style="font-size:11px;color:var(--ac-text3)">' + e.created_at + '</div>';
-                html += '</div>';
-            });
-            $('#escalation-list').html(html || '<div style="color:var(--ac-text3);font-size:13px;padding:10px 0">No escalated conversations.</div>');
-        });
-    }
-
-    loadEscalations();
-
-    $(document).on('click', '.toggle-read', function(e) {
-        e.stopPropagation();
-        $.post(agentclerk.ajaxUrl, {
-            action: 'agentclerk_toggle_read',
-            nonce: agentclerk.nonce,
-            conversation_id: $(this).data('id')
-        }, function() { loadEscalations(); });
-    });
-
-    // Support chat
-    var supportHistory = [];
-    function addMsg(role, text) {
-        var cls = role === 'assistant' ? 'ag' : 'us';
-        var av = role === 'assistant' ? 'AC' : 'You';
-        $('#support-msgs').append('<div class="ac-msg ' + cls + '"><div class="ac-mav">' + av + '</div><div class="ac-mbub">' + text + '</div></div>');
-        $('#support-msgs').scrollTop($('#support-msgs')[0].scrollHeight);
-    }
-
-    addMsg('assistant', 'Hi! I can help with AgentClerk plugin questions. What do you need help with?');
-
-    function sendSupport() {
-        var txt = $.trim($('#support-input').val());
-        if (!txt) return;
-        addMsg('user', txt);
-        supportHistory.push({ role: 'user', content: txt });
-        $('#support-input').val('');
-
-        $.post(agentclerk.ajaxUrl, {
-            action: 'agentclerk_support_chat',
-            nonce: agentclerk.nonce,
-            message: txt,
-            history: JSON.stringify(supportHistory)
-        }, function(r) {
-            if (r.success) {
-                addMsg('assistant', r.data.message);
-                supportHistory.push({ role: 'assistant', content: r.data.message });
-            } else {
-                addMsg('assistant', 'Error: ' + (r.data ? r.data.message : 'Something went wrong.'));
-            }
-        });
-    }
-
-    $('#support-send').on('click', sendSupport);
-    $('#support-input').on('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); sendSupport(); } });
-});
-</script>

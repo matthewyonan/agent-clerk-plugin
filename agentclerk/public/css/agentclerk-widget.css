@@ -1,309 +1,477 @@
-/* AgentClerk Widget Styles */
+/* AgentClerk Widget — Public Styles (v5 design system)
+ *
+ * Brand tokens:
+ *   Slate:        #1C2333
+ *   Electric:     #00E5C8
+ *   Electric-dk:  #0D7A6B
+ *   Off-white:    #F0F2F7
+ * ───────────────────────────────────────────────── */
 
-/* Floating Button */
-.agentclerk-widget-btn {
-    position: fixed;
-    bottom: 20px;
-    z-index: 99999;
-    background: #4f46e5;
-    color: #fff;
-    padding: 12px 24px;
-    border-radius: 50px;
-    cursor: pointer;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.agentclerk-widget-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.5);
-}
+/* ── Floating Widget Button ────────────────────── */
 
-/* Widget Panel */
-.agentclerk-widget-panel {
-    position: fixed;
-    bottom: 80px;
-    z-index: 99999;
-    width: 380px;
-    max-height: 520px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-    display: flex;
-    flex-direction: column;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    overflow: hidden;
+.acw-float-btn {
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	z-index: 99999;
+	background: #1C2333;
+	color: #fff;
+	font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+	font-size: 13px;
+	font-weight: 500;
+	padding: 9px 15px;
+	border-radius: 22px;
+	border: none;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18), 0 8px 24px rgba(0, 0, 0, 0.12);
+	transition: background 0.2s, box-shadow 0.2s;
+	line-height: 1;
 }
-
-.agentclerk-widget-header {
-    background: #4f46e5;
-    color: #fff;
-    padding: 14px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: 600;
-    font-size: 15px;
+.acw-float-btn:hover {
+	background: #252E42;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22), 0 10px 28px rgba(0, 0, 0, 0.14);
+}
+.acw-float-btn--left {
+	right: auto;
+	left: 20px;
+}
+.acw-float-icon {
+	color: #00E5C8;
+	display: flex;
+	align-items: center;
 }
 
-.agentclerk-widget-close {
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 20px;
-    cursor: pointer;
-    padding: 0 4px;
-    line-height: 1;
+/* ── Floating Widget Panel ─────────────────────── */
+
+.acw-panel {
+	position: fixed;
+	bottom: 80px;
+	right: 20px;
+	z-index: 99998;
+	width: 320px;
+	max-height: 500px;
+	background: #fff;
+	border-radius: 10px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 12px 40px rgba(0, 0, 0, 0.1);
+	overflow: hidden;
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	display: none;
+	flex-direction: column;
+	font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.acw-panel.open {
+	display: flex;
+}
+.acw-panel--left {
+	right: auto;
+	left: 20px;
 }
 
-.agentclerk-widget-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px;
-    min-height: 200px;
-    max-height: 340px;
+/* ── Chat Header ───────────────────────────────── */
+
+.acw-header {
+	background: #1C2333;
+	padding: 10px 13px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 9px;
+	flex-shrink: 0;
+}
+.acw-header-left {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+}
+.acw-avatar {
+	width: 23px;
+	height: 23px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+.acw-avatar--electric {
+	background: #00E5C8;
+	color: #1C2333;
+}
+.acw-header-info {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+}
+.acw-header-name {
+	font-size: 12px;
+	font-weight: 500;
+	color: #fff;
+	line-height: 1.2;
+}
+.acw-header-status {
+	font-size: 10px;
+	color: #00E5C8;
+	line-height: 1.2;
+}
+.acw-close-btn {
+	background: none;
+	border: none;
+	color: #8A95A8;
+	font-size: 18px;
+	cursor: pointer;
+	padding: 0 2px;
+	line-height: 1;
+	transition: color 0.15s;
+	margin-left: auto;
+}
+.acw-close-btn:hover {
+	color: #fff;
 }
 
-.agentclerk-widget-input-wrap {
-    display: flex;
-    border-top: 1px solid #e5e7eb;
-    padding: 8px;
-    gap: 8px;
+/* ── Compact Header (product embed) ────────────── */
+
+.acw-header--compact {
+	padding: 8px 11px;
+}
+.acw-header--compact .acw-avatar {
+	width: 20px;
+	height: 20px;
+}
+.acw-header--compact .acw-header-name {
+	font-size: 11px;
 }
 
-.agentclerk-widget-input-wrap input {
-    flex: 1;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 14px;
-    outline: none;
+/* ── Messages Area ─────────────────────────────── */
+
+.acw-messages {
+	display: flex;
+	flex-direction: column;
+	gap: 9px;
+	padding: 11px;
+	background: #F0F2F7;
+	height: 280px;
+	overflow-y: auto;
+	flex: 1;
 }
-.agentclerk-widget-input-wrap input:focus {
-    border-color: #4f46e5;
+.acw-messages--product {
+	height: 200px;
+}
+.acw-messages--fullpage {
+	height: auto;
+	min-height: 350px;
+	max-height: 450px;
+}
+.acw-messages--support {
+	height: auto;
+	min-height: 250px;
+	max-height: 400px;
 }
 
-.agentclerk-widget-input-wrap button {
-    background: #4f46e5;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 16px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
+/* ── Message Bubbles ───────────────────────────── */
+
+.acw-msg {
+	display: flex;
+	gap: 7px;
+	max-width: 88%;
 }
-.agentclerk-widget-input-wrap button:hover {
-    background: #4338ca;
+.acw-msg--agent {
+	align-self: flex-start;
+}
+.acw-msg--user {
+	align-self: flex-end;
+	flex-direction: row-reverse;
 }
 
-/* Escalation Panel */
-.agentclerk-widget-escalation {
-    padding: 12px;
-    border-top: 1px solid #e5e7eb;
-    background: #fffbeb;
+/* Agent avatar */
+.acw-msg-avatar {
+	width: 21px;
+	height: 21px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	font-family: 'DM Mono', 'Courier New', monospace;
+	font-size: 10px;
+	font-weight: 500;
+	line-height: 1;
 }
-.agentclerk-widget-escalation p {
-    margin: 0 0 8px;
-    font-size: 13px;
-    color: #92400e;
+.acw-msg--agent .acw-msg-avatar {
+	background: #1C2333;
+	color: #00E5C8;
 }
-.agentclerk-widget-escalation input {
-    width: 100%;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    padding: 6px 10px;
-    margin-bottom: 8px;
-    font-size: 13px;
-    box-sizing: border-box;
-}
-.agentclerk-widget-escalation button {
-    background: #f59e0b;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 14px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
+.acw-msg--user .acw-msg-avatar {
+	background: #0D7A6B;
+	color: #fff;
 }
 
-/* Messages */
-.agentclerk-msg {
-    margin-bottom: 10px;
-    padding: 8px 12px;
-    border-radius: 12px;
-    font-size: 14px;
-    line-height: 1.4;
-    max-width: 85%;
-    word-wrap: break-word;
+/* Bubbles */
+.acw-msg-bubble {
+	font-size: 12px;
+	line-height: 1.45;
+	padding: 8px 11px;
+	border-radius: 11px;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
 }
-.agentclerk-msg-user {
-    background: #4f46e5;
-    color: #fff;
-    margin-left: auto;
-    border-bottom-right-radius: 4px;
+.acw-msg--agent .acw-msg-bubble {
+	background: #fff;
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	color: #1C2333;
+	border-top-left-radius: 3px;
 }
-.agentclerk-msg-assistant {
-    background: #f3f4f6;
-    color: #1f2937;
-    border-bottom-left-radius: 4px;
-}
-
-/* Product Page Embed */
-.agentclerk-embed {
-    margin-top: 16px;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    overflow: hidden;
-    max-width: 400px;
-}
-.agentclerk-embed-header {
-    background: #4f46e5;
-    color: #fff;
-    padding: 10px 14px;
-    font-weight: 600;
-    font-size: 14px;
-}
-.agentclerk-embed-messages {
-    min-height: 120px;
-    max-height: 250px;
-    overflow-y: auto;
-    padding: 10px;
-}
-.agentclerk-embed-input {
-    display: flex;
-    border-top: 1px solid #e5e7eb;
-    padding: 6px;
-    gap: 6px;
-}
-.agentclerk-embed-input input {
-    flex: 1;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 13px;
-    outline: none;
-}
-.agentclerk-embed-input button {
-    background: #4f46e5;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
+.acw-msg--user .acw-msg-bubble {
+	background: #1C2333;
+	color: #fff;
+	border-top-right-radius: 3px;
 }
 
-/* Full Page */
-.agentclerk-fullpage {
-    max-width: 700px;
-    margin: 0 auto;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+/* Markdown-lite inside bubbles */
+.acw-msg-bubble strong {
+	font-weight: 600;
 }
-.agentclerk-fullpage-header {
-    background: #4f46e5;
-    color: #fff;
-    padding: 16px 20px;
-    border-radius: 12px 12px 0 0;
+.acw-msg-bubble a {
+	color: #0D7A6B;
+	text-decoration: underline;
 }
-.agentclerk-fullpage-header h2 {
-    margin: 0;
-    font-size: 18px;
-    color: #fff;
-}
-.agentclerk-fullpage-messages {
-    min-height: 400px;
-    max-height: 500px;
-    overflow-y: auto;
-    padding: 16px;
-    border: 1px solid #e5e7eb;
-    border-top: none;
-    background: #fafafa;
-}
-.agentclerk-fullpage-input {
-    display: flex;
-    border: 1px solid #e5e7eb;
-    border-top: none;
-    border-radius: 0 0 12px 12px;
-    padding: 10px;
-    gap: 8px;
-    background: #fff;
-}
-.agentclerk-fullpage-input input {
-    flex: 1;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 15px;
-    outline: none;
-}
-.agentclerk-fullpage-input input:focus {
-    border-color: #4f46e5;
-}
-.agentclerk-fullpage-input button {
-    background: #4f46e5;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-size: 15px;
-    font-weight: 600;
+.acw-msg--user .acw-msg-bubble a {
+	color: #00E5C8;
 }
 
-#agentclerk-escalation {
-    margin-top: 12px;
-    padding: 12px;
-    background: #fffbeb;
-    border: 1px solid #fcd34d;
-    border-radius: 8px;
+/* ── Input Area ────────────────────────────────── */
+
+.acw-input-row {
+	padding: 7px 9px;
+	background: #fff;
+	border-top: 1px solid rgba(0, 0, 0, 0.1);
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-shrink: 0;
 }
-#agentclerk-escalation input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    margin: 8px 0;
-    box-sizing: border-box;
+.acw-input {
+	flex: 1;
+	font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+	font-size: 12px;
+	padding: 6px 10px;
+	border-radius: 14px;
+	border: 1px solid rgba(0, 0, 0, 0.15);
+	outline: none;
+	background: #fff;
+	color: #1C2333;
+	transition: border-color 0.15s;
 }
-#agentclerk-escalation button {
-    background: #f59e0b;
-    color: #fff;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
+.acw-input:focus {
+	border-color: #0D7A6B;
+}
+.acw-input::placeholder {
+	color: #8A95A8;
+}
+.acw-send-btn {
+	width: 27px;
+	height: 27px;
+	border-radius: 50%;
+	background: #1C2333;
+	color: #00E5C8;
+	border: none;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	transition: background 0.15s;
+}
+.acw-send-btn:hover {
+	background: #252E42;
 }
 
-/* Support embed */
-.agentclerk-support-chat {
-    margin-top: 20px;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    padding: 16px;
-    max-width: 600px;
+/* ── Product Page Embed ────────────────────────── */
+
+.acw-product-embed {
+	margin-top: 15px;
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	border-radius: 10px;
+	overflow: hidden;
+	max-height: 400px;
+	display: flex;
+	flex-direction: column;
+	font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 }
-.agentclerk-support-chat .agentclerk-input-wrap {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
+
+/* ── Full Page (/clerk) Layout ─────────────────── */
+
+.acw-fullpage {
+	max-width: 680px;
+	margin: 30px auto;
+	border-radius: 10px;
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.06);
+	overflow: hidden;
+	min-height: 500px;
+	display: flex;
+	flex-direction: column;
+	font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 }
-.agentclerk-support-chat input[type="text"] {
-    flex: 1;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    padding: 8px;
+
+/* ── Support Page ──────────────────────────────── */
+
+.acw-support-wrap {
+	max-width: 680px;
+	margin: 20px auto;
+	font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 }
-.agentclerk-support-chat button {
-    background: #4f46e5;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 16px;
-    cursor: pointer;
+.acw-support-heading {
+	font-family: 'Syne', 'DM Sans', sans-serif;
+	font-size: 24px;
+	font-weight: 700;
+	color: #1C2333;
+	margin: 0 0 6px 0;
+}
+.acw-support-subtext {
+	font-size: 13px;
+	color: #4A5568;
+	margin: 0 0 18px 0;
+	line-height: 1.5;
+}
+.acw-support-chat {
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	border-radius: 10px;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+/* ── Escalation Panel ──────────────────────────── */
+
+.acw-escalation {
+	background: #FFFBEB;
+	border: 1px solid #FCD34D;
+	border-radius: 10px;
+	padding: 13px;
+	margin: 10px;
+}
+.acw-escalation-title {
+	font-size: 12px;
+	font-weight: 600;
+	color: #92400E;
+	margin: 0 0 8px 0;
+}
+.acw-escalation-text {
+	font-size: 11px;
+	color: #92400E;
+	margin: 0 0 8px 0;
+	line-height: 1.4;
+}
+.acw-escalation-input {
+	width: 100%;
+	border: 1px solid #FCD34D;
+	border-radius: 6px;
+	padding: 6px 10px;
+	font-size: 12px;
+	font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+	outline: none;
+	box-sizing: border-box;
+	margin-bottom: 8px;
+	background: #fff;
+	color: #1C2333;
+}
+.acw-escalation-input:focus {
+	border-color: #F59E0B;
+}
+.acw-escalation-confirm {
+	background: #1C2333;
+	color: #00E5C8;
+	border: none;
+	border-radius: 6px;
+	padding: 6px 14px;
+	cursor: pointer;
+	font-size: 12px;
+	font-weight: 500;
+	font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+	transition: background 0.15s;
+}
+.acw-escalation-confirm:hover {
+	background: #252E42;
+}
+
+/* ── Typing Indicator ──────────────────────────── */
+
+.acw-typing {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	align-self: flex-start;
+}
+.acw-typing-dots {
+	display: flex;
+	gap: 3px;
+	padding: 10px 12px;
+	background: #fff;
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	border-radius: 11px;
+	border-top-left-radius: 3px;
+}
+.acw-typing-dot {
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: #8A95A8;
+	animation: acwBounce 1.2s infinite;
+}
+.acw-typing-dot:nth-child(2) {
+	animation-delay: 0.15s;
+}
+.acw-typing-dot:nth-child(3) {
+	animation-delay: 0.3s;
+}
+
+@keyframes acwBounce {
+	0%, 60%, 100% {
+		transform: translateY(0);
+		opacity: 0.4;
+	}
+	30% {
+		transform: translateY(-4px);
+		opacity: 1;
+	}
+}
+
+/* ── Scrollbar ─────────────────────────────────── */
+
+.acw-messages::-webkit-scrollbar {
+	width: 4px;
+}
+.acw-messages::-webkit-scrollbar-track {
+	background: transparent;
+}
+.acw-messages::-webkit-scrollbar-thumb {
+	background: rgba(0, 0, 0, 0.15);
+	border-radius: 4px;
+}
+
+/* ── Responsive — below 400px ──────────────────── */
+
+@media (max-width: 400px) {
+	.acw-panel {
+		width: 100%;
+		bottom: 0;
+		right: 0;
+		left: 0;
+		max-height: 100vh;
+		border-radius: 0;
+	}
+	.acw-panel--left {
+		right: 0;
+		left: 0;
+	}
+	.acw-float-btn {
+		bottom: 12px;
+		right: 12px;
+	}
+	.acw-float-btn--left {
+		right: auto;
+		left: 12px;
+	}
 }

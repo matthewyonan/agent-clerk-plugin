@@ -1,8 +1,17 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit;
 }
 
+/**
+ * AgentClerk Admin
+ *
+ * Central admin class that registers menus, enqueues assets,
+ * renders views, and handles every wp_ajax_ action for the plugin.
+ *
+ * @package AgentClerk
+ * @since   1.0.0
+ */
 class AgentClerk_Admin {
 
     public function __construct() {
