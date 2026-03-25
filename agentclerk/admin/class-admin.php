@@ -86,7 +86,7 @@ class AgentClerk_Admin {
 
         // Always register onboarding page (hidden) so direct URL access works.
         add_submenu_page(
-            null,
+            '',
             'Setup',
             'Setup',
             'manage_options',
