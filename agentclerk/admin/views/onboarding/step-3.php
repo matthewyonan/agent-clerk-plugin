@@ -83,3 +83,82 @@ if ( empty( $support_file ) && ! empty( $scan_cache ) && class_exists( 'AgentCle
     </div>
     <div style="text-align:right;padding:20px 0 4px;font-size:11px;color:var(--ac-text3)">&copy; 2026 &mdash; A Brilliant Way</div>
 </div>
+
+<script>
+jQuery(function($) {
+    var chatHistory = [];
+    var gaps = <?php echo wp_json_encode( $gaps ); ?>;
+
+    function addMsg(role, text) {
+        var cls = role === 'assistant' ? 'ag' : 'us';
+        var av = role === 'assistant' ? 'AC' : 'You';
+        $('#chat-messages').append('<div class="ac-msg ' + cls + '"><div class="ac-mav">' + av + '</div><div class="ac-mbub">' + text + '</div></div>');
+        $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+    }
+
+    function setChips(chips) {
+        var row = $('#chat-chips').empty();
+        chips.forEach(function(c) {
+            $('<span class="ac-chip">' + c + '</span>').on('click', function() {
+                $('#chat-input').val(c);
+                sendMessage();
+            }).appendTo(row);
+        });
+    }
+
+    if (gaps.length > 0) {
+        addMsg('assistant', 'The scan went well &mdash; I found your products, pricing, and policies. Just a few things I couldn\'t find automatically.<br><br>First: <strong>how do you want me to notify you when a buyer has a question I can\'t resolve?</strong>');
+        setChips(['Both email and WP notification', 'Email only', 'WP admin only']);
+    } else {
+        addMsg('assistant', 'Your site looks well-configured! I found everything I need. You can edit the support file on the left, or continue to the catalog.');
+    }
+
+    function sendMessage() {
+        var txt = $.trim($('#chat-input').val());
+        if (!txt) return;
+        addMsg('user', txt);
+        var historyToSend = JSON.stringify(chatHistory);
+        chatHistory.push({ role: 'user', content: txt });
+        $('#chat-input').val('');
+        $('#chat-chips').empty();
+
+        $.post(agentclerk.ajaxUrl, {
+            action: 'agentclerk_onboarding_chat',
+            nonce: agentclerk.nonce,
+            message: txt,
+            context: 'gap_fill',
+            history: historyToSend
+        }, function(resp) {
+            if (resp.success && resp.data.message) {
+                addMsg('assistant', resp.data.message);
+                chatHistory.push({ role: 'assistant', content: resp.data.message });
+                if (resp.data.chips) setChips(resp.data.chips);
+            } else {
+                addMsg('assistant', 'Something went wrong — please try again.');
+            }
+        }).fail(function() {
+            addMsg('assistant', 'Connection error — please try again.');
+        });
+    }
+
+    $('#chat-send').on('click', sendMessage);
+    $('#chat-input').on('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
+
+    $('#step3-continue').on('click', function() {
+        $(this).prop('disabled', true).text('Saving...');
+        $.post(agentclerk.ajaxUrl, {
+            action: 'agentclerk_save_agent_config',
+            nonce: agentclerk.nonce,
+            support_file: $('#support-file').val()
+        }, function() {
+            $.post(agentclerk.ajaxUrl, {
+                action: 'agentclerk_save_onboarding_step',
+                nonce: agentclerk.nonce,
+                step: 4
+            }, function() {
+                window.location.href = agentclerk.ajaxUrl.replace('admin-ajax.php', 'admin.php?page=agentclerk-onboarding');
+            });
+        });
+    });
+});
+</script>
