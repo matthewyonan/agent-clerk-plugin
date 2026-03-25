@@ -370,14 +370,15 @@
             var txt = $.trim($('#ac-chat-input').val());
             if (!txt) return;
             addChatMessage('#ac-chat-messages', 'user', escHtml(txt));
+            var historyToSend = JSON.stringify(chatHistory);
             chatHistory.push({ role: 'user', content: txt });
             $('#ac-chat-input').val('');
             $('#ac-chat-chips').empty();
 
-            acAjax('start_scan', {
+            acAjax('onboarding_chat', {
                 message: txt,
                 context: 'gap_fill',
-                history: JSON.stringify(chatHistory)
+                history: historyToSend
             }).then(function(data) {
                 if (data.message) {
                     addChatMessage('#ac-chat-messages', 'assistant', data.message);
@@ -389,6 +390,8 @@
                         });
                     }
                 }
+            }).catch(function() {
+                addChatMessage('#ac-chat-messages', 'assistant', 'Something went wrong \u2014 please try again.');
             });
         }
 
