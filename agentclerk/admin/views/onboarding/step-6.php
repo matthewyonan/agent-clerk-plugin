@@ -41,7 +41,7 @@ if ( ! function_exists( 'ac_readiness_color' ) ) {
 
     <div class="ac-g2">
         <div>
-            <div class="ac-chat-shell" style="height:400px">
+            <div class="ac-chat-shell" style="height:400px;max-height:60vh">
                 <div class="ac-chat-hd">
                     <div class="ac-chat-av">&#9889;</div>
                     <div>
