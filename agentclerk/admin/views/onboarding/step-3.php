@@ -64,10 +64,10 @@ if ( empty( $support_file ) && ! empty( $scan_cache ) && class_exists( 'AgentCle
             </div>
         </div>
         <div>
-            <div class="ac-card" style="display:flex;flex-direction:column;min-height:500px">
+            <div class="ac-card" style="display:flex;flex-direction:column;height:560px;max-height:70vh">
                 <div class="ac-card-head"><h2><?php echo esc_html( 'Fill the gaps' ); ?></h2><?php if ( ! empty( $gaps ) ) : ?><span class="ac-b ac-b-a"><?php echo esc_html( count( $gaps ) . ' questions' ); ?></span><?php endif; ?></div>
-                <div class="ac-chat-shell" style="border:none;border-radius:0;flex:1">
-                    <div class="ac-msgs" id="ac-chat-messages" style="height:360px"></div>
+                <div class="ac-chat-shell" style="border:none;border-radius:0;flex:1;min-height:0">
+                    <div class="ac-msgs" id="ac-chat-messages" style="overflow-y:auto"></div>
                     <div class="ac-chips-row" id="ac-chat-chips"></div>
                     <div class="ac-chat-inp-row">
                         <textarea class="ac-chat-inp" id="ac-chat-input" rows="1" placeholder="<?php echo esc_attr( 'Type or choose above…' ); ?>"></textarea>

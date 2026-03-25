@@ -165,11 +165,58 @@ class AgentClerk_Agent {
 
 		$system_prompt = $this->build_onboarding_system_prompt( $context );
 		$history[]     = array( 'role' => 'user', 'content' => $message );
+		$tools         = $this->get_onboarding_tools();
 
-		$response = $this->call_anthropic( $system_prompt, $history, array(), false );
+		$response = $this->call_anthropic( $system_prompt, $history, $tools, false );
 
 		if ( is_wp_error( $response ) ) {
 			wp_send_json_error( array( 'message' => $response->get_error_message() ) );
+		}
+
+		// Process tool_use loop — AI may call update_agent_config, then we feed results back.
+		$saved_fields = array();
+		$loop_count   = 0;
+
+		while ( $loop_count < 3 ) {
+			$content_blocks = isset( $response['content'] ) ? $response['content'] : array();
+			$tool_calls     = array();
+
+			foreach ( $content_blocks as $block ) {
+				if ( 'tool_use' === ( $block['type'] ?? '' ) && 'update_agent_config' === ( $block['name'] ?? '' ) ) {
+					$tool_calls[] = $block;
+				}
+			}
+
+			if ( empty( $tool_calls ) ) {
+				break; // No tool use — we have the final text response.
+			}
+
+			// Append the assistant's full response (including tool_use blocks) to history.
+			$history[] = array( 'role' => 'assistant', 'content' => $content_blocks );
+
+			// Process each tool call and build tool_result messages.
+			foreach ( $tool_calls as $tc ) {
+				$result       = $this->process_onboarding_tool_call( $tc['input'] );
+				$saved_fields = array_merge( $saved_fields, $result['saved'] );
+				$history[]    = array(
+					'role'    => 'user',
+					'content' => array(
+						array(
+							'type'        => 'tool_result',
+							'tool_use_id' => $tc['id'],
+							'content'     => wp_json_encode( $result ),
+						),
+					),
+				);
+			}
+
+			// Call Anthropic again so it produces a text response after the tool call.
+			$response = $this->call_anthropic( $system_prompt, $history, $tools, false );
+			if ( is_wp_error( $response ) ) {
+				wp_send_json_error( array( 'message' => $response->get_error_message() ) );
+			}
+
+			$loop_count++;
 		}
 
 		$text = $this->extract_response_text( $response );
@@ -178,7 +225,10 @@ class AgentClerk_Agent {
 			wp_send_json_error( array( 'message' => 'AI returned an empty response. Please try again.' ) );
 		}
 
-		wp_send_json_success( array( 'message' => $text ) );
+		wp_send_json_success( array(
+			'message'      => $text,
+			'saved_fields' => $saved_fields,
+		) );
 	}
 
 	/**
@@ -266,6 +316,38 @@ class AgentClerk_Agent {
 		if ( 'gap_fill' === $context ) {
 			$gaps = $scan_cache['gaps'] ?? array();
 
+			// Show what's already configured so the AI skips those.
+			if ( ! empty( $config['business_desc'] ) ) {
+				$prompt .= "Already configured — Business description: {$config['business_desc']}\n";
+			} else {
+				$prompt .= "MISSING — Business description: Ask the seller to describe their business.\n";
+			}
+			$policies = $config['policies'] ?? array();
+			$has_config = false;
+			if ( ! empty( $policies['refund'] ) ) {
+				$prompt .= "Already configured — Refund policy: {$policies['refund']}\n";
+				$has_config = true;
+			}
+			if ( ! empty( $policies['license'] ) ) {
+				$prompt .= "Already configured — License policy: {$policies['license']}\n";
+				$has_config = true;
+			}
+			if ( ! empty( $policies['delivery'] ) ) {
+				$prompt .= "Already configured — Delivery policy: {$policies['delivery']}\n";
+				$has_config = true;
+			}
+			if ( ! empty( $config['escalation_method'] ) ) {
+				$prompt .= "Already configured — Escalation method: {$config['escalation_method']}\n";
+				$has_config = true;
+			}
+			if ( ! empty( $config['escalation_topics'] ) ) {
+				$prompt .= 'Already configured — Escalation topics: ' . implode( ', ', $config['escalation_topics'] ) . "\n";
+				$has_config = true;
+			}
+			if ( $has_config ) {
+				$prompt .= "\n";
+			}
+
 			if ( ! empty( $gaps ) ) {
 				$prompt .= "The site scan found these gaps that need addressing:\n";
 				foreach ( $gaps as $gap ) {
@@ -276,22 +358,131 @@ class AgentClerk_Agent {
 
 			// Include detected info for context.
 			if ( ! empty( $scan_cache['products'] ) ) {
-				$prompt .= "Products found: " . count( $scan_cache['products'] ) . "\n";
+				$prompt .= 'Products found: ' . count( $scan_cache['products'] ) . "\n";
 				foreach ( $scan_cache['products'] as $p ) {
 					$prompt .= "- {$p['name']}: \${$p['price']}\n";
 				}
 				$prompt .= "\n";
 			}
 
-			$prompt .= "Ask about each gap one at a time. Always also ask about:\n";
+			$prompt .= "Ask about each gap one at a time. Also ask about:\n";
 			$prompt .= "1. How should escalations be handled? (email, WP admin notification, or both)\n";
 			$prompt .= "2. What message should buyers see when escalated?\n";
 			$prompt .= "3. Any specific topics that should trigger escalation to a human?\n";
-			$prompt .= "\nWhen the seller provides information, confirm it and move to the next gap.\n";
+			$prompt .= "\n## Tool usage\n";
+			$prompt .= "When the seller provides concrete information (a policy, escalation preference, etc.), ";
+			$prompt .= "IMMEDIATELY call the update_agent_config tool to save it. Do not wait until the end.\n";
+			$prompt .= "- Include only the fields the seller just provided.\n";
+			$prompt .= "- Use the seller's own words for policies — clean up grammar only.\n";
+			$prompt .= "- After saving, confirm what was saved and move to the next gap.\n";
+			$prompt .= "- Skip questions for items already configured above.\n";
 			$prompt .= "Keep responses conversational and brief. One question at a time.\n";
 		}
 
 		return $prompt;
+	}
+
+	/**
+	 * Get the Anthropic tool definitions for onboarding config updates.
+	 *
+	 * @return array Tool definitions.
+	 */
+	private function get_onboarding_tools() {
+		return array(
+			array(
+				'name'         => 'update_agent_config',
+				'description'  => 'Save configuration values gathered from the seller. Call this each time the seller provides actionable information such as a policy, escalation preference, or support knowledge. Include only the fields being set.',
+				'input_schema' => array(
+					'type'       => 'object',
+					'properties' => array(
+						'business_desc'      => array(
+							'type'        => 'string',
+							'description' => 'Business description — what the store sells and who it serves.',
+						),
+						'policies'            => array(
+							'type'        => 'object',
+							'description' => 'Store policies. Include only the keys being set.',
+							'properties'  => array(
+								'refund'   => array( 'type' => 'string', 'description' => 'Refund policy text.' ),
+								'license'  => array( 'type' => 'string', 'description' => 'License terms text.' ),
+								'delivery' => array( 'type' => 'string', 'description' => 'Delivery / fulfillment policy text.' ),
+							),
+						),
+						'escalation_method'  => array(
+							'type'        => 'string',
+							'enum'        => array( 'email', 'wp', 'both' ),
+							'description' => 'How to notify when escalating: email, wp (admin notification), or both.',
+						),
+						'escalation_message' => array(
+							'type'        => 'string',
+							'description' => 'Message shown to buyers when a conversation is escalated.',
+						),
+						'escalation_topics'  => array(
+							'type'        => 'array',
+							'items'       => array( 'type' => 'string' ),
+							'description' => 'Topics that should trigger escalation to a human.',
+						),
+						'support_file'       => array(
+							'type'        => 'string',
+							'description' => 'Support knowledge base content to append.',
+						),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Process an update_agent_config tool call from the onboarding chat.
+	 *
+	 * @param array $input Tool input parameters.
+	 * @return array Result with list of saved fields.
+	 */
+	private function process_onboarding_tool_call( $input ) {
+		$config = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
+		$saved  = array();
+
+		if ( isset( $input['business_desc'] ) && '' !== $input['business_desc'] ) {
+			$config['business_desc'] = sanitize_textarea_field( $input['business_desc'] );
+			$saved[] = 'business_desc';
+		}
+
+		if ( ! empty( $input['policies'] ) && is_array( $input['policies'] ) ) {
+			if ( ! isset( $config['policies'] ) ) {
+				$config['policies'] = array();
+			}
+			foreach ( array( 'refund', 'license', 'delivery' ) as $key ) {
+				if ( isset( $input['policies'][ $key ] ) && '' !== $input['policies'][ $key ] ) {
+					$config['policies'][ $key ] = sanitize_textarea_field( $input['policies'][ $key ] );
+					$saved[] = $key . '_policy';
+				}
+			}
+		}
+
+		if ( isset( $input['escalation_method'] ) && in_array( $input['escalation_method'], array( 'email', 'wp', 'both' ), true ) ) {
+			$config['escalation_method'] = $input['escalation_method'];
+			$saved[] = 'escalation_method';
+		}
+
+		if ( isset( $input['escalation_message'] ) && '' !== $input['escalation_message'] ) {
+			$config['escalation_message'] = sanitize_textarea_field( $input['escalation_message'] );
+			$saved[] = 'escalation_message';
+		}
+
+		if ( isset( $input['escalation_topics'] ) && is_array( $input['escalation_topics'] ) ) {
+			$config['escalation_topics'] = array_map( 'sanitize_text_field', $input['escalation_topics'] );
+			$saved[] = 'escalation_topics';
+		}
+
+		if ( isset( $input['support_file'] ) && '' !== $input['support_file'] ) {
+			$config['support_file'] = sanitize_textarea_field( $input['support_file'] );
+			$saved[] = 'support_file';
+		}
+
+		update_option( 'agentclerk_agent_config', wp_json_encode( $config ) );
+		delete_transient( 'agentclerk_manifest_cache' );
+
+		return array( 'status' => 'saved', 'saved' => $saved );
 	}
 
 	/**

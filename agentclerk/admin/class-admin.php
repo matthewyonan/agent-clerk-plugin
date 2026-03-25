@@ -52,14 +52,17 @@ class AgentClerk_Admin {
             56
         );
 
-        add_submenu_page(
-            'agentclerk',
-            'Setup',
-            'Setup',
-            'manage_options',
-            'agentclerk-onboarding',
-            [ $this, 'render_onboarding' ]
-        );
+        if ( $status === 'onboarding' ) {
+            add_submenu_page(
+                'agentclerk',
+                'Setup',
+                'Setup',
+                'manage_options',
+                'agentclerk-onboarding',
+                [ $this, 'render_onboarding' ]
+            );
+            return;
+        }
 
         if ( $status === 'suspended' ) {
             remove_submenu_page( 'agentclerk', 'agentclerk' );
@@ -71,7 +74,6 @@ class AgentClerk_Admin {
                 'agentclerk',
                 [ $this, 'render_suspended' ]
             );
-            return;
         }
 
         if ( $status === 'active' ) {
@@ -81,6 +83,16 @@ class AgentClerk_Admin {
             add_submenu_page( 'agentclerk', 'Support', 'Support', 'manage_options', 'agentclerk-support', [ $this, 'render_support' ] );
             add_submenu_page( 'agentclerk', 'Settings', 'Settings', 'manage_options', 'agentclerk-settings', [ $this, 'render_settings' ] );
         }
+
+        // Always register onboarding page (hidden) so direct URL access works.
+        add_submenu_page(
+            null,
+            'Setup',
+            'Setup',
+            'manage_options',
+            'agentclerk-onboarding',
+            [ $this, 'render_onboarding' ]
+        );
     }
 
     public function enqueue_assets( $hook ) {
