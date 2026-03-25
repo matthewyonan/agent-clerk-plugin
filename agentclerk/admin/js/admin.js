@@ -352,7 +352,7 @@
         try {
             var gapEl = document.getElementById('ac-gaps-data');
             if (gapEl) gaps = JSON.parse(gapEl.textContent);
-        } catch (e) {}
+        } catch (ignore) { /* gaps stays empty */ }
 
         if (gaps.length > 0) {
             addChatMessage('#ac-chat-messages', 'assistant',
