@@ -279,7 +279,10 @@ class AgentClerk_Admin {
         }
 
         $results = AgentClerk_Scanner::start_scan();
-        update_option( 'agentclerk_onboarding_step', 3 );
+        $source  = isset( $_POST['source'] ) ? sanitize_text_field( wp_unslash( $_POST['source'] ) ) : '';
+        if ( 'settings' !== $source ) {
+            update_option( 'agentclerk_onboarding_step', 3 );
+        }
         wp_send_json_success( $results );
     }
 
