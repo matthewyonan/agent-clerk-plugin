@@ -63,6 +63,13 @@ $last_scan = get_option( 'agentclerk_last_scan_date', '' );
             </div></div>
         </div>
         <div style="text-align:right"><button class="ac-btn ac-btn-p" id="ac-save-business"><?php echo esc_html( 'Save changes' ); ?></button></div>
+        <div class="ac-card" style="margin-top:20px;border:1px solid var(--ac-border)">
+            <div class="ac-card-head"><h2><?php echo esc_html( 'Restart Setup' ); ?></h2></div>
+            <div class="ac-card-body">
+                <div style="font-size:12px;color:var(--ac-text2);margin-bottom:10px"><?php echo esc_html( 'Re-run the onboarding wizard from step 1. Your existing settings will be preserved — only the setup status is reset.' ); ?></div>
+                <button class="ac-btn ac-btn-g ac-btn-sm" id="ac-restart-setup">&#8635; <?php echo esc_html( 'Restart setup wizard' ); ?></button>
+            </div>
+        </div>
     </div>
 
     <!-- Catalog tab -->

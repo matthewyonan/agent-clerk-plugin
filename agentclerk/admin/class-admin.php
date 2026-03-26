@@ -37,6 +37,7 @@ class AgentClerk_Admin {
         add_action( 'wp_ajax_agentclerk_go_live', [ $this, 'go_live' ] );
         add_action( 'wp_ajax_agentclerk_save_catalog', [ $this, 'save_catalog' ] );
         add_action( 'wp_ajax_agentclerk_add_product', [ $this, 'add_product' ] );
+        add_action( 'wp_ajax_agentclerk_restart_setup', [ $this, 'restart_setup' ] );
     }
 
     public function register_menus() {
@@ -278,12 +279,29 @@ class AgentClerk_Admin {
             wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
         }
 
+        // Extend execution time — scanning crawls the site.
+        if ( function_exists( 'set_time_limit' ) ) {
+            set_time_limit( 120 );
+        }
+
         $results = AgentClerk_Scanner::start_scan();
         $source  = isset( $_POST['source'] ) ? sanitize_text_field( wp_unslash( $_POST['source'] ) ) : '';
         if ( 'settings' !== $source ) {
             update_option( 'agentclerk_onboarding_step', 3 );
         }
+        update_option( 'agentclerk_last_scan_date', current_time( 'Y-m-d H:i' ) );
         wp_send_json_success( $results );
+    }
+
+    public function restart_setup() {
+        check_ajax_referer( 'agentclerk_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
+        }
+
+        update_option( 'agentclerk_plugin_status', 'onboarding' );
+        update_option( 'agentclerk_onboarding_step', 1 );
+        wp_send_json_success( [ 'redirect' => admin_url( 'admin.php?page=agentclerk' ) ] );
     }
 
     public function scan_progress() {
