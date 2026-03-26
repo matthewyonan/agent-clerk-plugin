@@ -612,8 +612,12 @@
 
         // Sync WooCommerce
         $('#ac-sync-wc').on('click', function() {
-            $(this).text('Syncing...').prop('disabled', true);
-            acAjax('start_scan').then(function() { location.reload(); });
+            var btn = $(this);
+            btn.text('Syncing...').prop('disabled', true);
+            acAjax('start_scan', { source: 'settings' }).then(function() { location.reload(); }).catch(function(err) {
+                btn.html('&#8635; Sync WooCommerce').prop('disabled', false);
+                showToast('Sync failed: ' + ((err && err.message) || 'Unknown error'), 'error');
+            });
         });
 
         // Add product modal (settings)
@@ -668,8 +672,12 @@
 
         // Rescan
         $('#ac-rescan-btn').on('click', function() {
-            $(this).text('Scanning...').prop('disabled', true);
-            acAjax('start_scan').then(function() { location.reload(); });
+            var btn = $(this);
+            btn.text('Scanning...').prop('disabled', true);
+            acAjax('start_scan', { source: 'settings' }).then(function() { location.reload(); }).catch(function(err) {
+                btn.html('&#8635; Scan now').prop('disabled', false);
+                showToast('Scan failed: ' + ((err && err.message) || 'Unknown error'), 'error');
+            });
         });
 
         // Catalog count
@@ -779,7 +787,7 @@
         var period = 'month';
 
         function loadSales() {
-            acAjaxGet('get_sales_data', { period: period }).then(function(d) {
+            acAjaxGet('get_sales', { period: period }).then(function(d) {
                 $('#ac-ss-gross').text('$' + parseFloat(d.gross || 0).toFixed(0));
                 $('#ac-ss-count').text(d.count || 0);
                 $('#ac-ss-avg').text('$' + parseFloat(d.average || 0).toFixed(2));
@@ -840,7 +848,7 @@
 
         // Load escalations
         function loadEscalations() {
-            acAjaxGet('toggle_escalation_read', { list: 1 }).then(function(data) {
+            acAjaxGet('get_escalations', { list: 1 }).then(function(data) {
                 var items = data.escalations || [];
                 var openCount = 0;
                 var html = '';
@@ -875,6 +883,9 @@
                 if (data.resolved_count && data.resolved_count > 0) {
                     $('#ac-view-resolved').show().text('View ' + data.resolved_count + ' resolved escalations \u2192');
                 }
+            }).catch(function() {
+                $('#ac-escalation-list').html('<div style="color:var(--text3);font-size:13px;padding:10px 0">No escalated conversations.</div>');
+                $('#ac-open-count').text('0 open');
             });
         }
 
