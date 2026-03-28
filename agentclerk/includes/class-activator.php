@@ -86,6 +86,45 @@ class AgentClerk_Activator {
 			KEY conversation_id (conversation_id)
 		) {$charset};";
 
+		// A2A protocol tables.
+		$a2a_tasks     = $wpdb->prefix . 'agentclerk_a2a_tasks';
+		$a2a_messages  = $wpdb->prefix . 'agentclerk_a2a_task_messages';
+		$a2a_artifacts = $wpdb->prefix . 'agentclerk_a2a_task_artifacts';
+
+		$sql .= "CREATE TABLE {$a2a_tasks} (
+			task_id VARCHAR(64) NOT NULL,
+			context_id VARCHAR(128) DEFAULT NULL,
+			session_id VARCHAR(128) NOT NULL,
+			status VARCHAR(40) NOT NULL DEFAULT 'TASK_STATE_SUBMITTED',
+			error_msg TEXT DEFAULT NULL,
+			created_at DATETIME NOT NULL,
+			updated_at DATETIME NOT NULL,
+			PRIMARY KEY (task_id),
+			KEY context_id (context_id)
+		) {$charset};
+
+		CREATE TABLE {$a2a_messages} (
+			id BIGINT NOT NULL AUTO_INCREMENT,
+			task_id VARCHAR(64) NOT NULL,
+			message_id VARCHAR(64) NOT NULL,
+			role VARCHAR(20) NOT NULL,
+			content LONGTEXT NOT NULL,
+			created_at DATETIME NOT NULL,
+			PRIMARY KEY (id),
+			KEY task_id (task_id)
+		) {$charset};
+
+		CREATE TABLE {$a2a_artifacts} (
+			id BIGINT NOT NULL AUTO_INCREMENT,
+			task_id VARCHAR(64) NOT NULL,
+			artifact_id VARCHAR(128) NOT NULL,
+			name VARCHAR(255) DEFAULT NULL,
+			parts_json LONGTEXT NOT NULL,
+			created_at DATETIME NOT NULL,
+			PRIMARY KEY (id),
+			KEY task_id (task_id)
+		) {$charset};";
+
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( $sql );
 	}

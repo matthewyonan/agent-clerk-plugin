@@ -68,6 +68,7 @@ final class AgentClerk {
 		require_once AGENTCLERK_PLUGIN_DIR . 'includes/class-woocommerce.php';
 		require_once AGENTCLERK_PLUGIN_DIR . 'includes/class-conversations.php';
 		require_once AGENTCLERK_PLUGIN_DIR . 'includes/class-support.php';
+		require_once AGENTCLERK_PLUGIN_DIR . 'includes/class-a2a.php';
 		require_once AGENTCLERK_PLUGIN_DIR . 'includes/class-updater.php';
 
 		if ( is_admin() ) {
@@ -99,6 +100,7 @@ final class AgentClerk {
 		}
 
 		AgentClerk_Widget::instance();
+		AgentClerk_A2A::instance();
 
 		// Self-hosted update checker.
 		new AgentClerk_Updater();
@@ -110,6 +112,15 @@ final class AgentClerk {
 	public function register_rewrite_rules() {
 		add_rewrite_rule( '^ai-manifest\.json$', 'index.php?agentclerk_manifest=1', 'top' );
 		add_rewrite_rule( '^clerk-checkout/([a-zA-Z0-9]+)/?$', 'index.php?agentclerk_checkout=$matches[1]', 'top' );
+
+		// A2A protocol endpoints.
+		add_rewrite_rule( '^\.well-known/agent-card\.json$', 'index.php?agentclerk_a2a_card=1', 'top' );
+		add_rewrite_rule( '^a2a/message:send$', 'index.php?agentclerk_a2a_send=send', 'top' );
+		add_rewrite_rule( '^a2a/message:stream$', 'index.php?agentclerk_a2a_send=stream', 'top' );
+		add_rewrite_rule( '^a2a/tasks/?$', 'index.php?agentclerk_a2a_tasks=1', 'top' );
+		add_rewrite_rule( '^a2a/tasks/([a-zA-Z0-9-]+)(/pushNotificationConfigs.*)?$', 'index.php?agentclerk_a2a_task=$matches[1]', 'top' );
+		add_rewrite_rule( '^a2a/tasks/([a-zA-Z0-9-]+):cancel$', 'index.php?agentclerk_a2a_task=$matches[1]', 'top' );
+		add_rewrite_rule( '^a2a/tasks/([a-zA-Z0-9-]+):subscribe$', 'index.php?agentclerk_a2a_task=$matches[1]', 'top' );
 	}
 
 	/**
@@ -121,6 +132,11 @@ final class AgentClerk {
 	public function register_query_vars( $vars ) {
 		$vars[] = 'agentclerk_manifest';
 		$vars[] = 'agentclerk_checkout';
+		$vars[] = 'agentclerk_a2a_card';
+		$vars[] = 'agentclerk_a2a_send';
+		$vars[] = 'agentclerk_a2a_task';
+		$vars[] = 'agentclerk_a2a_tasks';
+		$vars[] = 'agentclerk_a2a_push';
 		return $vars;
 	}
 
