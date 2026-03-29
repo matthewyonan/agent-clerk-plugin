@@ -72,34 +72,59 @@ class AgentClerk_Agent {
 			setcookie( 'agentclerk_session', $session_id, time() + 7200, '/' );
 		}
 
+		$result = $this->process_chat( $message, $session_id, 'auto', $test_mode );
+
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+		}
+
+		wp_send_json_success( $result );
+	}
+
+	/**
+	 * Shared chat processing used by both AJAX and A2A endpoints.
+	 *
+	 * @param string $message    User message text.
+	 * @param string $session_id Session identifier.
+	 * @param string $buyer_type 'human', 'agent', or 'auto' (auto-detect).
+	 * @param bool   $test_mode  Whether this is a test conversation.
+	 * @return array|WP_Error Result with message, session_id, quote_link.
+	 */
+	public function process_chat( $message, $session_id, $buyer_type = 'auto', $test_mode = false ) {
+		if ( 'suspended' === get_option( 'agentclerk_plugin_status' ) ) {
+			return new WP_Error( 'suspended', 'Service temporarily unavailable.' );
+		}
+
+		if ( empty( $message ) ) {
+			return new WP_Error( 'empty_message', 'Message is required.' );
+		}
+
 		$conversation = $this->get_or_create_conversation( $session_id );
-		$buyer_type   = $this->detect_buyer_type( $message );
+
+		if ( 'auto' === $buyer_type ) {
+			$buyer_type = $this->detect_buyer_type( $message );
+		}
 
 		if ( 'agent' === $buyer_type ) {
 			$this->update_buyer_type( $conversation->id, 'agent' );
 		}
 
-		// Store first_message on the conversation record if this is the first user message.
 		$this->maybe_store_first_message( $conversation->id, $message );
-
 		$this->store_message( $conversation->id, 'user', $message );
 
 		$history       = $this->get_message_history( $conversation->id );
 		$system_prompt = $this->build_system_prompt( $buyer_type );
-
-		// Define the quote generation tool for Anthropic tool_use.
-		$tools = $this->get_quote_tools();
+		$tools         = $this->get_quote_tools();
 
 		$response = $this->call_anthropic( $system_prompt, $history, $tools, $test_mode );
 
 		if ( is_wp_error( $response ) ) {
-			wp_send_json_error( array( 'message' => $response->get_error_message() ) );
+			return $response;
 		}
 
 		$assistant_text = '';
 		$quote_link     = null;
 
-		// Process response content blocks (text + tool_use).
 		$content_blocks = isset( $response['content'] ) ? $response['content'] : array();
 
 		foreach ( $content_blocks as $block ) {
@@ -110,7 +135,6 @@ class AgentClerk_Agent {
 			}
 		}
 
-		// Fallback for non-tool_use responses.
 		if ( empty( $assistant_text ) && isset( $response['message'] ) ) {
 			$assistant_text = $response['message'];
 		}
@@ -118,19 +142,18 @@ class AgentClerk_Agent {
 		if ( $quote_link ) {
 			$assistant_text .= "\n\n[Checkout here](" . esc_url( $quote_link['url'] ) . ')';
 			$this->update_conversation_outcome( $conversation->id, 'quote', $quote_link['id'] );
-
-			// Store product_name on conversation.
 			$this->update_product_name( $conversation->id, $quote_link['product_name'] );
 		}
 
 		$this->store_message( $conversation->id, 'assistant', $assistant_text );
 		$this->touch_conversation( $conversation->id );
 
-		wp_send_json_success( array(
-			'message'    => $assistant_text,
-			'session_id' => $session_id,
-			'quote_link' => $quote_link ? $quote_link['url'] : null,
-		) );
+		return array(
+			'message'         => $assistant_text,
+			'session_id'      => $session_id,
+			'conversation_id' => $conversation->id,
+			'quote_link'      => $quote_link ? $quote_link['url'] : null,
+		);
 	}
 
 	/**

@@ -680,6 +680,20 @@
             });
         });
 
+        // Restart setup
+        $('#ac-restart-setup').on('click', function() {
+            if (!confirm('Restart the setup wizard? Your existing settings will be preserved.')) return;
+            var btn = $(this);
+            btn.text('Restarting...').prop('disabled', true);
+            acAjax('restart_setup').then(function(data) {
+                if (data.redirect) window.location.href = data.redirect;
+                else goToPage('agentclerk');
+            }).catch(function(err) {
+                btn.html('&#8635; Restart setup wizard').prop('disabled', false);
+                showToast('Failed: ' + ((err && err.message) || 'Unknown error'), 'error');
+            });
+        });
+
         // Catalog count
         var count = $('.ac-catalog-toggle').length;
         if (count > 0) { $('#ac-catalog-count').text(count + ' products \u00b7 synced from WooCommerce'); }

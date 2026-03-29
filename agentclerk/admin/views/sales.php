@@ -3,6 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 $tier     = get_option( 'agentclerk_tier', 'byok' );
 $license  = get_option( 'agentclerk_license_status', 'none' );
+$is_lifetime = ( 'active' === $license );
 $fee_rate = ( $tier === 'turnkey' ) ? '1.5% or $1.99 min' : '1% or $1.00 min';
 ?>
 <div class="wrap ac-wrap">
@@ -20,7 +21,12 @@ $fee_rate = ( $tier === 'turnkey' ) ? '1.5% or $1.99 min' : '1% or $1.00 min';
         </div>
     </div>
 
-    <?php if ( $license !== 'active' ) : ?>
+    <?php if ( $is_lifetime ) : ?>
+        <div class="ac-co gn" style="margin-bottom:16px">
+            <span class="ac-co-i">&#10003;</span>
+            <span><strong><?php echo esc_html( 'Lifetime license active' ); ?></strong> &mdash; <?php echo esc_html( 'no per-sale fees. Sell forever.' ); ?></span>
+        </div>
+    <?php else : ?>
         <div class="ac-ltm-cta" id="ac-sales-lifetime-cta">
             <span style="font-size:16px">&#9889;</span>
             <span style="flex:1;color:var(--text)" id="ac-ltm-cta-text">
@@ -39,9 +45,14 @@ $fee_rate = ( $tier === 'turnkey' ) ? '1.5% or $1.99 min' : '1% or $1.00 min';
         <div class="ac-stat-box"><div class="ac-stat-val" id="ac-ss-gross">&mdash;</div><div class="ac-stat-lbl"><?php echo esc_html( 'Gross sales via agent' ); ?></div><div class="ac-stat-sub" id="ac-ss-period-label"><?php echo esc_html( 'this month' ); ?></div></div>
         <div class="ac-stat-box"><div class="ac-stat-val" id="ac-ss-count">&mdash;</div><div class="ac-stat-lbl"><?php echo esc_html( 'Billed transactions' ); ?></div><div class="ac-stat-sub"><?php echo esc_html( 'agent-closed only' ); ?></div></div>
         <div class="ac-stat-box"><div class="ac-stat-val" id="ac-ss-avg">&mdash;</div><div class="ac-stat-lbl"><?php echo esc_html( 'Average order value' ); ?></div></div>
-        <div class="ac-stat-box"><div class="ac-stat-val" id="ac-ss-fees">&mdash;</div><div class="ac-stat-lbl"><?php echo esc_html( 'AgentClerk fees accrued' ); ?></div><div class="ac-stat-sub"><?php echo esc_html( 'of $20 threshold' ); ?></div></div>
+        <?php if ( $is_lifetime ) : ?>
+            <div class="ac-stat-box"><div class="ac-stat-val">$0</div><div class="ac-stat-lbl"><?php echo esc_html( 'AgentClerk fees' ); ?></div><div class="ac-stat-sub"><?php echo esc_html( 'lifetime — no fees' ); ?></div></div>
+        <?php else : ?>
+            <div class="ac-stat-box"><div class="ac-stat-val" id="ac-ss-fees">&mdash;</div><div class="ac-stat-lbl"><?php echo esc_html( 'AgentClerk fees accrued' ); ?></div><div class="ac-stat-sub"><?php echo esc_html( 'of $20 threshold' ); ?></div></div>
+        <?php endif; ?>
     </div>
 
+    <?php if ( ! $is_lifetime ) : ?>
     <div class="ac-g2">
         <div class="ac-card"><div class="ac-card-head"><h2><?php echo esc_html( 'Billing threshold' ); ?></h2></div><div class="ac-card-body">
             <div style="font-size:12px;color:var(--text2);margin-bottom:10px"><?php echo esc_html( 'Auto-billed when fees reach $20, or end of month — whichever comes first.' ); ?></div>
@@ -54,6 +65,7 @@ $fee_rate = ( $tier === 'turnkey' ) ? '1.5% or $1.99 min' : '1% or $1.00 min';
             <div class="ac-tog-row"><div><div class="ac-tog-lbl"><?php echo esc_html( 'Direct WooCommerce checkout' ); ?></div><div class="ac-tog-desc"><?php echo esc_html( "Sales that didn't go through the agent" ); ?></div></div><span class="ac-b ac-b-g"><?php echo esc_html( 'No charge' ); ?></span></div>
         </div></div>
     </div>
+    <?php endif; ?>
 
     <div class="ac-card"><div class="ac-card-head"><h2><?php echo esc_html( 'Transaction history' ); ?></h2></div>
         <table class="ac-dt">
