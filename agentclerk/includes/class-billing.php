@@ -47,6 +47,18 @@ class AgentClerk_Billing {
 		add_action( 'wp_ajax_agentclerk_lifetime_checkout', array( $this, 'lifetime_checkout' ) );
 		add_action( 'wp_ajax_agentclerk_card_update', array( $this, 'card_update' ) );
 		add_action( 'admin_init', array( $this, 'handle_license_return' ) );
+		add_action( 'admin_init', array( $this, 'maybe_poll_status' ) );
+	}
+
+	/**
+	 * Poll billing/license status on admin page load (throttled to every 5 min).
+	 */
+	public function maybe_poll_status() {
+		if ( false !== get_transient( 'agentclerk_last_status_poll' ) ) {
+			return;
+		}
+		set_transient( 'agentclerk_last_status_poll', 1, 5 * MINUTE_IN_SECONDS );
+		$this->poll_status();
 	}
 
 	/**
@@ -66,6 +78,20 @@ class AgentClerk_Billing {
 
 		$status = isset( $data['billingStatus'] ) ? sanitize_text_field( $data['billingStatus'] ) : 'active';
 		update_option( 'agentclerk_billing_status', $status );
+
+		// License status from backend.
+		if ( isset( $data['licenseStatus'] ) ) {
+			$license_status = sanitize_text_field( $data['licenseStatus'] );
+			update_option( 'agentclerk_license_status', $license_status );
+
+			// Lifetime license holders have zero fees.
+			if ( 'active' === $license_status ) {
+				update_option( 'agentclerk_accrued_fees', 0 );
+			}
+		}
+		if ( isset( $data['licenseKey'] ) ) {
+			update_option( 'agentclerk_license_key', sanitize_text_field( $data['licenseKey'] ) );
+		}
 
 		if ( isset( $data['accruedFees'] ) ) {
 			update_option( 'agentclerk_accrued_fees', floatval( $data['accruedFees'] ) );
