@@ -694,6 +694,20 @@
             });
         });
 
+        // Sync license
+        $('#ac-sync-license').on('click', function() {
+            var btn = $(this);
+            btn.text('Syncing...').prop('disabled', true);
+            acAjax('sync_license').then(function(data) {
+                var status = data.license_status || 'none';
+                showToast('License status: ' + status, status === 'active' ? 'success' : 'info');
+                setTimeout(function() { location.reload(); }, 1000);
+            }).catch(function(err) {
+                btn.html('&#8635; Sync license from server').prop('disabled', false);
+                showToast('Sync failed: ' + ((err && err.message) || 'Unknown error'), 'error');
+            });
+        });
+
         // Catalog count
         var count = $('.ac-catalog-toggle').length;
         if (count > 0) { $('#ac-catalog-count').text(count + ' products \u00b7 synced from WooCommerce'); }
@@ -846,9 +860,19 @@
         });
 
         // Lifetime CTA
-        $('#ac-sales-lifetime-btn, #ac-sales-lifetime-cta').on('click', function() {
+        $('#ac-sales-lifetime-btn').on('click', function(e) {
+            e.stopPropagation();
+            var btn = $(this);
+            btn.text('Processing...').css('pointer-events', 'none');
             acAjax('lifetime_checkout').then(function(data) {
                 if (data.checkoutUrl) window.location.href = data.checkoutUrl;
+                else {
+                    btn.html('Upgrade &rarr;').css('pointer-events', '');
+                    showToast('No checkout URL returned.', 'error');
+                }
+            }).catch(function(err) {
+                btn.html('Upgrade &rarr;').css('pointer-events', '');
+                showToast('Upgrade failed: ' + ((err && err.message) || 'Unknown error'), 'error');
             });
         });
     })();

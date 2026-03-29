@@ -38,6 +38,7 @@ class AgentClerk_Admin {
         add_action( 'wp_ajax_agentclerk_save_catalog', [ $this, 'save_catalog' ] );
         add_action( 'wp_ajax_agentclerk_add_product', [ $this, 'add_product' ] );
         add_action( 'wp_ajax_agentclerk_restart_setup', [ $this, 'restart_setup' ] );
+        add_action( 'wp_ajax_agentclerk_sync_license', [ $this, 'sync_license' ] );
     }
 
     public function register_menus() {
@@ -302,6 +303,22 @@ class AgentClerk_Admin {
         update_option( 'agentclerk_plugin_status', 'onboarding' );
         update_option( 'agentclerk_onboarding_step', 1 );
         wp_send_json_success( [ 'redirect' => admin_url( 'admin.php?page=agentclerk' ) ] );
+    }
+
+    public function sync_license() {
+        check_ajax_referer( 'agentclerk_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
+        }
+
+        // Force a billing status poll right now.
+        delete_transient( 'agentclerk_last_status_poll' );
+        AgentClerk_Billing::instance()->poll_status();
+
+        wp_send_json_success( [
+            'license_status' => get_option( 'agentclerk_license_status', 'none' ),
+            'billing_status' => get_option( 'agentclerk_billing_status', 'active' ),
+        ] );
     }
 
     public function scan_progress() {
