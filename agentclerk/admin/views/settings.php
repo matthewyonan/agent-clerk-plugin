@@ -66,8 +66,16 @@ $last_scan = get_option( 'agentclerk_last_scan_date', '' );
         <div class="ac-card" style="margin-top:20px;border:1px solid var(--ac-border)">
             <div class="ac-card-head"><h2><?php echo esc_html( 'Restart Setup' ); ?></h2></div>
             <div class="ac-card-body">
-                <div style="font-size:12px;color:var(--ac-text2);margin-bottom:10px"><?php echo esc_html( 'Re-run the onboarding wizard from step 1. Your existing settings will be preserved — only the setup status is reset.' ); ?></div>
-                <button class="ac-btn ac-btn-g ac-btn-sm" id="ac-restart-setup">&#8635; <?php echo esc_html( 'Restart setup wizard' ); ?></button>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                    <div style="flex:1">
+                        <div style="font-size:12px;color:var(--ac-text2);margin-bottom:6px"><?php echo esc_html( 'Re-run the onboarding wizard from step 1. Your existing settings will be preserved.' ); ?></div>
+                        <button class="ac-btn ac-btn-g ac-btn-sm" id="ac-restart-setup">&#8635; <?php echo esc_html( 'Restart setup wizard' ); ?></button>
+                    </div>
+                    <div style="border-left:1px solid var(--ac-border);padding-left:10px">
+                        <div style="font-size:12px;color:var(--ac-text2);margin-bottom:6px"><?php echo esc_html( 'License: ' . ( $license === 'active' ? 'Lifetime' : ucfirst( $license ) ) ); ?></div>
+                        <button class="ac-btn ac-btn-g ac-btn-sm" id="ac-sync-license">&#8635; <?php echo esc_html( 'Sync license from server' ); ?></button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
