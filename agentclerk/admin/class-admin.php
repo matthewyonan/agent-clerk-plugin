@@ -303,19 +303,16 @@ class AgentClerk_Admin {
             wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
         }
 
-        // Extend execution time — scanning crawls the site.
-        if ( function_exists( 'set_time_limit' ) ) {
-            // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- required for site scanning which crawls all URLs.
-            set_time_limit( 120 );
-        }
+        // Dispatch async scan via WP-Cron.
+        AgentClerk_Scanner::dispatch_async();
 
-        $results = AgentClerk_Scanner::start_scan();
-        $source  = isset( $_POST['source'] ) ? sanitize_text_field( wp_unslash( $_POST['source'] ) ) : '';
+        $source = isset( $_POST['source'] ) ? sanitize_text_field( wp_unslash( $_POST['source'] ) ) : '';
         if ( 'settings' !== $source ) {
             update_option( 'agentclerk_onboarding_step', 3 );
         }
         update_option( 'agentclerk_last_scan_date', current_time( 'Y-m-d H:i' ) );
-        wp_send_json_success( $results );
+
+        wp_send_json_success( [ 'status' => 'scanning' ] );
     }
 
     public function restart_setup() {

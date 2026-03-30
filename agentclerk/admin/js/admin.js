@@ -335,14 +335,7 @@
             $('#ac-scan-intro, #ac-scan-start-row').hide();
             $('#ac-scan-running').show();
 
-            acAjax('start_scan').then(function(data) {
-                clearInterval(pollTimer);
-                $('#ac-scan-badge').html('\u2713 Complete').removeClass('ac-b-a').addClass('ac-b-g');
-                $('#ac-scan-bar-fill').css('width', '100%');
-                $('#ac-scan-done').show();
-                $('#ac-scan-page-counter').text('Scan complete.');
-                updateFindings(data);
-            });
+            acAjax('start_scan');
 
             pollTimer = setInterval(function() {
                 acAjax('scan_progress').then(function(d) {
@@ -658,7 +651,21 @@
         $('#ac-sync-wc').on('click', function() {
             var btn = $(this);
             btn.text('Syncing...').prop('disabled', true);
-            acAjax('start_scan', { source: 'settings' }).then(function() { location.reload(); }).catch(function(err) {
+            acAjax('start_scan', { source: 'settings' }).then(function() {
+                // Poll for scan completion
+                var pollInterval = setInterval(function() {
+                    acAjax('scan_progress').then(function(d) {
+                        if (d.status === 'complete' || d.status === 'idle') {
+                            clearInterval(pollInterval);
+                            location.reload();
+                        }
+                    }).catch(function() {
+                        clearInterval(pollInterval);
+                        btn.html('&#8635; Sync WooCommerce').prop('disabled', false);
+                        showToast('Sync failed.', 'error');
+                    });
+                }, 2000);
+            }).catch(function(err) {
                 btn.html('&#8635; Sync WooCommerce').prop('disabled', false);
                 showToast('Sync failed: ' + ((err && err.message) || 'Unknown error'), 'error');
             });
@@ -718,7 +725,21 @@
         $('#ac-rescan-btn').on('click', function() {
             var btn = $(this);
             btn.text('Scanning...').prop('disabled', true);
-            acAjax('start_scan', { source: 'settings' }).then(function() { location.reload(); }).catch(function(err) {
+            acAjax('start_scan', { source: 'settings' }).then(function() {
+                // Poll for scan completion
+                var pollInterval = setInterval(function() {
+                    acAjax('scan_progress').then(function(d) {
+                        if (d.status === 'complete' || d.status === 'idle') {
+                            clearInterval(pollInterval);
+                            location.reload();
+                        }
+                    }).catch(function() {
+                        clearInterval(pollInterval);
+                        btn.html('&#8635; Scan now').prop('disabled', false);
+                        showToast('Scan failed.', 'error');
+                    });
+                }, 2000);
+            }).catch(function(err) {
                 btn.html('&#8635; Scan now').prop('disabled', false);
                 showToast('Scan failed: ' + ((err && err.message) || 'Unknown error'), 'error');
             });

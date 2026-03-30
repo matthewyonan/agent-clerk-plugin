@@ -44,6 +44,30 @@
 	align-items: center;
 }
 
+/* ── Theme conflict prevention ───────────────────
+ * Many WP themes (Elementor, Astra, Divi, OceanWP) apply
+ * aggressive global styles on button, input, svg elements.
+ * These resets prevent theme overrides inside our widget.
+ */
+[class^="acw-"] svg,
+[class*=" acw-"] svg {
+	display: inline-block !important;
+	visibility: visible !important;
+	opacity: 1 !important;
+	fill: none !important;
+	stroke: currentColor !important;
+	max-width: none !important;
+	max-height: none !important;
+	pointer-events: none !important;
+}
+[class^="acw-"] button,
+[class*=" acw-"] button {
+	font-family: inherit !important;
+	letter-spacing: normal !important;
+	text-transform: none !important;
+	text-decoration: none !important;
+}
+
 /* ── Floating Widget Panel ─────────────────────── */
 
 .acw-panel {
@@ -252,16 +276,24 @@
 	flex-shrink: 0;
 }
 .acw-input {
-	flex: 1;
-	font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-	font-size: 12px;
-	padding: 6px 10px;
-	border-radius: 14px;
-	border: 1px solid rgba(0, 0, 0, 0.15);
-	outline: none;
-	background: #fff;
-	color: #1C2333;
-	transition: border-color 0.15s;
+	flex: 1 !important;
+	font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+	font-size: 12px !important;
+	padding: 6px 10px !important;
+	border-radius: 14px !important;
+	border: 1px solid rgba(0, 0, 0, 0.15) !important;
+	outline: none !important;
+	background: #fff !important;
+	color: #1C2333 !important;
+	transition: border-color 0.15s !important;
+	box-shadow: none !important;
+	-webkit-appearance: none !important;
+	appearance: none !important;
+	margin: 0 !important;
+	min-height: auto !important;
+	max-width: none !important;
+	width: auto !important;
+	line-height: normal !important;
 }
 .acw-input:focus {
 	border-color: #0D7A6B;
@@ -270,21 +302,49 @@
 	color: #8A95A8;
 }
 .acw-send-btn {
-	width: 27px;
-	height: 27px;
-	border-radius: 50%;
-	background: #1C2333;
-	color: #00E5C8;
-	border: none;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-shrink: 0;
-	transition: background 0.15s;
+	width: 27px !important;
+	height: 27px !important;
+	min-width: 27px !important;
+	min-height: 27px !important;
+	border-radius: 50% !important;
+	background: #1C2333 !important;
+	color: #00E5C8 !important;
+	border: none !important;
+	cursor: pointer !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	flex-shrink: 0 !important;
+	transition: background 0.15s !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	outline: none !important;
+	box-shadow: none !important;
+	line-height: 1 !important;
+	-webkit-appearance: none !important;
+	appearance: none !important;
+	opacity: 1 !important;
+	visibility: visible !important;
+	overflow: visible !important;
 }
 .acw-send-btn:hover {
-	background: #252E42;
+	background: #252E42 !important;
+}
+.acw-send-btn:focus {
+	outline: none !important;
+	box-shadow: none !important;
+}
+.acw-send-btn svg {
+	display: inline-block !important;
+	visibility: visible !important;
+	opacity: 1 !important;
+	width: 13px !important;
+	height: 13px !important;
+	fill: none !important;
+	stroke: currentColor !important;
+	stroke-width: 2.5 !important;
+	pointer-events: none !important;
+	vertical-align: middle !important;
 }
 
 /* ── Product Page Embed ────────────────────────── */
