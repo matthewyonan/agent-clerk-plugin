@@ -381,7 +381,7 @@ class AgentClerk_Admin {
         }
 
         if ( isset( $_POST['escalation_topics'] ) ) {
-            $topics = wp_unslash( $_POST['escalation_topics'] );
+            $topics = sanitize_text_field( wp_unslash( $_POST['escalation_topics'] ) );
             if ( is_string( $topics ) ) {
                 $topics = json_decode( $topics, true );
             }
@@ -389,7 +389,7 @@ class AgentClerk_Admin {
         }
 
         if ( isset( $_POST['policies'] ) ) {
-            $policies = wp_unslash( $_POST['policies'] );
+            $policies = sanitize_text_field( wp_unslash( $_POST['policies'] ) );
             if ( is_string( $policies ) ) {
                 $policies = json_decode( $policies, true );
             }
@@ -403,7 +403,7 @@ class AgentClerk_Admin {
         }
 
         if ( isset( $_POST['support_page_id'] ) ) {
-            $config['support_page_id'] = (int) wp_unslash( $_POST['support_page_id'] );
+            $config['support_page_id'] = absint( wp_unslash( $_POST['support_page_id'] ) );
         }
 
         update_option( 'agentclerk_agent_config', wp_json_encode( $config ) );
@@ -418,7 +418,7 @@ class AgentClerk_Admin {
             wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
         }
 
-        $visibility = isset( $_POST['visibility'] ) ? json_decode( wp_unslash( $_POST['visibility'] ), true ) : [];
+        $visibility = isset( $_POST['visibility'] ) ? json_decode( sanitize_text_field( wp_unslash( $_POST['visibility'] ) ), true ) : [];
         if ( ! is_array( $visibility ) ) {
             $visibility = [];
         }

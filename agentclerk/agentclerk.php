@@ -69,7 +69,6 @@ final class AgentClerk {
 		require_once AGENTCLERK_PLUGIN_DIR . 'includes/class-conversations.php';
 		require_once AGENTCLERK_PLUGIN_DIR . 'includes/class-support.php';
 		require_once AGENTCLERK_PLUGIN_DIR . 'includes/class-a2a.php';
-		require_once AGENTCLERK_PLUGIN_DIR . 'includes/class-updater.php';
 
 		if ( is_admin() ) {
 			require_once AGENTCLERK_PLUGIN_DIR . 'admin/class-admin.php';
@@ -101,9 +100,6 @@ final class AgentClerk {
 
 		AgentClerk_Widget::instance();
 		AgentClerk_A2A::instance();
-
-		// Self-hosted update checker.
-		new AgentClerk_Updater();
 	}
 
 	/**

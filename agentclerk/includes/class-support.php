@@ -239,7 +239,7 @@ class AgentClerk_Support {
 		}
 
 		$message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
-		$history = isset( $_POST['history'] ) ? json_decode( wp_unslash( $_POST['history'] ), true ) : array();
+		$history = isset( $_POST['history'] ) ? json_decode( sanitize_text_field( wp_unslash( $_POST['history'] ) ), true ) : array();
 
 		if ( empty( $message ) ) {
 			wp_send_json_error( array( 'message' => 'Message is required.' ) );
