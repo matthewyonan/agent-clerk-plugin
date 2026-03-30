@@ -61,11 +61,6 @@ This plugin connects to the following third-party services:
    * [Terms of Service](https://stripe.com/legal)
    * [Privacy Policy](https://stripe.com/privacy)
 
-4. **Google Fonts** ([fonts.google.com](https://fonts.google.com))
-   Used for: loading the Syne, DM Sans, and DM Mono typefaces on plugin admin pages only.
-   * [Terms of Service](https://developers.google.com/terms)
-   * [Privacy Policy](https://policies.google.com/privacy)
-
 **Data handling:**
 
 * No buyer PII is transmitted to AgentClerk beyond transaction amount, product type, and timestamp for billing

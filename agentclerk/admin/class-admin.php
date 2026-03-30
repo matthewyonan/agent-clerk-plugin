@@ -102,7 +102,7 @@ class AgentClerk_Admin {
             return;
         }
 
-        wp_enqueue_style( 'agentclerk-fonts', 'https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap', [], null );
+        wp_enqueue_style( 'agentclerk-fonts', AGENTCLERK_PLUGIN_URL . 'admin/css/fonts.css', [], AGENTCLERK_VERSION );
         wp_enqueue_style( 'agentclerk-admin', AGENTCLERK_PLUGIN_URL . 'admin/css/admin.css', [], AGENTCLERK_VERSION );
         wp_enqueue_script( 'agentclerk-admin', AGENTCLERK_PLUGIN_URL . 'admin/js/admin.js', [ 'jquery' ], AGENTCLERK_VERSION, true );
 
