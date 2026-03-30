@@ -134,7 +134,7 @@ class AgentClerk_Billing {
 			printf(
 				/* translators: %d: number of days remaining in grace period */
 				esc_html__( 'Update your payment card within %d day(s) to avoid suspension.', 'agentclerk' ),
-				$days
+				intval( $days )
 			);
 			echo ' <a href="' . esc_url( admin_url( 'admin.php?page=agentclerk-sales' ) ) . '">';
 			echo esc_html__( 'Update card &rarr;', 'agentclerk' );

@@ -151,7 +151,7 @@ final class AgentClerk {
 				&& strpos( $screen->id, 'agentclerk' ) !== false
 				&& 'toplevel_page_agentclerk' !== $screen->id
 			) {
-				wp_redirect( admin_url( 'admin.php?page=agentclerk' ) );
+				wp_safe_redirect( admin_url( 'admin.php?page=agentclerk' ) );
 				exit;
 			}
 		}

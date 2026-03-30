@@ -170,7 +170,7 @@ class AgentClerk_Widget {
 		echo     '<div class="acw-header-left">';
 		echo       '<div class="acw-avatar acw-avatar--electric"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>';
 		echo       '<div class="acw-header-info">';
-		echo         '<span class="acw-header-name">' . $agent_name . '</span>';
+		echo         '<span class="acw-header-name">' . esc_html( $agent_name ) . '</span>';
 		echo         '<span class="acw-header-status">&#9679; Online</span>';
 		echo       '</div>';
 		echo     '</div>';
@@ -234,7 +234,7 @@ class AgentClerk_Widget {
 		$html .=     '<div class="acw-header-left">';
 		$html .=       '<div class="acw-avatar acw-avatar--electric"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>';
 		$html .=       '<div class="acw-header-info">';
-		$html .=         '<span class="acw-header-name">' . $agent_name . '</span>';
+		$html .=         '<span class="acw-header-name">' . esc_html( $agent_name ) . '</span>';
 		$html .=         '<span class="acw-header-status">&#9679; Online</span>';
 		$html .=       '</div>';
 		$html .=     '</div>';
@@ -261,13 +261,13 @@ class AgentClerk_Widget {
 
 		$html  = '<div class="acw-support-wrap">';
 		$html .=   '<h2 class="acw-support-heading">How can we help?</h2>';
-		$html .=   '<p class="acw-support-subtext">' . $agent_name . ' can answer most questions instantly. If needed, we\'ll connect you with a human.</p>';
+		$html .=   '<p class="acw-support-subtext">' . esc_html( $agent_name ) . ' can answer most questions instantly. If needed, we\'ll connect you with a human.</p>';
 		$html .=   '<div class="acw-support-chat" id="acw-support-chat">';
 		$html .=     '<div class="acw-header">';
 		$html .=       '<div class="acw-header-left">';
 		$html .=         '<div class="acw-avatar acw-avatar--electric"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>';
 		$html .=         '<div class="acw-header-info">';
-		$html .=           '<span class="acw-header-name">' . $agent_name . '</span>';
+		$html .=           '<span class="acw-header-name">' . esc_html( $agent_name ) . '</span>';
 		$html .=           '<span class="acw-header-status">&#9679; Online</span>';
 		$html .=         '</div>';
 		$html .=       '</div>';

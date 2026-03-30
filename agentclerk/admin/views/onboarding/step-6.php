@@ -1,33 +1,33 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-$config     = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
-$scan_cache = json_decode( get_option( 'agentclerk_scan_cache', '{}' ), true );
+$ac_config     = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
+$ac_scan_cache = json_decode( get_option( 'agentclerk_scan_cache', '{}' ), true );
 
-$config_fields = array( 'agent_name', 'business_name', 'business_desc', 'escalation_email', 'escalation_message' );
-$filled = 0;
-foreach ( $config_fields as $f ) {
-    if ( ! empty( $config[ $f ] ) ) { $filled++; }
+$ac_config_fields = array( 'agent_name', 'business_name', 'business_desc', 'escalation_email', 'escalation_message' );
+$ac_filled = 0;
+foreach ( $ac_config_fields as $ac_f ) {
+    if ( ! empty( $ac_config[ $ac_f ] ) ) { $ac_filled++; }
 }
-$business_score = count( $config_fields ) > 0 ? (int) round( ( $filled / count( $config_fields ) ) * 100 ) : 0;
+$ac_business_score = count( $ac_config_fields ) > 0 ? (int) round( ( $ac_filled / count( $ac_config_fields ) ) * 100 ) : 0;
 
-$products   = $scan_cache['products'] ?? array();
-$visibility = $config['product_visibility'] ?? array();
-$visible    = 0;
-foreach ( $products as $p ) {
-    if ( ! isset( $visibility[ $p['id'] ] ) || $visibility[ $p['id'] ] ) { $visible++; }
+$ac_products   = $ac_scan_cache['products'] ?? array();
+$ac_visibility = $ac_config['product_visibility'] ?? array();
+$ac_visible    = 0;
+foreach ( $ac_products as $ac_p ) {
+    if ( ! isset( $ac_visibility[ $ac_p['id'] ] ) || $ac_visibility[ $ac_p['id'] ] ) { $ac_visible++; }
 }
-$catalog_score = count( $products ) > 0 ? (int) round( ( $visible / count( $products ) ) * 100 ) : 0;
+$ac_catalog_score = count( $ac_products ) > 0 ? (int) round( ( $ac_visible / count( $ac_products ) ) * 100 ) : 0;
 
-$policies  = $config['policies'] ?? array();
-$pol_count = 0;
-if ( ! empty( $policies['refund'] ) ) { $pol_count++; }
-if ( ! empty( $policies['license'] ) ) { $pol_count++; }
-if ( ! empty( $policies['delivery'] ) ) { $pol_count++; }
-$policy_score = (int) round( ( $pol_count / 3 ) * 100 );
+$ac_policies  = $ac_config['policies'] ?? array();
+$ac_pol_count = 0;
+if ( ! empty( $ac_policies['refund'] ) ) { $ac_pol_count++; }
+if ( ! empty( $ac_policies['license'] ) ) { $ac_pol_count++; }
+if ( ! empty( $ac_policies['delivery'] ) ) { $ac_pol_count++; }
+$ac_policy_score = (int) round( ( $ac_pol_count / 3 ) * 100 );
 
-$support_len   = strlen( $config['support_file'] ?? '' );
-$support_score = min( 100, (int) round( ( $support_len / 200 ) * 100 ) );
+$ac_support_len   = strlen( $ac_config['support_file'] ?? '' );
+$ac_support_score = min( 100, (int) round( ( $ac_support_len / 200 ) * 100 ) );
 
 if ( ! function_exists( 'ac_readiness_color' ) ) {
     function ac_readiness_color( $score ) {
@@ -65,11 +65,11 @@ if ( ! function_exists( 'ac_readiness_color' ) ) {
             <div class="ac-card ac-mb">
                 <div class="ac-card-head"><h2><?php echo esc_html( 'Readiness' ); ?></h2></div>
                 <div class="ac-card-body">
-                    <div class="ac-sc-row"><div class="ac-sc-lbl"><?php echo esc_html( 'Business context' ); ?></div><div class="ac-sc-track"><div class="ac-sc-fill" style="width:<?php echo (int) $business_score; ?>%;background:<?php echo esc_attr( ac_readiness_color( $business_score ) ); ?>"></div></div><div class="ac-sc-val" style="color:<?php echo esc_attr( ac_readiness_color( $business_score ) ); ?>"><?php echo (int) $business_score; ?>%</div></div>
-                    <div class="ac-sc-row"><div class="ac-sc-lbl"><?php echo esc_html( 'Catalog' ); ?></div><div class="ac-sc-track"><div class="ac-sc-fill" style="width:<?php echo (int) $catalog_score; ?>%;background:<?php echo esc_attr( ac_readiness_color( $catalog_score ) ); ?>"></div></div><div class="ac-sc-val" style="color:<?php echo esc_attr( ac_readiness_color( $catalog_score ) ); ?>"><?php echo (int) $catalog_score; ?>%</div></div>
-                    <div class="ac-sc-row"><div class="ac-sc-lbl"><?php echo esc_html( 'Policies' ); ?></div><div class="ac-sc-track"><div class="ac-sc-fill" style="width:<?php echo (int) $policy_score; ?>%;background:<?php echo esc_attr( ac_readiness_color( $policy_score ) ); ?>"></div></div><div class="ac-sc-val" style="color:<?php echo esc_attr( ac_readiness_color( $policy_score ) ); ?>"><?php echo (int) $policy_score; ?>%</div></div>
-                    <div class="ac-sc-row"><div class="ac-sc-lbl"><?php echo esc_html( 'Support file' ); ?></div><div class="ac-sc-track"><div class="ac-sc-fill" style="width:<?php echo (int) $support_score; ?>%;background:<?php echo esc_attr( ac_readiness_color( $support_score ) ); ?>"></div></div><div class="ac-sc-val" style="color:<?php echo esc_attr( ac_readiness_color( $support_score ) ); ?>"><?php echo (int) $support_score; ?>%</div></div>
-                    <?php if ( $support_score < 75 ) : ?>
+                    <div class="ac-sc-row"><div class="ac-sc-lbl"><?php echo esc_html( 'Business context' ); ?></div><div class="ac-sc-track"><div class="ac-sc-fill" style="width:<?php echo (int) $ac_business_score; ?>%;background:<?php echo esc_attr( ac_readiness_color( $ac_business_score ) ); ?>"></div></div><div class="ac-sc-val" style="color:<?php echo esc_attr( ac_readiness_color( $ac_business_score ) ); ?>"><?php echo (int) $ac_business_score; ?>%</div></div>
+                    <div class="ac-sc-row"><div class="ac-sc-lbl"><?php echo esc_html( 'Catalog' ); ?></div><div class="ac-sc-track"><div class="ac-sc-fill" style="width:<?php echo (int) $ac_catalog_score; ?>%;background:<?php echo esc_attr( ac_readiness_color( $ac_catalog_score ) ); ?>"></div></div><div class="ac-sc-val" style="color:<?php echo esc_attr( ac_readiness_color( $ac_catalog_score ) ); ?>"><?php echo (int) $ac_catalog_score; ?>%</div></div>
+                    <div class="ac-sc-row"><div class="ac-sc-lbl"><?php echo esc_html( 'Policies' ); ?></div><div class="ac-sc-track"><div class="ac-sc-fill" style="width:<?php echo (int) $ac_policy_score; ?>%;background:<?php echo esc_attr( ac_readiness_color( $ac_policy_score ) ); ?>"></div></div><div class="ac-sc-val" style="color:<?php echo esc_attr( ac_readiness_color( $ac_policy_score ) ); ?>"><?php echo (int) $ac_policy_score; ?>%</div></div>
+                    <div class="ac-sc-row"><div class="ac-sc-lbl"><?php echo esc_html( 'Support file' ); ?></div><div class="ac-sc-track"><div class="ac-sc-fill" style="width:<?php echo (int) $ac_support_score; ?>%;background:<?php echo esc_attr( ac_readiness_color( $ac_support_score ) ); ?>"></div></div><div class="ac-sc-val" style="color:<?php echo esc_attr( ac_readiness_color( $ac_support_score ) ); ?>"><?php echo (int) $ac_support_score; ?>%</div></div>
+                    <?php if ( $ac_support_score < 75 ) : ?>
                         <hr>
                         <div class="ac-co am" style="margin-bottom:0"><span class="ac-co-i">&#9888;</span><span><?php echo esc_html( 'Support file is a draft. Improve it any time in Settings → Support & Escalation.' ); ?></span></div>
                     <?php endif; ?>

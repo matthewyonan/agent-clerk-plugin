@@ -58,8 +58,10 @@ class AgentClerk_WooCommerce {
 
 		global $wpdb;
 		$table = $wpdb->prefix . 'agentclerk_quote_links';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$quote = $wpdb->get_row(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 				"SELECT * FROM {$table} WHERE id = %s AND status = 'pending' AND expires_at > %s",
 				$token,
 				current_time( 'mysql' )
@@ -143,10 +145,13 @@ class AgentClerk_WooCommerce {
 		// Mark quote link as completed.
 		global $wpdb;
 		$quote_table = $wpdb->prefix . 'agentclerk_quote_links';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$quote       = $wpdb->get_row(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 			$wpdb->prepare( "SELECT * FROM {$quote_table} WHERE id = %s", $quote_link_id )
 		);
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update(
 			$quote_table,
 			array(
@@ -161,6 +166,7 @@ class AgentClerk_WooCommerce {
 		// Update the conversation record.
 		if ( $quote ) {
 			$conversations_table = $wpdb->prefix . 'agentclerk_conversations';
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->update(
 				$conversations_table,
 				array(
@@ -241,8 +247,10 @@ class AgentClerk_WooCommerce {
 		foreach ( $order->get_items() as $item ) {
 			$product_id = $item->get_product_id();
 
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$quote = $wpdb->get_row(
 				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 					"SELECT id FROM {$table} WHERE product_id = %d AND status = 'pending' ORDER BY created_at DESC LIMIT 1",
 					$product_id
 				)
@@ -267,8 +275,10 @@ class AgentClerk_WooCommerce {
 		$quote_table = $wpdb->prefix . 'agentclerk_quote_links';
 		$convo_table = $wpdb->prefix . 'agentclerk_conversations';
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$buyer_type = $wpdb->get_var(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 				"SELECT c.buyer_type FROM {$convo_table} c
 				 INNER JOIN {$quote_table} q ON q.conversation_id = c.id
 				 WHERE q.wc_order_id = %d

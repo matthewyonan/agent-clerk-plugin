@@ -356,7 +356,7 @@ class AgentClerk_Admin {
             wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
         }
 
-        $step = (int) ( $_POST['step'] ?? 0 );
+        $step = (int) sanitize_text_field( wp_unslash( $_POST['step'] ?? 0 ) );
         if ( $step >= 1 && $step <= 6 ) {
             update_option( 'agentclerk_onboarding_step', $step );
             wp_send_json_success();
@@ -403,7 +403,7 @@ class AgentClerk_Admin {
         }
 
         if ( isset( $_POST['support_page_id'] ) ) {
-            $config['support_page_id'] = (int) $_POST['support_page_id'];
+            $config['support_page_id'] = (int) wp_unslash( $_POST['support_page_id'] );
         }
 
         update_option( 'agentclerk_agent_config', wp_json_encode( $config ) );
