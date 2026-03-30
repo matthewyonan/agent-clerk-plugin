@@ -303,18 +303,16 @@ class AgentClerk_Admin {
             wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
         }
 
-        // Extend execution time — scanning crawls the site.
-        if ( function_exists( 'set_time_limit' ) ) {
-            set_time_limit( 120 );
-        }
+        // Dispatch async scan via WP-Cron.
+        AgentClerk_Scanner::dispatch_async();
 
-        $results = AgentClerk_Scanner::start_scan();
-        $source  = isset( $_POST['source'] ) ? sanitize_text_field( wp_unslash( $_POST['source'] ) ) : '';
+        $source = isset( $_POST['source'] ) ? sanitize_text_field( wp_unslash( $_POST['source'] ) ) : '';
         if ( 'settings' !== $source ) {
             update_option( 'agentclerk_onboarding_step', 3 );
         }
         update_option( 'agentclerk_last_scan_date', current_time( 'Y-m-d H:i' ) );
-        wp_send_json_success( $results );
+
+        wp_send_json_success( [ 'status' => 'scanning' ] );
     }
 
     public function restart_setup() {
@@ -381,7 +379,7 @@ class AgentClerk_Admin {
         }
 
         if ( isset( $_POST['escalation_topics'] ) ) {
-            $topics = wp_unslash( $_POST['escalation_topics'] );
+            $topics = sanitize_text_field( wp_unslash( $_POST['escalation_topics'] ) );
             if ( is_string( $topics ) ) {
                 $topics = json_decode( $topics, true );
             }
@@ -389,7 +387,7 @@ class AgentClerk_Admin {
         }
 
         if ( isset( $_POST['policies'] ) ) {
-            $policies = wp_unslash( $_POST['policies'] );
+            $policies = sanitize_text_field( wp_unslash( $_POST['policies'] ) );
             if ( is_string( $policies ) ) {
                 $policies = json_decode( $policies, true );
             }
@@ -403,7 +401,7 @@ class AgentClerk_Admin {
         }
 
         if ( isset( $_POST['support_page_id'] ) ) {
-            $config['support_page_id'] = (int) wp_unslash( $_POST['support_page_id'] );
+            $config['support_page_id'] = absint( wp_unslash( $_POST['support_page_id'] ) );
         }
 
         update_option( 'agentclerk_agent_config', wp_json_encode( $config ) );
@@ -418,7 +416,7 @@ class AgentClerk_Admin {
             wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
         }
 
-        $visibility = isset( $_POST['visibility'] ) ? json_decode( wp_unslash( $_POST['visibility'] ), true ) : [];
+        $visibility = isset( $_POST['visibility'] ) ? json_decode( sanitize_text_field( wp_unslash( $_POST['visibility'] ) ), true ) : [];
         if ( ! is_array( $visibility ) ) {
             $visibility = [];
         }

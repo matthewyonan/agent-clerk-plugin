@@ -67,8 +67,8 @@ class AgentClerk_Conversations {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$rows = $wpdb->get_results(
 				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-					"SELECT * FROM {$table} WHERE outcome = %s ORDER BY updated_at DESC LIMIT %d OFFSET %d",
+					"SELECT * FROM %i WHERE outcome = %s ORDER BY updated_at DESC LIMIT %d OFFSET %d",
+					$table,
 					$filter,
 					$limit,
 					$offset
@@ -76,22 +76,22 @@ class AgentClerk_Conversations {
 			);
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$total = (int) $wpdb->get_var(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-				$wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE outcome = %s", $filter )
+				$wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE outcome = %s", $table, $filter )
 			);
 		} else {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$rows = $wpdb->get_results(
 				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-					"SELECT * FROM {$table} ORDER BY updated_at DESC LIMIT %d OFFSET %d",
+					"SELECT * FROM %i ORDER BY updated_at DESC LIMIT %d OFFSET %d",
+					$table,
 					$limit,
 					$offset
 				)
 			);
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+			$total = (int) $wpdb->get_var(
+				$wpdb->prepare( "SELECT COUNT(*) FROM %i", $table )
+			);
 		}
 
 		wp_send_json_success( array(
@@ -124,16 +124,15 @@ class AgentClerk_Conversations {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$messages = $wpdb->get_results(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-				"SELECT role, content, created_at FROM {$messages_table} WHERE conversation_id = %d ORDER BY created_at ASC",
+				"SELECT role, content, created_at FROM %i WHERE conversation_id = %d ORDER BY created_at ASC",
+				$messages_table,
 				$conversation_id
 			)
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$conversation = $wpdb->get_row(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			$wpdb->prepare( "SELECT * FROM {$convo_table} WHERE id = %d", $conversation_id )
+			$wpdb->prepare( "SELECT * FROM %i WHERE id = %d", $convo_table, $conversation_id )
 		);
 
 		wp_send_json_success( array(
@@ -158,59 +157,62 @@ class AgentClerk_Conversations {
 		$table = $wpdb->prefix . 'agentclerk_conversations';
 		$today = current_time( 'Y-m-d' );
 
+		$cache_key = 'agentclerk_stats';
+		$cached    = wp_cache_get( $cache_key, 'agentclerk' );
+
+		if ( false !== $cached ) {
+			wp_send_json_success( $cached );
+		}
+
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-		$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+		$total = (int) $wpdb->get_var(
+			$wpdb->prepare( "SELECT COUNT(*) FROM %i", $table )
+		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$today_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-				"SELECT COUNT(*) FROM {$table} WHERE DATE(started_at) = %s",
+				"SELECT COUNT(*) FROM %i WHERE DATE(started_at) = %s",
+				$table,
 				$today
 			)
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$setup = (int) $wpdb->get_var(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			"SELECT COUNT(*) FROM {$table} WHERE outcome = 'setup'"
+			$wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE outcome = 'setup'", $table )
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$support = (int) $wpdb->get_var(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			"SELECT COUNT(*) FROM {$table} WHERE outcome = 'support'"
+			$wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE outcome = 'support'", $table )
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$in_cart = (int) $wpdb->get_var(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			"SELECT COUNT(*) FROM {$table} WHERE outcome = 'quote'"
+			$wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE outcome = 'quote'", $table )
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$escalated = (int) $wpdb->get_var(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			"SELECT COUNT(*) FROM {$table} WHERE outcome = 'escalated'"
+			$wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE outcome = 'escalated'", $table )
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$purchased = (int) $wpdb->get_var(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			"SELECT COUNT(*) FROM {$table} WHERE outcome = 'purchased'"
+			$wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE outcome = 'purchased'", $table )
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$sales_today = (float) $wpdb->get_var(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-				"SELECT COALESCE(SUM(sale_amount), 0) FROM {$table} WHERE outcome = 'purchased' AND DATE(updated_at) = %s",
+				"SELECT COALESCE(SUM(sale_amount), 0) FROM %i WHERE outcome = 'purchased' AND DATE(updated_at) = %s",
+				$table,
 				$today
 			)
 		);
 
-		wp_send_json_success( array(
+		$stats = array(
 			'total'       => $total,
 			'today'       => $today_count,
 			'setup'       => $setup,
@@ -219,7 +221,11 @@ class AgentClerk_Conversations {
 			'escalated'   => $escalated,
 			'purchased'   => $purchased,
 			'sales_today' => $sales_today,
-		) );
+		);
+
+		wp_cache_set( $cache_key, $stats, 'agentclerk', 60 );
+
+		wp_send_json_success( $stats );
 	}
 
 	/**
@@ -250,30 +256,23 @@ class AgentClerk_Conversations {
 			$where .= $wpdb->prepare( ' AND DATE(updated_at) = %s', current_time( 'Y-m-d' ) );
 		}
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $where is built with prepare() above.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$gross = (float) $wpdb->get_var(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			"SELECT COALESCE(SUM(sale_amount), 0) FROM {$table} WHERE {$where}"
+			"SELECT COALESCE(SUM(sale_amount), 0) FROM {$table} WHERE {$where}" // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- dynamic WHERE built via prepare().
 		);
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$fees = (float) $wpdb->get_var(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			"SELECT COALESCE(SUM(acclerk_fee), 0) FROM {$table} WHERE {$where}"
+			"SELECT COALESCE(SUM(acclerk_fee), 0) FROM {$table} WHERE {$where}" // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- dynamic WHERE built via prepare().
 		);
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$count = (int) $wpdb->get_var(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			"SELECT COUNT(*) FROM {$table} WHERE {$where}"
+			"SELECT COUNT(*) FROM {$table} WHERE {$where}" // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- dynamic WHERE built via prepare().
 		);
-		// phpcs:enable
-
 		$avg = $count > 0 ? round( $gross / $count, 2 ) : 0;
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$transactions = $wpdb->get_results(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			"SELECT id, session_id, product_name, sale_amount, acclerk_fee, buyer_type, updated_at FROM {$table} WHERE {$where} ORDER BY updated_at DESC LIMIT 50"
+			"SELECT id, session_id, product_name, sale_amount, acclerk_fee, buyer_type, updated_at FROM {$table} WHERE {$where} ORDER BY updated_at DESC LIMIT 50" // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- dynamic WHERE built via prepare().
 		);
 
 		wp_send_json_success( array(
@@ -301,8 +300,8 @@ class AgentClerk_Conversations {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-				"UPDATE {$table} SET outcome = 'abandoned', updated_at = %s WHERE outcome = 'browsing' AND updated_at < %s",
+				"UPDATE %i SET outcome = 'abandoned', updated_at = %s WHERE outcome = 'browsing' AND updated_at < %s",
+				$table,
 				current_time( 'mysql' ),
 				$threshold
 			)
@@ -313,8 +312,8 @@ class AgentClerk_Conversations {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-				"UPDATE {$quote_table} SET status = 'expired' WHERE status = 'pending' AND expires_at < %s",
+				"UPDATE %i SET status = 'expired' WHERE status = 'pending' AND expires_at < %s",
+				$quote_table,
 				current_time( 'mysql' )
 			)
 		);

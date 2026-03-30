@@ -14,15 +14,37 @@ if ( ! defined( 'ABSPATH' ) ) {
 class AgentClerk_Activator {
 
 	/**
+	 * Current database schema version.
+	 *
+	 * @var string
+	 */
+	const DB_VERSION = '1.0';
+
+	/**
 	 * Run on plugin activation.
 	 */
 	public static function activate() {
 		self::create_tables();
+		update_option( 'agentclerk_db_version', self::DB_VERSION );
 		self::set_defaults();
 		self::create_clerk_page();
 		self::add_rewrite_rules();
 		self::schedule_crons();
 		flush_rewrite_rules();
+	}
+
+	/**
+	 * Check if the DB schema needs updating and run create_tables() if so.
+	 *
+	 * Called on plugins_loaded so schema migrations run on plugin updates,
+	 * not just on activation.
+	 */
+	public static function maybe_update_db() {
+		$installed_version = get_option( 'agentclerk_db_version', '0' );
+		if ( version_compare( $installed_version, self::DB_VERSION, '<' ) ) {
+			self::create_tables();
+			update_option( 'agentclerk_db_version', self::DB_VERSION );
+		}
 	}
 
 	/**
@@ -35,9 +57,9 @@ class AgentClerk_Activator {
 	}
 
 	/**
-	 * Create the three plugin database tables.
+	 * Create the six plugin database tables via dbDelta.
 	 */
-	private static function create_tables() {
+	public static function create_tables() {
 		global $wpdb;
 		$charset = $wpdb->get_charset_collate();
 
@@ -58,7 +80,7 @@ class AgentClerk_Activator {
 			acclerk_fee DECIMAL(10,2) DEFAULT NULL,
 			started_at DATETIME NOT NULL,
 			updated_at DATETIME NOT NULL,
-			PRIMARY KEY (id),
+			PRIMARY KEY  (id),
 			UNIQUE KEY session_id (session_id)
 		) {$charset};
 
@@ -68,7 +90,7 @@ class AgentClerk_Activator {
 			role ENUM('user','assistant') NOT NULL,
 			content LONGTEXT NOT NULL,
 			created_at DATETIME NOT NULL,
-			PRIMARY KEY (id),
+			PRIMARY KEY  (id),
 			KEY conversation_id (conversation_id)
 		) {$charset};
 
@@ -82,7 +104,7 @@ class AgentClerk_Activator {
 			status ENUM('pending','completed','expired') NOT NULL DEFAULT 'pending',
 			expires_at DATETIME NOT NULL,
 			created_at DATETIME NOT NULL,
-			PRIMARY KEY (id),
+			PRIMARY KEY  (id),
 			KEY conversation_id (conversation_id)
 		) {$charset};";
 
@@ -99,7 +121,7 @@ class AgentClerk_Activator {
 			error_msg TEXT DEFAULT NULL,
 			created_at DATETIME NOT NULL,
 			updated_at DATETIME NOT NULL,
-			PRIMARY KEY (task_id),
+			PRIMARY KEY  (task_id),
 			KEY context_id (context_id)
 		) {$charset};
 
@@ -110,7 +132,7 @@ class AgentClerk_Activator {
 			role VARCHAR(20) NOT NULL,
 			content LONGTEXT NOT NULL,
 			created_at DATETIME NOT NULL,
-			PRIMARY KEY (id),
+			PRIMARY KEY  (id),
 			KEY task_id (task_id)
 		) {$charset};
 
@@ -121,7 +143,7 @@ class AgentClerk_Activator {
 			name VARCHAR(255) DEFAULT NULL,
 			parts_json LONGTEXT NOT NULL,
 			created_at DATETIME NOT NULL,
-			PRIMARY KEY (id),
+			PRIMARY KEY  (id),
 			KEY task_id (task_id)
 		) {$charset};";
 

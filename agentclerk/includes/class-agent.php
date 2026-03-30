@@ -168,7 +168,7 @@ class AgentClerk_Agent {
 
 		$message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
 		$context = isset( $_POST['context'] ) ? sanitize_text_field( wp_unslash( $_POST['context'] ) ) : 'gap_fill';
-		$history = isset( $_POST['history'] ) ? json_decode( wp_unslash( $_POST['history'] ), true ) : array();
+		$history = isset( $_POST['history'] ) ? json_decode( sanitize_text_field( wp_unslash( $_POST['history'] ) ), true ) : array();
 
 		if ( empty( $message ) ) {
 			wp_send_json_error( array( 'message' => 'Message is required.' ) );
@@ -816,11 +816,19 @@ class AgentClerk_Agent {
 		global $wpdb;
 		$table = $wpdb->prefix . 'agentclerk_conversations';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$conversation = $wpdb->get_row(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			$wpdb->prepare( "SELECT * FROM {$table} WHERE session_id = %s", $session_id )
-		);
+		$cache_key    = 'agentclerk_convo_' . $session_id;
+		$conversation = wp_cache_get( $cache_key, 'agentclerk' );
+
+		if ( false === $conversation ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$conversation = $wpdb->get_row(
+				$wpdb->prepare( "SELECT * FROM %i WHERE session_id = %s", $table, $session_id )
+			);
+
+			if ( $conversation ) {
+				wp_cache_set( $cache_key, $conversation, 'agentclerk', 300 );
+			}
+		}
 
 		if ( $conversation ) {
 			return $conversation;
@@ -841,10 +849,15 @@ class AgentClerk_Agent {
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		return $wpdb->get_row(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $wpdb->insert_id )
+		$conversation = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM %i WHERE id = %d", $table, $wpdb->insert_id )
 		);
+
+		if ( $conversation ) {
+			wp_cache_set( $cache_key, $conversation, 'agentclerk', 300 );
+		}
+
+		return $conversation;
 	}
 
 	/**
@@ -859,8 +872,7 @@ class AgentClerk_Agent {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$existing = $wpdb->get_var(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			$wpdb->prepare( "SELECT first_message FROM {$table} WHERE id = %d", $conversation_id )
+			$wpdb->prepare( "SELECT first_message FROM %i WHERE id = %d", $table, $conversation_id )
 		);
 
 		if ( empty( $existing ) ) {
@@ -895,6 +907,9 @@ class AgentClerk_Agent {
 			),
 			array( '%d', '%s', '%s', '%s' )
 		);
+
+		// Invalidate message history cache.
+		wp_cache_delete( 'agentclerk_history_' . $conversation_id, 'agentclerk' );
 	}
 
 	/**
@@ -907,15 +922,24 @@ class AgentClerk_Agent {
 		global $wpdb;
 		$table = $wpdb->prefix . 'agentclerk_messages';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-				"SELECT role, content FROM {$table} WHERE conversation_id = %d ORDER BY created_at ASC",
-				$conversation_id
-			),
-			ARRAY_A
-		);
+		$cache_key = 'agentclerk_history_' . $conversation_id;
+		$rows      = wp_cache_get( $cache_key, 'agentclerk' );
+
+		if ( false === $rows ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT role, content FROM %i WHERE conversation_id = %d ORDER BY created_at ASC",
+					$table,
+					$conversation_id
+				),
+				ARRAY_A
+			);
+
+			if ( $rows ) {
+				wp_cache_set( $cache_key, $rows, 'agentclerk', 300 );
+			}
+		}
 
 		return $rows ? $rows : array();
 	}
