@@ -1,10 +1,10 @@
-=== AgentClerk - AI Sales & Support Agent for WooCommerce ===
+=== AgentClerk ===
 Contributors: matthewyonan
 Tags: woocommerce, ai, sales, support, automation
-Requires at least: 6.0
-Tested up to: 6.7
+Requires at least: 6.2
+Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,6 +22,7 @@ AgentClerk turns your WooCommerce store into a sales and support agent. It handl
 * Supports all WooCommerce fulfillment types: digital downloads, digital services, physical products, subscriptions
 * Handles post-purchase setup, onboarding, support, and troubleshooting
 * Makes your store discoverable and transactable by AI buyer agents via a machine-readable endpoint
+* Supports the A2A (Agent-to-Agent) protocol for standardised agent interoperability
 * Buyer-facing support page with escalation and email confirmation flow
 * Full conversation logging with outcome tracking and demand analysis
 
@@ -81,7 +82,7 @@ This plugin connects to the following third-party services:
 
 **Requirements:**
 
-* WordPress 6.0 or higher
+* WordPress 6.2 or higher
 * WooCommerce 7.0 or higher
 * PHP 7.4 or higher
 * An Anthropic API key (BYOK tier) or $99 setup payment (TurnKey tier)
@@ -108,6 +109,10 @@ Yes. Each product has an "Agent can sell this" toggle. Only enabled products app
 
 A machine-readable endpoint at yourstore.com/ai-manifest.json that makes your store discoverable by AI buyer agents. It contains only the products you've enabled and updates automatically when your catalog changes.
 
+= What is A2A? =
+
+A2A (Agent-to-Agent) is an open protocol that enables AI agents to communicate with each other. AgentClerk implements A2A so external AI shopping agents can discover your store, have conversations, and complete purchases through a standardised interface.
+
 = Can I try it before going live? =
 
 Yes. Step 6 of onboarding includes a test mode where you can chat with your agent as a buyer would, with a readiness checklist showing quality scores before you go live.
@@ -131,15 +136,24 @@ Deactivate the plugin. Your WooCommerce store continues to function normally. No
 
 == Changelog ==
 
+= 1.2.1 =
+* Added A2A (Agent-to-Agent) protocol support
+* Added promo code support for checkout flows
+* Added async scanning via WP-Cron (eliminates set_time_limit)
+* Added wp_cache_get/set for custom table queries
+* Added %i placeholder for table names (WordPress 6.2+)
+* Added DB version tracking for schema migrations
+* Fixed widget send button theme conflict with !important overrides
+* Fixed browser cache issues with version bumping
+* Improved error handling and loading states across all chat surfaces
+* All WordPress Plugin Check (PCP) errors resolved
+
 = 1.1.0 =
 * Complete ground-up plugin rebuild
 * Async site scanner with background processing and progress polling
 * AI quote generation via Anthropic tool_use (structured output)
 * Escalation notification method control (email, WP admin, or both)
-* Install summary with quality scores sent to AgentClerk dashboard on go-live
 * Admin UI matching wireframe v6 design system
-* Correct brand colors throughout buyer-facing widget (Slate/Electric)
-* Self-hosted update system for installations outside WordPress.org
 * All SQL queries use prepared statements
 * Full input sanitization and output escaping
 
@@ -147,6 +161,9 @@ Deactivate the plugin. Your WooCommerce store continues to function normally. No
 * Initial release
 
 == Upgrade Notice ==
+
+= 1.2.1 =
+A2A protocol support, promo codes, async scanning, improved WordPress coding standards compliance. Recommended for all users.
 
 = 1.1.0 =
 Complete rebuild with improved security, async scanning, and wireframe-accurate UI. Recommended for all users.
