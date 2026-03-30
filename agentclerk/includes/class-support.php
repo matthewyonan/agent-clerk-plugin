@@ -67,8 +67,7 @@ class AgentClerk_Support {
 		$table        = $wpdb->prefix . 'agentclerk_conversations';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$conversation = $wpdb->get_row(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			$wpdb->prepare( "SELECT * FROM {$table} WHERE session_id = %s", $session_id )
+			$wpdb->prepare( "SELECT * FROM %i WHERE session_id = %s", $table, $session_id )
 		);
 
 		if ( ! $conversation ) {
@@ -97,8 +96,8 @@ class AgentClerk_Support {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$first_message  = $wpdb->get_var(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-				"SELECT content FROM {$messages_table} WHERE conversation_id = %d AND role = 'user' ORDER BY created_at ASC LIMIT 1",
+				"SELECT content FROM %i WHERE conversation_id = %d AND role = 'user' ORDER BY created_at ASC LIMIT 1",
+				$messages_table,
 				$conversation->id
 			)
 		);
@@ -166,8 +165,7 @@ class AgentClerk_Support {
 		$table = $wpdb->prefix . 'agentclerk_conversations';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows  = $wpdb->get_results(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			"SELECT * FROM {$table} WHERE outcome = 'escalated' ORDER BY updated_at DESC LIMIT 50"
+			$wpdb->prepare( "SELECT * FROM %i WHERE outcome = 'escalated' ORDER BY updated_at DESC LIMIT 50", $table )
 		);
 
 		$escalations = array();
@@ -178,8 +176,8 @@ class AgentClerk_Support {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$first_message  = $wpdb->get_var(
 				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-					"SELECT content FROM {$messages_table} WHERE conversation_id = %d AND role = 'user' ORDER BY created_at ASC LIMIT 1",
+					"SELECT content FROM %i WHERE conversation_id = %d AND role = 'user' ORDER BY created_at ASC LIMIT 1",
+					$messages_table,
 					$row->id
 				)
 			);

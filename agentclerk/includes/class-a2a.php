@@ -426,8 +426,7 @@ class AgentClerk_A2A {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-				"SELECT task_id FROM {$table} WHERE {$where} ORDER BY created_at DESC LIMIT %d OFFSET %d",
+				"SELECT task_id FROM {$table} WHERE {$where} ORDER BY created_at DESC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- dynamic WHERE built via prepare().
 				...$args
 			)
 		);
@@ -446,8 +445,8 @@ class AgentClerk_A2A {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$task = $wpdb->get_row( $wpdb->prepare(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			"SELECT * FROM {$table} WHERE task_id = %s",
+			"SELECT * FROM %i WHERE task_id = %s",
+			$table,
 			$task_id
 		) );
 
@@ -505,8 +504,8 @@ class AgentClerk_A2A {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$task = $wpdb->get_row( $wpdb->prepare(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			"SELECT * FROM {$table} WHERE task_id = %s",
+			"SELECT * FROM %i WHERE task_id = %s",
+			$table,
 			$task_id
 		) );
 
@@ -615,6 +614,10 @@ class AgentClerk_A2A {
 			array( '%s' )
 		);
 
+		// Invalidate task caches.
+		wp_cache_delete( 'agentclerk_task_row_' . $task_id, 'agentclerk' );
+		wp_cache_delete( 'agentclerk_task_resp_' . $task_id, 'agentclerk' );
+
 		// Fire push notifications.
 		$this->fire_push_notifications( $task_id, array(
 			'statusUpdate' => array(
@@ -640,17 +643,33 @@ class AgentClerk_A2A {
 			array( '%s', '%s', '%s' ),
 			array( '%s' )
 		);
+
+		// Invalidate task caches.
+		wp_cache_delete( 'agentclerk_task_row_' . $task_id, 'agentclerk' );
+		wp_cache_delete( 'agentclerk_task_resp_' . $task_id, 'agentclerk' );
 	}
 
 	private function get_task_row( $task_id ) {
 		global $wpdb;
 		$table = $wpdb->prefix . 'agentclerk_a2a_tasks';
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		return $wpdb->get_row( $wpdb->prepare(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			"SELECT * FROM {$table} WHERE task_id = %s",
-			$task_id
-		) );
+
+		$cache_key = 'agentclerk_task_row_' . $task_id;
+		$result    = wp_cache_get( $cache_key, 'agentclerk' );
+
+		if ( false === $result ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$result = $wpdb->get_row( $wpdb->prepare(
+				"SELECT * FROM %i WHERE task_id = %s",
+				$table,
+				$task_id
+			) );
+
+			if ( $result ) {
+				wp_cache_set( $cache_key, $result, 'agentclerk', 300 );
+			}
+		}
+
+		return $result;
 	}
 
 	private function get_task_context( $task_id ) {
@@ -672,6 +691,9 @@ class AgentClerk_A2A {
 			'created_at' => current_time( 'mysql' ),
 		), array( '%s', '%s', '%s', '%s', '%s' ) );
 
+		// Invalidate task response cache.
+		wp_cache_delete( 'agentclerk_task_resp_' . $task_id, 'agentclerk' );
+
 		return $msg_id;
 	}
 
@@ -687,9 +709,19 @@ class AgentClerk_A2A {
 			'parts_json'  => wp_json_encode( $parts ),
 			'created_at'  => current_time( 'mysql' ),
 		), array( '%s', '%s', '%s', '%s', '%s' ) );
+
+		// Invalidate task response cache.
+		wp_cache_delete( 'agentclerk_task_resp_' . $task_id, 'agentclerk' );
 	}
 
 	private function get_task_response( $task_id ) {
+		$cache_key = 'agentclerk_task_resp_' . $task_id;
+		$cached    = wp_cache_get( $cache_key, 'agentclerk' );
+
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
 		$task = $this->get_task_row( $task_id );
 		if ( ! $task ) {
 			return null;
@@ -701,8 +733,8 @@ class AgentClerk_A2A {
 		$msgs_table = $wpdb->prefix . 'agentclerk_a2a_task_messages';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$messages   = $wpdb->get_results( $wpdb->prepare(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			"SELECT * FROM {$msgs_table} WHERE task_id = %s ORDER BY created_at ASC",
+			"SELECT * FROM %i WHERE task_id = %s ORDER BY created_at ASC",
+			$msgs_table,
 			$task_id
 		) );
 
@@ -719,8 +751,8 @@ class AgentClerk_A2A {
 		$art_table = $wpdb->prefix . 'agentclerk_a2a_task_artifacts';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$artifacts_rows = $wpdb->get_results( $wpdb->prepare(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			"SELECT * FROM {$art_table} WHERE task_id = %s ORDER BY created_at ASC",
+			"SELECT * FROM %i WHERE task_id = %s ORDER BY created_at ASC",
+			$art_table,
 			$task_id
 		) );
 
@@ -749,6 +781,8 @@ class AgentClerk_A2A {
 				'parts' => array( array( 'text' => $task->error_msg ) ),
 			);
 		}
+
+		wp_cache_set( $cache_key, $response, 'agentclerk', 300 );
 
 		return $response;
 	}

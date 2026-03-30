@@ -8,7 +8,7 @@
  * Author URI: https://agentclerk.io
  * License: GPL-2.0+
  * Text Domain: agentclerk
- * Requires at least: 6.0
+ * Requires at least: 6.2
  * Requires PHP: 7.4
  * WC requires at least: 7.0
  */
@@ -81,6 +81,8 @@ final class AgentClerk {
 	 * Register hooks and initialize components.
 	 */
 	private function init_hooks() {
+		AgentClerk_Activator::maybe_update_db();
+
 		add_action( 'init', array( $this, 'register_rewrite_rules' ) );
 		add_filter( 'query_vars', array( $this, 'register_query_vars' ) );
 		add_action( 'template_redirect', array( $this, 'handle_redirects' ) );

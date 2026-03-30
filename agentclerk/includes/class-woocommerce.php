@@ -61,8 +61,8 @@ class AgentClerk_WooCommerce {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$quote = $wpdb->get_row(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-				"SELECT * FROM {$table} WHERE id = %s AND status = 'pending' AND expires_at > %s",
+				"SELECT * FROM %i WHERE id = %s AND status = 'pending' AND expires_at > %s",
+				$table,
 				$token,
 				current_time( 'mysql' )
 			)
@@ -147,8 +147,7 @@ class AgentClerk_WooCommerce {
 		$quote_table = $wpdb->prefix . 'agentclerk_quote_links';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$quote       = $wpdb->get_row(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-			$wpdb->prepare( "SELECT * FROM {$quote_table} WHERE id = %s", $quote_link_id )
+			$wpdb->prepare( "SELECT * FROM %i WHERE id = %s", $quote_table, $quote_link_id )
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -250,8 +249,8 @@ class AgentClerk_WooCommerce {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$quote = $wpdb->get_row(
 				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-					"SELECT id FROM {$table} WHERE product_id = %d AND status = 'pending' ORDER BY created_at DESC LIMIT 1",
+					"SELECT id FROM %i WHERE product_id = %d AND status = 'pending' ORDER BY created_at DESC LIMIT 1",
+					$table,
 					$product_id
 				)
 			);
@@ -278,11 +277,12 @@ class AgentClerk_WooCommerce {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$buyer_type = $wpdb->get_var(
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
-				"SELECT c.buyer_type FROM {$convo_table} c
-				 INNER JOIN {$quote_table} q ON q.conversation_id = c.id
+				"SELECT c.buyer_type FROM %i c
+				 INNER JOIN %i q ON q.conversation_id = c.id
 				 WHERE q.wc_order_id = %d
 				 LIMIT 1",
+				$convo_table,
+				$quote_table,
 				$order_id
 			)
 		);
