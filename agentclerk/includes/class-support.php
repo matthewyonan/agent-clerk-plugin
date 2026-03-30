@@ -56,7 +56,7 @@ class AgentClerk_Support {
 	public function handle_escalation() {
 		check_ajax_referer( 'agentclerk_nonce', 'nonce' );
 
-		$session_id = isset( $_COOKIE['agentclerk_session'] ) ? sanitize_text_field( $_COOKIE['agentclerk_session'] ) : '';
+		$session_id = isset( $_COOKIE['agentclerk_session'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['agentclerk_session'] ) ) : '';
 		$email      = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
 
 		if ( empty( $session_id ) || empty( $email ) ) {
@@ -65,7 +65,9 @@ class AgentClerk_Support {
 
 		global $wpdb;
 		$table        = $wpdb->prefix . 'agentclerk_conversations';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$conversation = $wpdb->get_row(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 			$wpdb->prepare( "SELECT * FROM {$table} WHERE session_id = %s", $session_id )
 		);
 
@@ -74,6 +76,7 @@ class AgentClerk_Support {
 		}
 
 		// Mark conversation as escalated.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update(
 			$table,
 			array(
@@ -91,8 +94,10 @@ class AgentClerk_Support {
 
 		// Get the first user message for context.
 		$messages_table = $wpdb->prefix . 'agentclerk_messages';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$first_message  = $wpdb->get_var(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 				"SELECT content FROM {$messages_table} WHERE conversation_id = %d AND role = 'user' ORDER BY created_at ASC LIMIT 1",
 				$conversation->id
 			)
@@ -159,7 +164,9 @@ class AgentClerk_Support {
 
 		global $wpdb;
 		$table = $wpdb->prefix . 'agentclerk_conversations';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows  = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 			"SELECT * FROM {$table} WHERE outcome = 'escalated' ORDER BY updated_at DESC LIMIT 50"
 		);
 
@@ -168,8 +175,10 @@ class AgentClerk_Support {
 
 		foreach ( $rows as $row ) {
 			$messages_table = $wpdb->prefix . 'agentclerk_messages';
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$first_message  = $wpdb->get_var(
 				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 					"SELECT content FROM {$messages_table} WHERE conversation_id = %d AND role = 'user' ORDER BY created_at ASC LIMIT 1",
 					$row->id
 				)

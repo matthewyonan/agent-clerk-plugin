@@ -1,10 +1,10 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-$status       = get_option( 'agentclerk_plugin_status', 'active' );
-$tier         = get_option( 'agentclerk_tier', 'byok' );
-$license      = get_option( 'agentclerk_license_status', 'none' );
-$accrued_fees = (float) get_option( 'agentclerk_accrued_fees', 0 );
+$ac_status       = get_option( 'agentclerk_plugin_status', 'active' );
+$ac_tier         = get_option( 'agentclerk_tier', 'byok' );
+$ac_license      = get_option( 'agentclerk_license_status', 'none' );
+$ac_accrued_fees = (float) get_option( 'agentclerk_accrued_fees', 0 );
 ?>
 <div class="wrap ac-wrap">
     <div class="ac-fb ac-mb">
@@ -14,8 +14,8 @@ $accrued_fees = (float) get_option( 'agentclerk_accrued_fees', 0 );
         </div>
         <div class="ac-fr">
             <span class="ac-b ac-b-g">&#9679; <?php echo esc_html( 'Live' ); ?></span>
-            <span class="ac-b ac-b-s"><?php echo esc_html( strtoupper( $tier ) ); ?></span>
-            <?php if ( $license === 'active' ) : ?>
+            <span class="ac-b ac-b-s"><?php echo esc_html( strtoupper( $ac_tier ) ); ?></span>
+            <?php if ( $ac_license === 'active' ) : ?>
                 <span class="ac-b ac-b-e"><?php echo esc_html( 'Lifetime' ); ?></span>
             <?php endif; ?>
         </div>
@@ -40,7 +40,7 @@ $accrued_fees = (float) get_option( 'agentclerk_accrued_fees', 0 );
         </div>
     </div>
 
-    <?php if ( $license !== 'active' && $accrued_fees > 0 ) : ?>
+    <?php if ( $ac_license !== 'active' && $ac_accrued_fees > 0 ) : ?>
         <div class="ac-ltm-cta" id="ac-lifetime-cta-bar">
             <span style="font-size:16px">&#9889;</span>
             <span style="flex:1;color:var(--text)">
@@ -50,7 +50,7 @@ $accrued_fees = (float) get_option( 'agentclerk_accrued_fees', 0 );
                         'You\'ve accrued <strong>$%s</strong> in fees. <strong style="color:var(--elec-dk)">Lifetime license &mdash; $49</strong> eliminates all per-sale fees permanently.',
                         array( 'strong' => array( 'style' => array() ) )
                     ),
-                    esc_html( number_format( $accrued_fees, 2 ) )
+                    esc_html( number_format( $ac_accrued_fees, 2 ) )
                 );
                 ?>
             </span>

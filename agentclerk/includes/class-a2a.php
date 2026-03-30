@@ -181,7 +181,8 @@ class AgentClerk_A2A {
 	 * ================================================================== */
 
 	private function handle_send_message( $blocking = true ) {
-		if ( 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
+		$method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : 'GET';
+		if ( 'POST' !== $method ) {
 			$this->send_error( 'UnsupportedOperationError', 'Method not allowed.', 405 );
 		}
 
@@ -356,8 +357,8 @@ class AgentClerk_A2A {
 	 * ================================================================== */
 
 	private function route_task_request( $task_id ) {
-		$method = $_SERVER['REQUEST_METHOD'];
-		$uri    = $_SERVER['REQUEST_URI'];
+		$method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : 'GET';
+		$uri    = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 
 		$this->validate_version_header();
 
@@ -397,15 +398,16 @@ class AgentClerk_A2A {
 	}
 
 	private function handle_list_tasks() {
-		if ( 'GET' !== $_SERVER['REQUEST_METHOD'] ) {
+		$method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : 'GET';
+		if ( 'GET' !== $method ) {
 			$this->send_error( 'UnsupportedOperationError', 'Method not allowed.', 405 );
 		}
 
 		$this->validate_version_header();
 
-		$context_id = isset( $_GET['contextId'] ) ? sanitize_text_field( $_GET['contextId'] ) : '';
-		$limit      = isset( $_GET['limit'] ) ? min( absint( $_GET['limit'] ), 100 ) : 20;
-		$offset     = isset( $_GET['offset'] ) ? absint( $_GET['offset'] ) : 0;
+		$context_id = isset( $_GET['contextId'] ) ? sanitize_text_field( wp_unslash( $_GET['contextId'] ) ) : '';
+		$limit      = isset( $_GET['limit'] ) ? min( absint( wp_unslash( $_GET['limit'] ) ), 100 ) : 20;
+		$offset     = isset( $_GET['offset'] ) ? absint( wp_unslash( $_GET['offset'] ) ) : 0;
 
 		global $wpdb;
 		$table = $wpdb->prefix . 'agentclerk_a2a_tasks';
@@ -421,8 +423,10 @@ class AgentClerk_A2A {
 		$args[] = $limit;
 		$args[] = $offset;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 				"SELECT task_id FROM {$table} WHERE {$where} ORDER BY created_at DESC LIMIT %d OFFSET %d",
 				...$args
 			)
@@ -440,7 +444,9 @@ class AgentClerk_A2A {
 		global $wpdb;
 		$table = $wpdb->prefix . 'agentclerk_a2a_tasks';
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$task = $wpdb->get_row( $wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 			"SELECT * FROM {$table} WHERE task_id = %s",
 			$task_id
 		) );
@@ -491,13 +497,15 @@ class AgentClerk_A2A {
 	 * ================================================================== */
 
 	private function route_push_config( $task_id ) {
-		$method = $_SERVER['REQUEST_METHOD'];
+		$method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : 'GET';
 		$this->validate_version_header();
 
 		global $wpdb;
 		$table = $wpdb->prefix . 'agentclerk_a2a_tasks';
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$task = $wpdb->get_row( $wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 			"SELECT * FROM {$table} WHERE task_id = %s",
 			$task_id
 		) );
@@ -541,7 +549,7 @@ class AgentClerk_A2A {
 		}
 
 		if ( 'DELETE' === $method ) {
-			$uri       = $_SERVER['REQUEST_URI'];
+			$uri       = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 			$config_id = basename( $uri );
 			$push_meta = get_option( 'agentclerk_a2a_push_configs', array() );
 			unset( $push_meta[ $task_id ][ $config_id ] );
@@ -582,6 +590,7 @@ class AgentClerk_A2A {
 		$task_id = wp_generate_uuid4();
 		$now     = current_time( 'mysql' );
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->insert( $table, array(
 			'task_id'    => $task_id,
 			'context_id' => $context_id,
@@ -598,6 +607,7 @@ class AgentClerk_A2A {
 		global $wpdb;
 		$table = $wpdb->prefix . 'agentclerk_a2a_tasks';
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update( $table,
 			array( 'status' => $state, 'updated_at' => current_time( 'mysql' ) ),
 			array( 'task_id' => $task_id ),
@@ -619,6 +629,7 @@ class AgentClerk_A2A {
 		global $wpdb;
 		$table = $wpdb->prefix . 'agentclerk_a2a_tasks';
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update( $table,
 			array(
 				'status'     => 'TASK_STATE_FAILED',
@@ -634,7 +645,9 @@ class AgentClerk_A2A {
 	private function get_task_row( $task_id ) {
 		global $wpdb;
 		$table = $wpdb->prefix . 'agentclerk_a2a_tasks';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		return $wpdb->get_row( $wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 			"SELECT * FROM {$table} WHERE task_id = %s",
 			$task_id
 		) );
@@ -650,6 +663,7 @@ class AgentClerk_A2A {
 		$table  = $wpdb->prefix . 'agentclerk_a2a_task_messages';
 		$msg_id = $msg_id ?? wp_generate_uuid4();
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->insert( $table, array(
 			'task_id'    => $task_id,
 			'message_id' => $msg_id,
@@ -665,6 +679,7 @@ class AgentClerk_A2A {
 		global $wpdb;
 		$table = $wpdb->prefix . 'agentclerk_a2a_task_artifacts';
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->insert( $table, array(
 			'task_id'     => $task_id,
 			'artifact_id' => $artifact_id,
@@ -684,7 +699,9 @@ class AgentClerk_A2A {
 
 		// Get messages.
 		$msgs_table = $wpdb->prefix . 'agentclerk_a2a_task_messages';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$messages   = $wpdb->get_results( $wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 			"SELECT * FROM {$msgs_table} WHERE task_id = %s ORDER BY created_at ASC",
 			$task_id
 		) );
@@ -700,7 +717,9 @@ class AgentClerk_A2A {
 
 		// Get artifacts.
 		$art_table = $wpdb->prefix . 'agentclerk_a2a_task_artifacts';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$artifacts_rows = $wpdb->get_results( $wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 			"SELECT * FROM {$art_table} WHERE task_id = %s ORDER BY created_at ASC",
 			$task_id
 		) );
@@ -757,7 +776,7 @@ class AgentClerk_A2A {
 
 	private function validate_version_header() {
 		$version = isset( $_SERVER['HTTP_A2A_VERSION'] )
-			? sanitize_text_field( $_SERVER['HTTP_A2A_VERSION'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['HTTP_A2A_VERSION'] ) )
 			: '';
 
 		if ( $version && version_compare( $version, '1.0', '>' ) ) {

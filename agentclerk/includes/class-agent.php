@@ -60,7 +60,7 @@ class AgentClerk_Agent {
 		}
 
 		$message    = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
-		$session_id = isset( $_COOKIE['agentclerk_session'] ) ? sanitize_text_field( $_COOKIE['agentclerk_session'] ) : '';
+		$session_id = isset( $_COOKIE['agentclerk_session'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['agentclerk_session'] ) ) : '';
 		$test_mode  = isset( $_POST['test_mode'] ) && '1' === $_POST['test_mode'];
 
 		if ( empty( $message ) ) {
@@ -575,6 +575,7 @@ class AgentClerk_Agent {
 		$now   = current_time( 'mysql' );
 
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->insert(
 			$wpdb->prefix . 'agentclerk_quote_links',
 			array(
@@ -815,7 +816,9 @@ class AgentClerk_Agent {
 		global $wpdb;
 		$table = $wpdb->prefix . 'agentclerk_conversations';
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$conversation = $wpdb->get_row(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 			$wpdb->prepare( "SELECT * FROM {$table} WHERE session_id = %s", $session_id )
 		);
 
@@ -824,6 +827,7 @@ class AgentClerk_Agent {
 		}
 
 		$now = current_time( 'mysql' );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->insert(
 			$table,
 			array(
@@ -836,7 +840,9 @@ class AgentClerk_Agent {
 			array( '%s', '%s', '%s', '%s', '%s' )
 		);
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		return $wpdb->get_row(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 			$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $wpdb->insert_id )
 		);
 	}
@@ -851,11 +857,14 @@ class AgentClerk_Agent {
 		global $wpdb;
 		$table = $wpdb->prefix . 'agentclerk_conversations';
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$existing = $wpdb->get_var(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 			$wpdb->prepare( "SELECT first_message FROM {$table} WHERE id = %d", $conversation_id )
 		);
 
 		if ( empty( $existing ) ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->update(
 				$table,
 				array( 'first_message' => $message ),
@@ -875,6 +884,7 @@ class AgentClerk_Agent {
 	 */
 	private function store_message( $conversation_id, $role, $content ) {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->insert(
 			$wpdb->prefix . 'agentclerk_messages',
 			array(
@@ -897,8 +907,10 @@ class AgentClerk_Agent {
 		global $wpdb;
 		$table = $wpdb->prefix . 'agentclerk_messages';
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, safe.
 				"SELECT role, content FROM {$table} WHERE conversation_id = %d ORDER BY created_at ASC",
 				$conversation_id
 			),
@@ -916,6 +928,7 @@ class AgentClerk_Agent {
 	 */
 	private function update_buyer_type( $conversation_id, $type ) {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update(
 			$wpdb->prefix . 'agentclerk_conversations',
 			array( 'buyer_type' => $type ),
@@ -933,6 +946,7 @@ class AgentClerk_Agent {
 	 */
 	private function update_product_name( $conversation_id, $product_name ) {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update(
 			$wpdb->prefix . 'agentclerk_conversations',
 			array( 'product_name' => $product_name ),
@@ -962,6 +976,7 @@ class AgentClerk_Agent {
 			$formats[]             = '%s';
 		}
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update(
 			$wpdb->prefix . 'agentclerk_conversations',
 			$data,
@@ -978,6 +993,7 @@ class AgentClerk_Agent {
 	 */
 	private function touch_conversation( $conversation_id ) {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update(
 			$wpdb->prefix . 'agentclerk_conversations',
 			array( 'updated_at' => current_time( 'mysql' ) ),
