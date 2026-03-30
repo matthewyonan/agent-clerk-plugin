@@ -4,8 +4,8 @@
  * Plugin URI: https://agentclerk.io
  * Description: AI seller agent for WooCommerce. Answers buyers, closes sales, handles support automatically.
  * Version: 1.2.1
- * Author: AgentClerk
- * Author URI: https://agentclerk.io
+ * Author: A Brilliant Way
+ * Author URI: https://abrilliantway.com
  * License: GPL-2.0+
  * Text Domain: agentclerk
  * Requires at least: 6.2
