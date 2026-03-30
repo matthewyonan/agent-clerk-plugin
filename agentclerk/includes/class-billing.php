@@ -163,12 +163,19 @@ class AgentClerk_Billing {
 			wp_send_json_error( array( 'message' => 'Unauthorized.' ), 403 );
 		}
 
+		$promo_code = isset( $_POST['promoCode'] ) ? sanitize_text_field( wp_unslash( $_POST['promoCode'] ) ) : '';
+
+		$body = array(
+			'successUrl' => admin_url( 'admin.php?page=agentclerk-sales&license_success=1&nonce=' . wp_create_nonce( 'agentclerk_license' ) ),
+			'cancelUrl'  => admin_url( 'admin.php?page=agentclerk-sales' ),
+		);
+		if ( ! empty( $promo_code ) ) {
+			$body['promoCode'] = $promo_code;
+		}
+
 		$response = AgentClerk::backend_request( '/license/checkout', array(
 			'method' => 'POST',
-			'body'   => array(
-				'successUrl' => admin_url( 'admin.php?page=agentclerk-sales&license_success=1&nonce=' . wp_create_nonce( 'agentclerk_license' ) ),
-				'cancelUrl'  => admin_url( 'admin.php?page=agentclerk-sales' ),
-			),
+			'body'   => $body,
 		) );
 
 		if ( is_wp_error( $response ) ) {
@@ -176,6 +183,31 @@ class AgentClerk_Billing {
 		}
 
 		$data = json_decode( wp_remote_retrieve_body( $response ), true );
+
+		// Backend returned an error.
+		if ( ! empty( $data['error'] ) ) {
+			wp_send_json_error( array( 'message' => sanitize_text_field( $data['error'] ) ) );
+		}
+
+		// Free promo code — license activated immediately.
+		if ( ! empty( $data['licensed'] ) || ! empty( $data['alreadyLicensed'] ) ) {
+			if ( ! empty( $data['licenseStatus'] ) ) {
+				update_option( 'agentclerk_license_status', sanitize_text_field( $data['licenseStatus'] ) );
+			}
+			if ( ! empty( $data['licenseKey'] ) ) {
+				update_option( 'agentclerk_license_key', sanitize_text_field( $data['licenseKey'] ) );
+			}
+			if ( ! empty( $data['billingStatus'] ) ) {
+				update_option( 'agentclerk_billing_status', sanitize_text_field( $data['billingStatus'] ) );
+			}
+			if ( ! empty( $data['tier'] ) ) {
+				update_option( 'agentclerk_tier', sanitize_text_field( $data['tier'] ) );
+			}
+			update_option( 'agentclerk_accrued_fees', 0 );
+			wp_send_json_success( array( 'licensed' => true ) );
+		}
+
+		// Stripe checkout redirect.
 		wp_send_json_success( array( 'checkoutUrl' => $data['checkoutUrl'] ?? '' ) );
 	}
 

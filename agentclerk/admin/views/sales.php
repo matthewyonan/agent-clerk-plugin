@@ -37,7 +37,11 @@ $fee_rate = ( $tier === 'turnkey' ) ? '1.5% or $1.99 min' : '1% or $1.00 min';
                 );
                 ?>
             </span>
-            <span class="ac-ltm-btn" id="ac-sales-lifetime-btn"><?php echo esc_html( 'Upgrade' ); ?> &rarr;</span>
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+                <a href="#" id="ac-promo-toggle" style="font-size:12px;color:var(--ac-text2);white-space:nowrap"><?php echo esc_html( 'Have a promo code?' ); ?></a>
+                <input type="text" id="ac-promo-code" placeholder="<?php echo esc_attr( 'Code' ); ?>" style="display:none;width:120px;font-size:12px;font-family:'DM Mono',monospace;padding:6px 10px;text-transform:uppercase">
+                <span class="ac-ltm-btn" id="ac-sales-lifetime-btn"><?php echo esc_html( 'Upgrade' ); ?> &rarr;</span>
+            </div>
         </div>
     <?php endif; ?>
 

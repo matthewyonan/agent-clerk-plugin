@@ -81,11 +81,19 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             <p style="font-size:13px;color:var(--text2);margin-bottom:13px"><?php echo esc_html( 'One-time $99 setup fee. No monthly charge. You pay 1.5% only when a sale closes through your agent.' ); ?></p>
             <div id="ac-stripe-card-element-turnkey" style="padding:10px;border:1px solid var(--border2);border-radius:var(--r2)"></div>
             <div id="ac-stripe-card-errors-turnkey" role="alert" style="color:#EF4444;font-size:12px;margin-top:4px"></div>
+            <div style="margin-top:10px;text-align:center">
+                <a href="#" class="ac-promo-toggle" style="font-size:12px;color:var(--ac-text2)"><?php echo esc_html( 'Have a promo code?' ); ?></a>
+                <input type="text" id="ac-promo-turnkey" class="ac-promo-input" placeholder="<?php echo esc_attr( 'Enter code' ); ?>" style="display:none;width:100%;margin-top:6px;font-size:12px;font-family:'DM Mono',monospace;padding:6px 10px;text-transform:uppercase">
+            </div>
             <button class="ac-btn ac-btn-e ac-btn-lg" id="ac-submit-turnkey" style="width:100%;justify-content:center;margin-top:10px"><?php echo esc_html( 'Pay $99 and continue' ); ?> &rarr;</button>
             <div class="ac-fn" style="text-align:center;margin-top:7px"><?php echo esc_html( 'Secured by Stripe.' ); ?></div>
         </div>
     </div>
 
+    <div style="margin-bottom:10px">
+        <a href="#" class="ac-promo-toggle" style="font-size:12px;color:var(--ac-text2)"><?php echo esc_html( 'Have a promo code?' ); ?></a>
+        <input type="text" id="ac-promo-byok" class="ac-promo-input" placeholder="<?php echo esc_attr( 'Enter code' ); ?>" style="display:none;width:200px;margin-top:6px;font-size:12px;font-family:'DM Mono',monospace;padding:6px 10px;text-transform:uppercase">
+    </div>
     <div class="ac-fr">
         <button class="ac-btn ac-btn-e ac-btn-lg" id="ac-submit-byok"><?php echo esc_html( 'Scan my site and start setup' ); ?> &rarr;</button>
         <span style="font-size:12px;color:var(--text3)"><?php echo esc_html( 'Takes 1–2 minutes' ); ?></span>
