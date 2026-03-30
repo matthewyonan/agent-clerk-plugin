@@ -1,8 +1,8 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-$ac_placement = json_decode( get_option( 'agentclerk_placement', '{}' ), true );
-$ac_site_url  = get_site_url();
+$agentclerk_placement = json_decode( get_option( 'agentclerk_placement', '{}' ), true );
+$agentclerk_site_url  = get_site_url();
 ?>
 <div class="wrap ac-wrap">
     <div class="ac-steps">
@@ -17,20 +17,20 @@ $ac_site_url  = get_site_url();
     <div class="ac-ps"><?php echo esc_html( 'All three on by default. Change any time in Settings.' ); ?></div>
 
     <div class="ac-pl-grid ac-mb">
-        <div class="ac-pl-card <?php echo ( $ac_placement['widget'] ?? true ) ? 'on' : ''; ?>" id="ac-pl-widget">
+        <div class="ac-pl-card <?php echo ( $agentclerk_placement['widget'] ?? true ) ? 'on' : ''; ?>" id="ac-pl-widget">
             <div style="font-size:24px;margin-bottom:6px">&#128172;</div>
             <div style="font-size:12px;font-weight:500;margin-bottom:3px"><?php echo esc_html( 'Floating widget' ); ?></div>
             <div style="font-size:11px;color:var(--text3)"><?php echo esc_html( 'Chat button on every page' ); ?></div>
         </div>
-        <div class="ac-pl-card <?php echo ( $ac_placement['product_page'] ?? true ) ? 'on' : ''; ?>" id="ac-pl-product">
+        <div class="ac-pl-card <?php echo ( $agentclerk_placement['product_page'] ?? true ) ? 'on' : ''; ?>" id="ac-pl-product">
             <div style="font-size:24px;margin-bottom:6px">&#128230;</div>
             <div style="font-size:12px;font-weight:500;margin-bottom:3px"><?php echo esc_html( 'Product pages' ); ?></div>
             <div style="font-size:11px;color:var(--text3)"><?php echo esc_html( 'Below Add to Cart' ); ?></div>
         </div>
-        <div class="ac-pl-card <?php echo ( $ac_placement['clerk_page'] ?? true ) ? 'on' : ''; ?>" id="ac-pl-clerk">
+        <div class="ac-pl-card <?php echo ( $agentclerk_placement['clerk_page'] ?? true ) ? 'on' : ''; ?>" id="ac-pl-clerk">
             <div style="font-size:24px;margin-bottom:6px">&#128279;</div>
             <div style="font-size:12px;font-weight:500;margin-bottom:3px"><?php echo esc_html( 'Dedicated page' ); ?></div>
-            <div style="font-size:11px;color:var(--text3)"><?php echo esc_html( wp_parse_url( $ac_site_url, PHP_URL_HOST ) . '/clerk' ); ?></div>
+            <div style="font-size:11px;color:var(--text3)"><?php echo esc_html( wp_parse_url( $agentclerk_site_url, PHP_URL_HOST ) . '/clerk' ); ?></div>
         </div>
     </div>
 
@@ -38,13 +38,13 @@ $ac_site_url  = get_site_url();
         <div class="ac-card-head"><h2><?php echo esc_html( 'Widget appearance' ); ?></h2></div>
         <div class="ac-card-body">
             <div class="ac-g2">
-                <div class="ac-fg"><label class="ac-fl"><?php echo esc_html( 'Button label' ); ?></label><input type="text" id="ac-button-label" value="<?php echo esc_attr( $ac_placement['button_label'] ?? 'Get Help' ); ?>"></div>
-                <div class="ac-fg"><label class="ac-fl"><?php echo esc_html( 'Agent name (visible to buyers)' ); ?></label><input type="text" id="ac-agent-name" value="<?php echo esc_attr( $ac_placement['agent_name'] ?? 'AgentClerk' ); ?>"></div>
+                <div class="ac-fg"><label class="ac-fl"><?php echo esc_html( 'Button label' ); ?></label><input type="text" id="ac-button-label" value="<?php echo esc_attr( $agentclerk_placement['button_label'] ?? 'Get Help' ); ?>"></div>
+                <div class="ac-fg"><label class="ac-fl"><?php echo esc_html( 'Agent name (visible to buyers)' ); ?></label><input type="text" id="ac-agent-name" value="<?php echo esc_attr( $agentclerk_placement['agent_name'] ?? 'AgentClerk' ); ?>"></div>
             </div>
         </div>
     </div>
 
-    <div class="ac-co gn ac-mb"><span class="ac-co-i">&#10003;</span><div><?php printf( wp_kses( 'Always discoverable at <code style="font-family:\'DM Mono\',monospace;font-size:11px;background:var(--elec-lt);padding:1px 5px;border-radius:3px">%s/ai-manifest.json</code> — active regardless of widget placement.', array( 'code' => array( 'style' => array() ) ) ), esc_html( $ac_site_url ) ); ?></div></div>
+    <div class="ac-co gn ac-mb"><span class="ac-co-i">&#10003;</span><div><?php printf( wp_kses( 'Always discoverable at <code style="font-family:\'DM Mono\',monospace;font-size:11px;background:var(--elec-lt);padding:1px 5px;border-radius:3px">%s/ai-manifest.json</code> — active regardless of widget placement.', array( 'code' => array( 'style' => array() ) ) ), esc_html( $agentclerk_site_url ) ); ?></div></div>
 
     <button class="ac-btn ac-btn-e ac-btn-lg" id="ac-step5-continue"><?php echo esc_html( 'Test and go live' ); ?> &rarr;</button>
     <div style="text-align:right;padding:20px 0 4px;font-size:11px;color:var(--ac-text3)">&copy; 2026 &mdash; A Brilliant Way</div>

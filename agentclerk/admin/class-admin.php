@@ -305,6 +305,7 @@ class AgentClerk_Admin {
 
         // Extend execution time — scanning crawls the site.
         if ( function_exists( 'set_time_limit' ) ) {
+            // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- required for site scanning which crawls all URLs.
             set_time_limit( 120 );
         }
 

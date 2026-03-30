@@ -1,21 +1,21 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-$ac_products = array();
+$agentclerk_products = array();
 if ( function_exists( 'wc_get_products' ) ) {
-    $ac_wc_products = wc_get_products( array( 'status' => 'publish', 'limit' => -1 ) );
-    foreach ( $ac_wc_products as $ac_p ) {
-        $ac_products[] = array(
-            'id'     => $ac_p->get_id(),
-            'name'   => $ac_p->get_name(),
-            'type'   => $ac_p->get_type(),
-            'price'  => $ac_p->get_price(),
-            'status' => $ac_p->get_status(),
+    $agentclerk_wc_products = wc_get_products( array( 'status' => 'publish', 'limit' => -1 ) );
+    foreach ( $agentclerk_wc_products as $agentclerk_p ) {
+        $agentclerk_products[] = array(
+            'id'     => $agentclerk_p->get_id(),
+            'name'   => $agentclerk_p->get_name(),
+            'type'   => $agentclerk_p->get_type(),
+            'price'  => $agentclerk_p->get_price(),
+            'status' => $agentclerk_p->get_status(),
         );
     }
 }
-$ac_config     = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
-$ac_visibility = $ac_config['product_visibility'] ?? array();
+$agentclerk_config     = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
+$agentclerk_visibility = $agentclerk_config['product_visibility'] ?? array();
 ?>
 <div class="wrap ac-wrap">
     <div class="ac-steps">
@@ -29,7 +29,7 @@ $ac_visibility = $ac_config['product_visibility'] ?? array();
     <div class="ac-fb ac-mb">
         <div>
             <div class="ac-pt"><?php echo esc_html( 'Your product catalog' ); ?></div>
-            <div class="ac-ps"><?php printf( esc_html( '%d products imported from WooCommerce. Control which ones your agent can sell.' ), count( $ac_products ) ); ?></div>
+            <div class="ac-ps"><?php printf( esc_html( '%d products imported from WooCommerce. Control which ones your agent can sell.' ), count( $agentclerk_products ) ); ?></div>
         </div>
         <button class="ac-btn ac-btn-g ac-btn-sm" id="ac-show-add-product">+ <?php echo esc_html( 'Add product' ); ?></button>
     </div>
@@ -40,19 +40,19 @@ $ac_visibility = $ac_config['product_visibility'] ?? array();
         <table class="ac-dt">
             <thead><tr><th><?php echo esc_html( 'Product' ); ?></th><th><?php echo esc_html( 'Type' ); ?></th><th><?php echo esc_html( 'Price' ); ?></th><th><?php echo esc_html( 'WooCommerce' ); ?></th><th><?php echo esc_html( 'Agent can sell this' ); ?></th></tr></thead>
             <tbody>
-                <?php foreach ( $ac_products as $ac_p ) :
-                    $ac_checked    = ! isset( $ac_visibility[ $ac_p['id'] ] ) || $ac_visibility[ $ac_p['id'] ];
-                    $ac_type_badge = ( $ac_p['type'] === 'simple' ) ? 'ac-b-e' : 'ac-b-a';
+                <?php foreach ( $agentclerk_products as $agentclerk_p ) :
+                    $agentclerk_checked    = ! isset( $agentclerk_visibility[ $agentclerk_p['id'] ] ) || $agentclerk_visibility[ $agentclerk_p['id'] ];
+                    $agentclerk_type_badge = ( $agentclerk_p['type'] === 'simple' ) ? 'ac-b-e' : 'ac-b-a';
                 ?>
                     <tr>
-                        <td style="font-weight:500"><?php echo esc_html( $ac_p['name'] ); ?></td>
-                        <td><span class="ac-b <?php echo esc_attr( $ac_type_badge ); ?>"><?php echo esc_html( ucfirst( $ac_p['type'] ) ); ?></span></td>
-                        <td style="font-family:'DM Mono',monospace;font-size:12px">$<?php echo esc_html( number_format( (float) $ac_p['price'], 2 ) ); ?></td>
+                        <td style="font-weight:500"><?php echo esc_html( $agentclerk_p['name'] ); ?></td>
+                        <td><span class="ac-b <?php echo esc_attr( $agentclerk_type_badge ); ?>"><?php echo esc_html( ucfirst( $agentclerk_p['type'] ) ); ?></span></td>
+                        <td style="font-family:'DM Mono',monospace;font-size:12px">$<?php echo esc_html( number_format( (float) $agentclerk_p['price'], 2 ) ); ?></td>
                         <td><span class="ac-b ac-b-g"><?php echo esc_html( 'Published' ); ?></span></td>
-                        <td><div class="ac-tog <?php echo $ac_checked ? 'on' : ''; ?>" data-id="<?php echo esc_attr( $ac_p['id'] ); ?>"></div></td>
+                        <td><div class="ac-tog <?php echo $agentclerk_checked ? 'on' : ''; ?>" data-id="<?php echo esc_attr( $agentclerk_p['id'] ); ?>"></div></td>
                     </tr>
                 <?php endforeach; ?>
-                <?php if ( empty( $ac_products ) ) : ?>
+                <?php if ( empty( $agentclerk_products ) ) : ?>
                     <tr><td colspan="5" style="color:var(--text3)"><?php echo esc_html( 'No WooCommerce products found.' ); ?></td></tr>
                 <?php endif; ?>
             </tbody>

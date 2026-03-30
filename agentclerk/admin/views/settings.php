@@ -1,12 +1,12 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-$ac_config    = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
-$ac_placement = json_decode( get_option( 'agentclerk_placement', '{}' ), true );
-$ac_tier      = get_option( 'agentclerk_tier', 'byok' );
-$ac_license   = get_option( 'agentclerk_license_status', 'none' );
-$ac_site_url  = get_site_url();
-$ac_last_scan = get_option( 'agentclerk_last_scan_date', '' );
+$agentclerk_config    = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
+$agentclerk_placement = json_decode( get_option( 'agentclerk_placement', '{}' ), true );
+$agentclerk_tier      = get_option( 'agentclerk_tier', 'byok' );
+$agentclerk_license   = get_option( 'agentclerk_license_status', 'none' );
+$agentclerk_site_url  = get_site_url();
+$agentclerk_last_scan = get_option( 'agentclerk_last_scan_date', '' );
 ?>
 <div class="wrap ac-wrap">
     <div class="ac-fb ac-mb">
@@ -16,8 +16,8 @@ $ac_last_scan = get_option( 'agentclerk_last_scan_date', '' );
         </div>
         <div class="ac-fr">
             <span class="ac-b ac-b-g">&#9679; <?php echo esc_html( 'Live' ); ?></span>
-            <span class="ac-b ac-b-s"><?php echo esc_html( strtoupper( $ac_tier ) ); ?></span>
-            <?php if ( $ac_license === 'active' ) : ?>
+            <span class="ac-b ac-b-s"><?php echo esc_html( strtoupper( $agentclerk_tier ) ); ?></span>
+            <?php if ( $agentclerk_license === 'active' ) : ?>
                 <span class="ac-b ac-b-e"><?php echo esc_html( 'Lifetime' ); ?></span>
             <?php endif; ?>
         </div>
@@ -27,7 +27,7 @@ $ac_last_scan = get_option( 'agentclerk_last_scan_date', '' );
         <div class="ac-stab active" data-tab="ac-tp-agent"><?php echo esc_html( 'Business & Agent' ); ?></div>
         <div class="ac-stab" data-tab="ac-tp-catalog"><?php echo esc_html( 'Catalog' ); ?></div>
         <div class="ac-stab" data-tab="ac-tp-placement"><?php echo esc_html( 'Placement' ); ?></div>
-        <?php if ( $ac_tier === 'byok' ) : ?>
+        <?php if ( $agentclerk_tier === 'byok' ) : ?>
             <div class="ac-stab" data-tab="ac-tp-api"><?php echo esc_html( 'API Key' ); ?></div>
         <?php endif; ?>
         <div class="ac-stab" data-tab="ac-tp-support"><?php echo esc_html( 'Support & Escalation' ); ?></div>
@@ -44,19 +44,19 @@ $ac_last_scan = get_option( 'agentclerk_last_scan_date', '' );
                 </div>
                 <div class="ac-fg">
                     <label class="ac-fl"><?php echo esc_html( 'Business description (used by agent)' ); ?></label>
-                    <textarea id="ac-s-biz-desc" style="min-height:70px"><?php echo esc_textarea( $ac_config['business_desc'] ?? '' ); ?></textarea>
+                    <textarea id="ac-s-biz-desc" style="min-height:70px"><?php echo esc_textarea( $agentclerk_config['business_desc'] ?? '' ); ?></textarea>
                 </div>
             </div></div>
             <div class="ac-card"><div class="ac-card-head"><h2><?php echo esc_html( 'Agent' ); ?></h2></div><div class="ac-card-body">
                 <div class="ac-fg">
                     <label class="ac-fl"><?php echo esc_html( 'Agent name (shown to buyers)' ); ?></label>
-                    <input type="text" id="ac-s-agent-name" value="<?php echo esc_attr( $ac_config['agent_name'] ?? 'AgentClerk' ); ?>">
+                    <input type="text" id="ac-s-agent-name" value="<?php echo esc_attr( $agentclerk_config['agent_name'] ?? 'AgentClerk' ); ?>">
                 </div>
                 <div class="ac-fg">
                     <label class="ac-fl"><?php echo esc_html( 'Re-scan site' ); ?></label>
                     <div class="ac-fr">
                         <button class="ac-btn ac-btn-g ac-btn-sm" id="ac-rescan-btn">&#8635; <?php echo esc_html( 'Scan now' ); ?></button>
-                        <span style="font-size:12px;color:var(--text3)"><?php echo $ac_last_scan ? esc_html( sprintf( 'Last scanned: %s', $ac_last_scan ) ) : ''; ?></span>
+                        <span style="font-size:12px;color:var(--text3)"><?php echo $agentclerk_last_scan ? esc_html( sprintf( 'Last scanned: %s', $agentclerk_last_scan ) ) : ''; ?></span>
                     </div>
                     <div class="ac-fn"><?php echo esc_html( 'Run a new scan to pick up updated product descriptions or policy changes.' ); ?></div>
                 </div>
@@ -72,7 +72,7 @@ $ac_last_scan = get_option( 'agentclerk_last_scan_date', '' );
                         <button class="ac-btn ac-btn-g ac-btn-sm" id="ac-restart-setup">&#8635; <?php echo esc_html( 'Restart setup wizard' ); ?></button>
                     </div>
                     <div style="border-left:1px solid var(--ac-border);padding-left:10px">
-                        <div style="font-size:12px;color:var(--ac-text2);margin-bottom:6px"><?php echo esc_html( 'License: ' . ( $ac_license === 'active' ? 'Lifetime' : ucfirst( $ac_license ) ) ); ?></div>
+                        <div style="font-size:12px;color:var(--ac-text2);margin-bottom:6px"><?php echo esc_html( 'License: ' . ( $agentclerk_license === 'active' ? 'Lifetime' : ucfirst( $agentclerk_license ) ) ); ?></div>
                         <button class="ac-btn ac-btn-g ac-btn-sm" id="ac-sync-license">&#8635; <?php echo esc_html( 'Sync license from server' ); ?></button>
                     </div>
                 </div>
@@ -94,24 +94,24 @@ $ac_last_scan = get_option( 'agentclerk_last_scan_date', '' );
             <thead><tr><th><?php echo esc_html( 'Product' ); ?></th><th><?php echo esc_html( 'Type' ); ?></th><th><?php echo esc_html( 'Price' ); ?></th><th><?php echo esc_html( 'WooCommerce' ); ?></th><th><?php echo esc_html( 'Agent can sell this' ); ?></th></tr></thead>
             <tbody>
                 <?php
-                $ac_product_count = 0;
+                $agentclerk_product_count = 0;
                 if ( function_exists( 'wc_get_products' ) ) {
-                    $ac_wc_products   = wc_get_products( array( 'status' => 'publish', 'limit' => -1 ) );
-                    $ac_visibility    = $ac_config['product_visibility'] ?? array();
-                    $ac_product_count = count( $ac_wc_products );
-                    foreach ( $ac_wc_products as $ac_p ) {
-                        $ac_checked    = ! isset( $ac_visibility[ $ac_p->get_id() ] ) || $ac_visibility[ $ac_p->get_id() ];
-                        $ac_type_badge = ( $ac_p->get_type() === 'simple' ) ? 'ac-b-e' : 'ac-b-a';
+                    $agentclerk_wc_products   = wc_get_products( array( 'status' => 'publish', 'limit' => -1 ) );
+                    $agentclerk_visibility    = $agentclerk_config['product_visibility'] ?? array();
+                    $agentclerk_product_count = count( $agentclerk_wc_products );
+                    foreach ( $agentclerk_wc_products as $agentclerk_p ) {
+                        $agentclerk_checked    = ! isset( $agentclerk_visibility[ $agentclerk_p->get_id() ] ) || $agentclerk_visibility[ $agentclerk_p->get_id() ];
+                        $agentclerk_type_badge = ( $agentclerk_p->get_type() === 'simple' ) ? 'ac-b-e' : 'ac-b-a';
                         echo '<tr>';
-                        echo '<td style="font-weight:500">' . esc_html( $ac_p->get_name() ) . '</td>';
-                        echo '<td><span class="ac-b ' . esc_attr( $ac_type_badge ) . '">' . esc_html( ucfirst( $ac_p->get_type() ) ) . '</span></td>';
-                        echo '<td style="font-family:\'DM Mono\',monospace;font-size:12px">$' . esc_html( number_format( (float) $ac_p->get_price(), 2 ) ) . '</td>';
+                        echo '<td style="font-weight:500">' . esc_html( $agentclerk_p->get_name() ) . '</td>';
+                        echo '<td><span class="ac-b ' . esc_attr( $agentclerk_type_badge ) . '">' . esc_html( ucfirst( $agentclerk_p->get_type() ) ) . '</span></td>';
+                        echo '<td style="font-family:\'DM Mono\',monospace;font-size:12px">$' . esc_html( number_format( (float) $agentclerk_p->get_price(), 2 ) ) . '</td>';
                         echo '<td><span class="ac-b ac-b-g">' . esc_html( 'Published' ) . '</span></td>';
-                        echo '<td><div class="ac-tog ac-catalog-toggle ' . ( $ac_checked ? 'on' : '' ) . '" data-id="' . esc_attr( $ac_p->get_id() ) . '"></div></td>';
+                        echo '<td><div class="ac-tog ac-catalog-toggle ' . ( $agentclerk_checked ? 'on' : '' ) . '" data-id="' . esc_attr( $agentclerk_p->get_id() ) . '"></div></td>';
                         echo '</tr>';
                     }
                 }
-                if ( 0 === $ac_product_count ) {
+                if ( 0 === $agentclerk_product_count ) {
                     echo '<tr><td colspan="5" style="color:var(--text3)">' . esc_html( 'No WooCommerce products found.' ) . '</td></tr>';
                 }
                 ?>
@@ -122,34 +122,34 @@ $ac_last_scan = get_option( 'agentclerk_last_scan_date', '' );
     <!-- Placement tab -->
     <div class="ac-tp" id="ac-tp-placement">
         <div class="ac-pl-grid ac-mb">
-            <div class="ac-pl-card <?php echo ( $ac_placement['widget'] ?? true ) ? 'on' : ''; ?>" id="ac-s-pl-widget">
+            <div class="ac-pl-card <?php echo ( $agentclerk_placement['widget'] ?? true ) ? 'on' : ''; ?>" id="ac-s-pl-widget">
                 <div style="font-size:24px;margin-bottom:6px">&#128172;</div>
                 <div style="font-size:12px;font-weight:500;margin-bottom:3px"><?php echo esc_html( 'Floating widget' ); ?></div>
                 <div style="font-size:11px;color:var(--text3)"><?php echo esc_html( 'All pages, bottom-right' ); ?></div>
             </div>
-            <div class="ac-pl-card <?php echo ( $ac_placement['product_page'] ?? true ) ? 'on' : ''; ?>" id="ac-s-pl-product">
+            <div class="ac-pl-card <?php echo ( $agentclerk_placement['product_page'] ?? true ) ? 'on' : ''; ?>" id="ac-s-pl-product">
                 <div style="font-size:24px;margin-bottom:6px">&#128230;</div>
                 <div style="font-size:12px;font-weight:500;margin-bottom:3px"><?php echo esc_html( 'Product pages' ); ?></div>
                 <div style="font-size:11px;color:var(--text3)"><?php echo esc_html( 'Below Add to Cart' ); ?></div>
             </div>
-            <div class="ac-pl-card <?php echo ( $ac_placement['clerk_page'] ?? true ) ? 'on' : ''; ?>" id="ac-s-pl-clerk">
+            <div class="ac-pl-card <?php echo ( $agentclerk_placement['clerk_page'] ?? true ) ? 'on' : ''; ?>" id="ac-s-pl-clerk">
                 <div style="font-size:24px;margin-bottom:6px">&#128279;</div>
                 <div style="font-size:12px;font-weight:500;margin-bottom:3px"><?php echo esc_html( 'Dedicated /clerk page' ); ?></div>
-                <div style="font-size:11px;color:var(--text3)"><?php echo esc_html( wp_parse_url( $ac_site_url, PHP_URL_HOST ) . '/clerk' ); ?></div>
+                <div style="font-size:11px;color:var(--text3)"><?php echo esc_html( wp_parse_url( $agentclerk_site_url, PHP_URL_HOST ) . '/clerk' ); ?></div>
             </div>
         </div>
         <div class="ac-card"><div class="ac-card-head"><h2><?php echo esc_html( 'Widget settings' ); ?></h2></div><div class="ac-card-body">
             <div class="ac-g2">
-                <div class="ac-fg"><label class="ac-fl"><?php echo esc_html( 'Button label' ); ?></label><input type="text" id="ac-s-btn-label" value="<?php echo esc_attr( $ac_placement['button_label'] ?? 'Get Help' ); ?>"></div>
-                <div class="ac-fg"><label class="ac-fl"><?php echo esc_html( 'Position' ); ?></label><select id="ac-s-position"><option value="bottom-right" <?php selected( $ac_placement['position'] ?? 'bottom-right', 'bottom-right' ); ?>><?php echo esc_html( 'Bottom right' ); ?></option><option value="bottom-left" <?php selected( $ac_placement['position'] ?? 'bottom-right', 'bottom-left' ); ?>><?php echo esc_html( 'Bottom left' ); ?></option></select></div>
+                <div class="ac-fg"><label class="ac-fl"><?php echo esc_html( 'Button label' ); ?></label><input type="text" id="ac-s-btn-label" value="<?php echo esc_attr( $agentclerk_placement['button_label'] ?? 'Get Help' ); ?>"></div>
+                <div class="ac-fg"><label class="ac-fl"><?php echo esc_html( 'Position' ); ?></label><select id="ac-s-position"><option value="bottom-right" <?php selected( $agentclerk_placement['position'] ?? 'bottom-right', 'bottom-right' ); ?>><?php echo esc_html( 'Bottom right' ); ?></option><option value="bottom-left" <?php selected( $agentclerk_placement['position'] ?? 'bottom-right', 'bottom-left' ); ?>><?php echo esc_html( 'Bottom left' ); ?></option></select></div>
             </div>
-            <div class="ac-co gn" style="margin-bottom:0"><span class="ac-co-i">&#10003;</span><div><?php printf( wp_kses( 'Manifest always active: <code style="font-family:\'DM Mono\',monospace;font-size:11px">%s/ai-manifest.json</code>', array( 'code' => array( 'style' => array() ) ) ), esc_html( $ac_site_url ) ); ?></div></div>
+            <div class="ac-co gn" style="margin-bottom:0"><span class="ac-co-i">&#10003;</span><div><?php printf( wp_kses( 'Manifest always active: <code style="font-family:\'DM Mono\',monospace;font-size:11px">%s/ai-manifest.json</code>', array( 'code' => array( 'style' => array() ) ) ), esc_html( $agentclerk_site_url ) ); ?></div></div>
         </div></div>
         <div style="text-align:right;margin-top:8px"><button class="ac-btn ac-btn-p" id="ac-save-placement"><?php echo esc_html( 'Save' ); ?></button></div>
     </div>
 
     <!-- API Key tab -->
-    <?php if ( $ac_tier === 'byok' ) : ?>
+    <?php if ( $agentclerk_tier === 'byok' ) : ?>
     <div class="ac-tp" id="ac-tp-api">
         <div class="ac-card" style="max-width:500px"><div class="ac-card-head"><h2><?php echo esc_html( 'Anthropic API Key' ); ?></h2><span class="ac-b ac-b-g">&#10003; <?php echo esc_html( 'Valid' ); ?></span></div><div class="ac-card-body">
             <div class="ac-fg">
@@ -171,26 +171,26 @@ $ac_last_scan = get_option( 'agentclerk_last_scan_date', '' );
         <div class="ac-g2">
             <div><div class="ac-card"><div class="ac-card-head"><h2><?php echo esc_html( 'Support knowledge file' ); ?></h2><span class="ac-b ac-b-a"><?php echo esc_html( 'Draft' ); ?></span></div><div class="ac-card-body">
                 <div class="ac-co sl ac-mb"><span class="ac-co-i">&#8505;</span><span><?php echo esc_html( 'Edit directly, or type an instruction in the chat: e.g. "Add a question about Figma version compatibility."' ); ?></span></div>
-                <textarea id="ac-s-support-file" style="min-height:200px;font-size:12px;font-family:'DM Mono',monospace;line-height:1.65"><?php echo esc_textarea( $ac_config['support_file'] ?? '' ); ?></textarea>
+                <textarea id="ac-s-support-file" style="min-height:200px;font-size:12px;font-family:'DM Mono',monospace;line-height:1.65"><?php echo esc_textarea( $agentclerk_config['support_file'] ?? '' ); ?></textarea>
             </div></div></div>
             <div>
                 <div class="ac-card ac-mb"><div class="ac-card-head"><h2><?php echo esc_html( 'Escalation' ); ?></h2></div><div class="ac-card-body">
                     <div class="ac-fg"><label class="ac-fl"><?php echo esc_html( 'Notify me when agent can\'t help a buyer' ); ?></label>
                         <select id="ac-s-notification-method">
-                            <option value="both" <?php selected( $ac_config['notification_method'] ?? 'both', 'both' ); ?>><?php echo esc_html( 'Both email and WP admin notification' ); ?></option>
-                            <option value="email" <?php selected( $ac_config['notification_method'] ?? 'both', 'email' ); ?>><?php echo esc_html( 'Email only' ); ?></option>
-                            <option value="wp_admin" <?php selected( $ac_config['notification_method'] ?? 'both', 'wp_admin' ); ?>><?php echo esc_html( 'WP admin only' ); ?></option>
+                            <option value="both" <?php selected( $agentclerk_config['notification_method'] ?? 'both', 'both' ); ?>><?php echo esc_html( 'Both email and WP admin notification' ); ?></option>
+                            <option value="email" <?php selected( $agentclerk_config['notification_method'] ?? 'both', 'email' ); ?>><?php echo esc_html( 'Email only' ); ?></option>
+                            <option value="wp_admin" <?php selected( $agentclerk_config['notification_method'] ?? 'both', 'wp_admin' ); ?>><?php echo esc_html( 'WP admin only' ); ?></option>
                         </select>
                     </div>
-                    <div class="ac-fg"><label class="ac-fl"><?php echo esc_html( 'Notification email' ); ?></label><input type="email" id="ac-s-escalation-email" value="<?php echo esc_attr( $ac_config['escalation_email'] ?? '' ); ?>"></div>
+                    <div class="ac-fg"><label class="ac-fl"><?php echo esc_html( 'Notification email' ); ?></label><input type="email" id="ac-s-escalation-email" value="<?php echo esc_attr( $agentclerk_config['escalation_email'] ?? '' ); ?>"></div>
                     <hr>
-                    <div class="ac-fg" style="margin-bottom:0"><label class="ac-fl"><?php echo esc_html( 'Message shown to buyer when escalated' ); ?></label><textarea id="ac-s-escalation-msg" style="min-height:60px;font-size:12px"><?php echo esc_textarea( $ac_config['escalation_message'] ?? '' ); ?></textarea></div>
+                    <div class="ac-fg" style="margin-bottom:0"><label class="ac-fl"><?php echo esc_html( 'Message shown to buyer when escalated' ); ?></label><textarea id="ac-s-escalation-msg" style="min-height:60px;font-size:12px"><?php echo esc_textarea( $agentclerk_config['escalation_message'] ?? '' ); ?></textarea></div>
                 </div></div>
                 <div class="ac-card"><div class="ac-card-head"><h2><?php echo esc_html( 'Always escalate these topics' ); ?></h2></div><div class="ac-card-body">
                     <div style="font-size:12px;color:var(--text3);margin-bottom:9px"><?php echo esc_html( 'Agent never attempts to handle these.' ); ?></div>
                     <div id="ac-topics-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px">
-                        <?php foreach ( ( $ac_config['escalation_topics'] ?? array() ) as $ac_topic ) : ?>
-                            <span class="ac-b ac-b-s" style="cursor:pointer" data-topic="<?php echo esc_attr( $ac_topic ); ?>"><?php echo esc_html( $ac_topic ); ?> &times;</span>
+                        <?php foreach ( ( $agentclerk_config['escalation_topics'] ?? array() ) as $agentclerk_topic ) : ?>
+                            <span class="ac-b ac-b-s" style="cursor:pointer" data-topic="<?php echo esc_attr( $agentclerk_topic ); ?>"><?php echo esc_html( $agentclerk_topic ); ?> &times;</span>
                         <?php endforeach; ?>
                     </div>
                     <input type="text" id="ac-s-new-topic" placeholder="<?php echo esc_attr( 'Add topic and press Enter…' ); ?>" style="font-size:12px">
