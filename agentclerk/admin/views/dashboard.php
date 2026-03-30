@@ -54,7 +54,11 @@ $accrued_fees = (float) get_option( 'agentclerk_accrued_fees', 0 );
                 );
                 ?>
             </span>
-            <span class="ac-ltm-btn" id="ac-lifetime-license-cta"><?php echo esc_html( 'Upgrade' ); ?> &rarr;</span>
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+                <a href="#" class="ac-promo-toggle" style="font-size:12px;color:var(--ac-text2);white-space:nowrap"><?php echo esc_html( 'Promo code?' ); ?></a>
+                <input type="text" id="ac-promo-dash" class="ac-promo-input" placeholder="<?php echo esc_attr( 'Code' ); ?>" style="display:none;width:100px;font-size:12px;font-family:'DM Mono',monospace;padding:6px 10px;text-transform:uppercase">
+                <span class="ac-ltm-btn" id="ac-lifetime-license-cta"><?php echo esc_html( 'Upgrade' ); ?> &rarr;</span>
+            </div>
         </div>
     <?php endif; ?>
     <div style="text-align:right;padding:20px 0 4px;font-size:11px;color:var(--ac-text3)">&copy; 2026 &mdash; A Brilliant Way</div>

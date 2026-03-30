@@ -249,20 +249,43 @@ class AgentClerk_Admin {
         }
 
         if ( $tier === 'turnkey' ) {
+            $promo_code = isset( $_POST['promoCode'] ) ? sanitize_text_field( wp_unslash( $_POST['promoCode'] ) ) : '';
+            $checkout_body_data = [
+                'successUrl' => admin_url( 'admin.php?page=agentclerk&step=2&turnkey_success=1' ),
+                'cancelUrl'  => admin_url( 'admin.php?page=agentclerk&step=1&turnkey_cancelled=1' ),
+            ];
+            if ( ! empty( $promo_code ) ) {
+                $checkout_body_data['promoCode'] = $promo_code;
+            }
+
             $checkout = wp_remote_post( AGENTCLERK_BACKEND_URL . '/billing/turnkey-checkout', [
                 'headers' => [
                     'X-AgentClerk-Secret' => $result['installSecret'],
                     'X-AgentClerk-Site'   => home_url(),
                     'Content-Type'        => 'application/json',
                 ],
-                'body' => wp_json_encode( [
-                    'successUrl' => admin_url( 'admin.php?page=agentclerk&step=2&turnkey_success=1' ),
-                    'cancelUrl'  => admin_url( 'admin.php?page=agentclerk&step=1&turnkey_cancelled=1' ),
-                ] ),
+                'body' => wp_json_encode( $checkout_body_data ),
             ] );
 
             if ( ! is_wp_error( $checkout ) ) {
                 $checkout_body = json_decode( wp_remote_retrieve_body( $checkout ), true );
+
+                // Backend error.
+                if ( ! empty( $checkout_body['error'] ) ) {
+                    wp_send_json_error( [ 'message' => sanitize_text_field( $checkout_body['error'] ) ] );
+                }
+
+                // Free promo — activated immediately.
+                if ( ! empty( $checkout_body['activated'] ) ) {
+                    if ( ! empty( $checkout_body['billingStatus'] ) ) {
+                        update_option( 'agentclerk_billing_status', sanitize_text_field( $checkout_body['billingStatus'] ) );
+                    }
+                    update_option( 'agentclerk_onboarding_step', 2 );
+                    wp_send_json_success( [ 'step' => 2 ] );
+                    return;
+                }
+
+                // Stripe checkout.
                 if ( ! empty( $checkout_body['checkoutUrl'] ) ) {
                     wp_send_json_success( [ 'redirect' => $checkout_body['checkoutUrl'] ] );
                     return;

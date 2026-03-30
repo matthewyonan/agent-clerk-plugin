@@ -82,6 +82,46 @@
         window.location.href = agentclerk.ajaxUrl.replace('admin-ajax.php', 'admin.php?page=' + page);
     }
 
+    // Promo code toggle — show/hide input when "Have a promo code?" is clicked.
+    $(document).on('click', '.ac-promo-toggle', function(e) {
+        e.preventDefault();
+        var $input = $(this).siblings('.ac-promo-input');
+        if (!$input.length) $input = $(this).closest('div').find('.ac-promo-input');
+        if (!$input.length) $input = $('#ac-promo-code'); // Sales page fallback
+        $input.toggle().focus();
+    });
+
+    /**
+     * Handle lifetime checkout with promo code support.
+     * Reads promo from the given input selector, calls backend,
+     * handles redirect / instant activation / error.
+     */
+    function doLifetimeCheckout($btn, promoInputSel) {
+        var promo = $(promoInputSel).val() ? $.trim($(promoInputSel).val()) : '';
+        var origHtml = $btn.html();
+        $btn.text('Processing...').css('pointer-events', 'none');
+
+        var data = {};
+        if (promo) data.promoCode = promo;
+
+        acAjax('lifetime_checkout', data).then(function(resp) {
+            if (resp.licensed) {
+                showToast('Lifetime license activated! No more fees.', 'success');
+                setTimeout(function() { location.reload(); }, 1200);
+                return;
+            }
+            if (resp.checkoutUrl) {
+                window.location.href = resp.checkoutUrl;
+                return;
+            }
+            $btn.html(origHtml).css('pointer-events', '');
+            showToast('No checkout URL returned.', 'error');
+        }).catch(function(err) {
+            $btn.html(origHtml).css('pointer-events', '');
+            showToast(((err && err.message) || 'Upgrade failed.'), 'error');
+        });
+    }
+
     function addChatMessage(containerId, role, text) {
         var cls = role === 'assistant' ? 'ag' : 'us';
         var av  = role === 'assistant' ? 'AC' : 'You';
@@ -205,11 +245,16 @@
         });
 
         function submitRegistration(tier, pmId, apiKey) {
-            acAjax('register_install', {
+            var promoSel = tier === 'turnkey' ? '#ac-promo-turnkey' : '#ac-promo-byok';
+            var promo = $(promoSel).val() ? $.trim($(promoSel).val()) : '';
+            var regData = {
                 tier: tier,
                 stripe_payment_method_id: pmId,
                 api_key: apiKey
-            }).then(function(data) {
+            };
+            if (promo) regData.promoCode = promo;
+
+            acAjax('register_install', regData).then(function(data) {
                 if (data.redirect) window.location.href = data.redirect;
                 else goToPage('agentclerk-onboarding');
             }).catch(function(err) {
@@ -255,11 +300,10 @@
             }
         });
 
-        // Lifetime CTA
-        $('#ac-lifetime-cta-bar').on('click', function() {
-            acAjax('lifetime_checkout').then(function(data) {
-                if (data.checkoutUrl) window.location.href = data.checkoutUrl;
-            });
+        // Lifetime CTA — Step 1
+        $('#ac-lifetime-cta-bar').on('click', function(e) {
+            e.stopPropagation();
+            doLifetimeCheckout($(this), '#ac-promo-byok');
         });
     })();
 
@@ -859,21 +903,10 @@
             loadSales();
         });
 
-        // Lifetime CTA
+        // Lifetime CTA — Sales page
         $('#ac-sales-lifetime-btn').on('click', function(e) {
             e.stopPropagation();
-            var btn = $(this);
-            btn.text('Processing...').css('pointer-events', 'none');
-            acAjax('lifetime_checkout').then(function(data) {
-                if (data.checkoutUrl) window.location.href = data.checkoutUrl;
-                else {
-                    btn.html('Upgrade &rarr;').css('pointer-events', '');
-                    showToast('No checkout URL returned.', 'error');
-                }
-            }).catch(function(err) {
-                btn.html('Upgrade &rarr;').css('pointer-events', '');
-                showToast('Upgrade failed: ' + ((err && err.message) || 'Unknown error'), 'error');
-            });
+            doLifetimeCheckout($(this), '#ac-promo-code');
         });
     })();
 
@@ -983,11 +1016,10 @@
             $('#ac-dash-escalated').text(d.escalated || 0);
         });
 
-        // Lifetime CTA
-        $('#ac-lifetime-license-cta, #ac-lifetime-cta-bar').on('click', function() {
-            acAjax('lifetime_checkout').then(function(data) {
-                if (data.checkoutUrl) window.location.href = data.checkoutUrl;
-            });
+        // Lifetime CTA — Dashboard
+        $('#ac-lifetime-license-cta').on('click', function(e) {
+            e.stopPropagation();
+            doLifetimeCheckout($(this), '#ac-promo-dash');
         });
     })();
 
