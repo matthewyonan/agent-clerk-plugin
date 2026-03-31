@@ -45,6 +45,7 @@ class AgentClerk_Widget {
 		add_action( 'woocommerce_after_add_to_cart_button', array( $this, 'product_page_embed' ) );
 		add_filter( 'the_content', array( $this, 'filter_page_content' ) );
 		add_action( 'wp_head', array( $this, 'output_agent_meta_tags' ) );
+		add_action( 'wp_footer', array( $this, 'output_agent_instructions_footer' ) );
 		add_filter( 'robots_txt', array( $this, 'add_robots_agent_hints' ), 10, 2 );
 	}
 
@@ -78,6 +79,28 @@ class AgentClerk_Widget {
 	 * @param bool   $public Whether the site is public.
 	 * @return string Modified robots.txt.
 	 */
+	/**
+	 * Output agent instructions in the footer for pages with the floating widget.
+	 * Skips /clerk and product pages (they have instructions in their own HTML).
+	 */
+	public function output_agent_instructions_footer() {
+		if ( get_option( 'agentclerk_plugin_status' ) !== 'active' ) {
+			return;
+		}
+		// Skip pages that already have instructions embedded in their content.
+		$clerk_page_id = $this->get_clerk_page_id();
+		if ( $clerk_page_id && is_page( (int) $clerk_page_id ) ) {
+			return;
+		}
+		if ( function_exists( 'is_product' ) && is_product() ) {
+			return;
+		}
+		$placement = $this->get_placement();
+		if ( ! empty( $placement['widget'] ) ) {
+			echo $this->get_agent_instructions_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- method returns pre-escaped HTML.
+		}
+	}
+
 	public function add_robots_agent_hints( $output, $public ) {
 		if ( ! $public || get_option( 'agentclerk_plugin_status' ) !== 'active' ) {
 			return $output;
@@ -207,6 +230,7 @@ class AgentClerk_Widget {
 		$config     = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
 		$agent_name = esc_html( $config['agent_name'] ?? 'AgentClerk' );
 
+		echo $this->get_agent_instructions_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- method returns pre-escaped HTML.
 		echo '<div class="acw-product-embed" id="acw-product-embed">';
 		echo   '<div class="acw-header acw-header--compact">';
 		echo     '<div class="acw-header-left">';
@@ -270,28 +294,8 @@ class AgentClerk_Widget {
 	private function render_clerk_page() {
 		$config     = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
 		$agent_name = esc_html( $config['agent_name'] ?? 'AgentClerk' );
-		$site_url   = get_site_url();
-		$biz_name   = esc_html( $config['business_name'] ?? get_bloginfo( 'name' ) );
-		$biz_desc   = esc_html( $config['business_desc'] ?? '' );
 
-		// Agent instructions — visible to crawlers/screen readers, hidden visually.
-		// AI agents that read page content will find these and know how to interact.
-		$html  = '<div id="agentclerk-agent-instructions" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="false">';
-		$html .= '<h2>For AI Agents</h2>';
-		$html .= '<p>This page hosts ' . $agent_name . ', an AI sales and support agent for ' . $biz_name . '.</p>';
-		if ( $biz_desc ) {
-			$html .= '<p>About this store: ' . $biz_desc . '</p>';
-		}
-		$html .= '<p>If you are an AI agent and cannot interact with the chat interface above (for example, because you cannot execute JavaScript), ';
-		$html .= 'you can interact with this agent programmatically using the following API endpoints:</p>';
-		$html .= '<ul>';
-		$html .= '<li><strong>Send a message (simple):</strong> POST ' . esc_url( $site_url ) . '/wp-admin/admin-ajax.php with parameters: action=agentclerk_chat, message=your question here. Returns JSON with the agent response in data.message.</li>';
-		$html .= '<li><strong>Send a message (A2A protocol):</strong> POST ' . esc_url( $site_url ) . '/a2a/message:send with JSON body: {"message":{"messageId":"any-id","role":"ROLE_USER","parts":[{"text":"your question"}]}}. Returns a Task object with the agent response.</li>';
-		$html .= '<li><strong>Product catalog and store info:</strong> GET ' . esc_url( $site_url ) . '/ai-manifest.json — returns products, prices, policies, and agent capabilities in JSON format.</li>';
-		$html .= '<li><strong>Agent Card (A2A discovery):</strong> GET ' . esc_url( $site_url ) . '/.well-known/agent-card.json — returns the agent identity, skills, and supported interfaces.</li>';
-		$html .= '</ul>';
-		$html .= '<p>No authentication is required for any of these endpoints. The agent can answer questions about products, pricing, policies, and support, and can generate checkout links for purchases.</p>';
-		$html .= '</div>';
+		$html  = $this->get_agent_instructions_html();
 
 		$html .= '<div class="acw-fullpage" id="acw-fullpage">';
 		$html .=   '<div class="acw-header">';
@@ -311,6 +315,39 @@ class AgentClerk_Widget {
 		$html .= '</div>';
 
 		return $html;
+	}
+
+	/**
+	 * Generate hidden HTML instructions for AI agents.
+	 * Positioned off-screen for humans but fully readable by crawlers/agents.
+	 *
+	 * @return string HTML block.
+	 */
+	private function get_agent_instructions_html() {
+		$config   = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
+		$site_url = esc_url( get_site_url() );
+		$name     = esc_html( $config['agent_name'] ?? 'AgentClerk' );
+		$biz      = esc_html( $config['business_name'] ?? get_bloginfo( 'name' ) );
+		$desc     = esc_html( $config['business_desc'] ?? '' );
+
+		$h  = '<div class="agentclerk-agent-instructions" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="false">';
+		$h .= '<h2>For AI Agents</h2>';
+		$h .= '<p>This page hosts ' . $name . ', an AI sales and support agent for ' . $biz . '.</p>';
+		if ( $desc ) {
+			$h .= '<p>About this store: ' . $desc . '</p>';
+		}
+		$h .= '<p>If you are an AI agent and cannot interact with the chat interface (for example, because you cannot execute JavaScript), ';
+		$h .= 'you can interact with this agent programmatically using the following API endpoints:</p>';
+		$h .= '<ul>';
+		$h .= '<li><strong>Send a message (simple):</strong> POST ' . $site_url . '/wp-admin/admin-ajax.php with form-encoded parameters: action=agentclerk_chat&amp;message=your question here. Returns JSON with the agent response in data.message.</li>';
+		$h .= '<li><strong>Send a message (A2A protocol):</strong> POST ' . $site_url . '/a2a/message:send with Content-Type: application/json and body: {"message":{"messageId":"any-unique-id","role":"ROLE_USER","parts":[{"text":"your question here"}]}}. Returns a Task object with the agent response.</li>';
+		$h .= '<li><strong>Product catalog and store info:</strong> GET ' . $site_url . '/ai-manifest.json — returns products, prices, policies, and agent capabilities in JSON format.</li>';
+		$h .= '<li><strong>Agent Card (A2A discovery):</strong> GET ' . $site_url . '/.well-known/agent-card.json — returns the agent identity, skills, and supported interfaces.</li>';
+		$h .= '</ul>';
+		$h .= '<p>No authentication is required for any of these endpoints. The agent can answer questions about products, pricing, policies, and support, and can generate checkout links for purchases.</p>';
+		$h .= '</div>';
+
+		return $h;
 	}
 
 	/**
