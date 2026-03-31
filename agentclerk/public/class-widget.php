@@ -346,6 +346,11 @@ class AgentClerk_Widget {
 		// /clerk full-page chat.
 		$clerk_page_id = $this->get_clerk_page_id();
 		if ( $clerk_page_id && (int) $page_id === (int) $clerk_page_id ) {
+			// Ensure the page uses the default theme template (not Elementor Canvas/blank).
+			$current_template = get_post_meta( $clerk_page_id, '_wp_page_template', true );
+			if ( $current_template && 'default' !== $current_template ) {
+				update_post_meta( $clerk_page_id, '_wp_page_template', 'default' );
+			}
 			return $this->render_clerk_page();
 		}
 
