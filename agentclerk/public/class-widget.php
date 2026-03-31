@@ -43,6 +43,7 @@ class AgentClerk_Widget {
 
 		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue_assets' ) );
 		add_action( 'woocommerce_after_add_to_cart_button', array( $this, 'product_page_embed' ) );
+		add_action( 'woocommerce_after_shop_loop', array( $this, 'category_page_embed' ) );
 		add_filter( 'the_content', array( $this, 'filter_page_content' ) );
 		add_action( 'wp_head', array( $this, 'output_agent_meta_tags' ) );
 		add_action( 'wp_footer', array( $this, 'output_agent_instructions_footer' ) );
@@ -87,18 +88,53 @@ class AgentClerk_Widget {
 		if ( get_option( 'agentclerk_plugin_status' ) !== 'active' ) {
 			return;
 		}
-		// Skip pages that already have instructions embedded in their content.
+
+		// Check merchant AAP discovery setting.
+		$config    = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
+		$discovery = $config['aap_discovery'] ?? 'body_and_footer';
+		if ( 'off' === $discovery ) {
+			return;
+		}
+
+		// Skip pages that already have procurement surface.
 		$clerk_page_id = $this->get_clerk_page_id();
 		if ( $clerk_page_id && is_page( (int) $clerk_page_id ) ) {
 			return;
 		}
-		if ( function_exists( 'is_product' ) && is_product() ) {
+
+		$placement = $this->get_placement();
+		if ( empty( $placement['widget'] ) ) {
 			return;
 		}
-		$placement = $this->get_placement();
-		if ( ! empty( $placement['widget'] ) ) {
-			echo $this->get_agent_instructions_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- method returns pre-escaped HTML.
+
+		$clerk_url = get_permalink( $clerk_page_id );
+		if ( ! $clerk_url ) {
+			$clerk_url = get_site_url() . '/clerk/';
 		}
+		$config     = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
+		$agent_name = esc_html( $config['agent_name'] ?? 'AgentClerk' );
+		$biz_name   = esc_html( $config['business_name'] ?? get_bloginfo( 'name' ) );
+
+		// Hidden technical instructions for agents that read hidden content.
+		echo $this->get_agent_instructions_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+		// Visible discovery block.
+		echo '<div class="agentclerk-ssr-footer">';
+		echo '<div class="agentclerk-ssr-footer-inner">';
+		echo '<p><strong>Agent-Assisted Purchasing Available</strong></p>';
+		echo '<p>' . $agent_name . ' is the AI store agent for ' . $biz_name . '. An AI agent can evaluate and recommend products, generate a checkout link for a human buyer to approve, and continue setup after payment.</p>';
+		echo '<form method="get" action="' . esc_url( $clerk_url ) . '">';
+		echo '<input type="text" name="q" placeholder="Ask the store agent..." />';
+		echo '<button type="submit">Ask</button>';
+		echo '</form>';
+		echo '<ul>';
+		echo '<li><a href="' . esc_url( $clerk_url . '?intent=recommend' ) . '">Find the right product</a></li>';
+		echo '<li><a href="' . esc_url( $clerk_url . '?intent=checkout' ) . '">Create a checkout link</a></li>';
+		echo '<li><a href="' . esc_url( $clerk_url . '?intent=activation' ) . '">Retrieve activation details</a></li>';
+		echo '<li><a href="' . esc_url( $clerk_url . '?q=' . rawurlencode( 'What is your return policy?' ) ) . '">Return policy</a></li>';
+		echo '</ul>';
+		echo '</div>';
+		echo '</div>';
 	}
 
 	public function add_robots_agent_hints( $output, $public ) {
@@ -230,6 +266,43 @@ class AgentClerk_Widget {
 		$config     = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
 		$agent_name = esc_html( $config['agent_name'] ?? 'AgentClerk' );
 
+		// SSR agent block for browsing agents.
+		$product_name = '';
+		$product_id   = 0;
+		if ( function_exists( 'is_product' ) && is_product() ) {
+			global $product;
+			if ( $product instanceof WC_Product ) {
+				$product_id   = $product->get_id();
+				$product_name = $product->get_name();
+			}
+		}
+
+		$clerk_url = get_permalink( get_option( 'agentclerk_clerk_page_id', 0 ) );
+		if ( ! $clerk_url ) {
+			$clerk_url = get_site_url() . '/clerk/';
+		}
+
+		echo '<div class="agentclerk-ssr-product">';
+		echo '<h3>Questions about ' . esc_html( $product_name ) . '?</h3>';
+		echo '<p>' . esc_html( $agent_name ) . ' can help with product details, compatibility, shipping, returns, and purchasing.</p>';
+
+		echo '<p><strong>Buying for a user?</strong> Ask the store agent to recommend the right option and create a payment link your user can approve.</p>';
+
+		echo '<ul>';
+		echo '<li><a href="' . esc_url( $clerk_url . '?product=' . $product_id . '&q=' . rawurlencode( 'Tell me about ' . $product_name ) ) . '">Product details</a></li>';
+		echo '<li><a href="' . esc_url( $clerk_url . '?product=' . $product_id . '&q=' . rawurlencode( 'Create a checkout link for ' . $product_name . ' I can send to my user' ) ) . '">Create checkout link</a></li>';
+		echo '<li><a href="' . esc_url( $clerk_url . '?product=' . $product_id . '&q=' . rawurlencode( 'How fast does ' . $product_name . ' ship?' ) ) . '">Shipping info</a></li>';
+		echo '<li><a href="' . esc_url( $clerk_url . '?product=' . $product_id . '&q=' . rawurlencode( 'What is the return policy for ' . $product_name . '?' ) ) . '">Return policy</a></li>';
+		echo '<li><a href="' . esc_url( $clerk_url . '?product=' . $product_id . '&q=' . rawurlencode( 'Compare ' . $product_name . ' with similar products' ) ) . '">Compare options</a></li>';
+		echo '</ul>';
+
+		echo '<form method="get" action="' . esc_url( $clerk_url ) . '">';
+		echo '<input type="text" name="q" placeholder="Ask about ' . esc_attr( $product_name ) . '..." />';
+		echo '<input type="hidden" name="product" value="' . esc_attr( $product_id ) . '" />';
+		echo '<button type="submit">Ask</button>';
+		echo '</form>';
+		echo '</div>';
+
 		echo $this->get_agent_instructions_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- method returns pre-escaped HTML.
 		echo '<div class="acw-product-embed" id="acw-product-embed">';
 		echo   '<div class="acw-header acw-header--compact">';
@@ -273,6 +346,11 @@ class AgentClerk_Widget {
 		// /clerk full-page chat.
 		$clerk_page_id = $this->get_clerk_page_id();
 		if ( $clerk_page_id && (int) $page_id === (int) $clerk_page_id ) {
+			// Ensure the page uses the default theme template (not Elementor Canvas/blank).
+			$current_template = get_post_meta( $clerk_page_id, '_wp_page_template', true );
+			if ( $current_template && 'default' !== $current_template ) {
+				update_post_meta( $clerk_page_id, '_wp_page_template', 'default' );
+			}
 			return $this->render_clerk_page();
 		}
 
@@ -289,14 +367,155 @@ class AgentClerk_Widget {
 	/**
 	 * Render the full-page /clerk chat interface.
 	 *
+	 * Includes both an SSR form (works for browsing AI agents and noscript
+	 * users) and the existing JS chat widget for human visitors.
+	 *
 	 * @return string HTML output.
 	 */
 	private function render_clerk_page() {
 		$config     = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
 		$agent_name = esc_html( $config['agent_name'] ?? 'AgentClerk' );
+		$biz_name   = esc_html( $config['business_name'] ?? get_bloginfo( 'name' ) );
 
-		$html  = $this->get_agent_instructions_html();
+		$clerk_url = get_permalink( get_option( 'agentclerk_clerk_page_id', 0 ) );
+		if ( ! $clerk_url ) {
+			$clerk_url = get_site_url() . '/clerk/';
+		}
 
+		// Read and sanitise GET parameters.
+		$question   = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
+		$session_id = isset( $_GET['session'] ) ? sanitize_text_field( wp_unslash( $_GET['session'] ) ) : bin2hex( random_bytes( 16 ) );
+		$product_id = isset( $_GET['product'] ) ? absint( $_GET['product'] ) : 0;
+		$intent     = isset( $_GET['intent'] ) ? sanitize_text_field( wp_unslash( $_GET['intent'] ) ) : '';
+		$category   = isset( $_GET['category'] ) ? sanitize_text_field( wp_unslash( $_GET['category'] ) ) : '';
+		$code       = isset( $_GET['code'] ) ? sanitize_text_field( wp_unslash( $_GET['code'] ) ) : '';
+
+		// If intent is set but no question, pre-seed the question.
+		if ( '' === $question && '' !== $intent ) {
+			$intent_map = array(
+				'recommend'  => 'Help me find the right product or plan for my needs. What do you need to know?',
+				'checkout'   => 'I would like to create a checkout link. Which product should I generate it for?',
+				'activation' => 'I have purchased and need to retrieve my activation details. I have a confirmation code.',
+				'compare'    => 'Please compare your available products or plans.',
+			);
+			if ( isset( $intent_map[ $intent ] ) ) {
+				$question = $intent_map[ $intent ];
+			}
+		}
+
+		// Hidden agent instructions (still useful for agents that read hidden content).
+		$html = $this->get_agent_instructions_html();
+
+		/* ── SSR block ─────────────────────────────── */
+		$html .= '<div class="agentclerk-ssr">';
+
+		if ( '' !== $question ) {
+			// Prepend product context to the question when provided.
+			$chat_message = $question;
+			if ( $product_id && function_exists( 'wc_get_product' ) ) {
+				$prod = wc_get_product( $product_id );
+				if ( $prod instanceof WC_Product ) {
+					$chat_message = '[Product context: ' . $prod->get_name() . ' (ID ' . $product_id . ')] ' . $chat_message;
+				}
+			}
+			if ( $code ) {
+				$chat_message = '[Confirmation code: ' . $code . '] ' . $chat_message;
+			}
+			if ( $category ) {
+				$chat_message = '[Category context: ' . $category . '] ' . $chat_message;
+			}
+
+			$result = AgentClerk_Agent::instance()->process_chat( $chat_message, $session_id, 'auto', false );
+
+			$html .= '<div class="agentclerk-ssr-conversation">';
+			$html .= '<div class="agentclerk-ssr-question">';
+			$html .= '<strong>You asked:</strong> ' . esc_html( $question );
+			$html .= '</div>';
+
+			if ( is_wp_error( $result ) ) {
+				$html .= '<div class="agentclerk-ssr-answer">';
+				$html .= '<strong>' . $agent_name . ':</strong> Sorry, something went wrong. Please try again.';
+				$html .= '</div>';
+			} else {
+				$response_text = $result['message'] ?? '';
+				$html .= '<div class="agentclerk-ssr-answer">';
+				$html .= '<strong>' . $agent_name . ':</strong> ';
+				$html .= $this->render_agent_response( $response_text );
+				$html .= '</div>';
+			}
+
+			$html .= '</div>'; // .agentclerk-ssr-conversation
+
+			// Next actions.
+			$html .= '<section class="agentclerk-ssr-next">';
+			$html .= '<h3>What would you like to do next?</h3>';
+			$html .= '<ul>';
+			$html .= '<li><a href="' . esc_url( $clerk_url . '?session=' . $session_id . '&q=' . rawurlencode( 'I want a recommendation' ) ) . '">Get a recommendation</a></li>';
+			$html .= '<li><a href="' . esc_url( $clerk_url . '?session=' . $session_id . '&q=' . rawurlencode( 'Create a checkout link for my user' ) ) . '">Create a checkout link</a></li>';
+			$html .= '<li><a href="' . esc_url( $clerk_url . '?session=' . $session_id . '&q=' . rawurlencode( 'I already purchased and need activation details' ) ) . '">I already purchased</a></li>';
+			$html .= '<li><a href="' . esc_url( $clerk_url . '?session=' . $session_id . '&q=' . rawurlencode( 'Tell me more about that' ) ) . '">Tell me more</a></li>';
+			$html .= '</ul>';
+			$html .= '</section>';
+
+			// Follow-up form.
+			$html .= '<form method="get" action="' . esc_url( $clerk_url ) . '">';
+			$html .= '<input type="text" name="q" placeholder="Ask a follow-up question..." />';
+			$html .= '<input type="hidden" name="session" value="' . esc_attr( $session_id ) . '" />';
+			if ( $product_id ) {
+				$html .= '<input type="hidden" name="product" value="' . esc_attr( $product_id ) . '" />';
+			}
+			$html .= '<button type="submit">Ask</button>';
+			$html .= '</form>';
+		} else {
+			// Landing page — no question and no intent.
+			$html .= '<h1>Agent-Assisted Purchasing</h1>';
+			$html .= '<p>For AI agents acting on behalf of a human buyer, or anyone who wants help choosing and buying from ' . $biz_name . '.</p>';
+
+			$html .= '<nav class="agentclerk-ssr-nav">';
+			$html .= '<h2>What you can do here</h2>';
+			$html .= '<ul>';
+			$html .= '<li><a href="' . esc_url( $clerk_url . '?intent=recommend' ) . '">Find the right product or plan</a></li>';
+			$html .= '<li><a href="' . esc_url( $clerk_url . '?intent=checkout' ) . '">Create a checkout link</a></li>';
+			$html .= '<li><a href="' . esc_url( $clerk_url . '?intent=activation' ) . '">Retrieve activation details</a></li>';
+			$html .= '<li><a href="' . esc_url( $clerk_url . '?intent=compare' ) . '">Compare options</a></li>';
+			$html .= '</ul>';
+			$html .= '</nav>';
+
+			$html .= '<section class="agentclerk-ssr-how">';
+			$html .= '<h2>How it works</h2>';
+			$html .= '<ol>';
+			$html .= '<li>Tell the agent what you need</li>';
+			$html .= '<li>Agent recommends the right product with rationale</li>';
+			$html .= '<li>Agent generates a checkout link</li>';
+			$html .= '<li>Human buyer reviews the checkout link and approves payment</li>';
+			$html .= '<li>Return with the confirmation code to retrieve activation details and continue setup</li>';
+			$html .= '</ol>';
+			$html .= '</section>';
+
+			$html .= '<section class="agentclerk-ssr-ask">';
+			$html .= '<h2>Ask the store agent</h2>';
+			$html .= '<form method="get" action="' . esc_url( $clerk_url ) . '">';
+			$html .= '<input type="text" name="q" placeholder="Ask about products, pricing, checkout links, activation, or setup" />';
+			$html .= '<input type="hidden" name="session" value="' . esc_attr( $session_id ) . '" />';
+			$html .= '<button type="submit">Ask</button>';
+			$html .= '</form>';
+			$html .= '</section>';
+
+			$html .= '<section class="agentclerk-ssr-examples">';
+			$html .= '<h2>Example tasks</h2>';
+			$html .= '<ul>';
+			$html .= '<li><a href="' . esc_url( $clerk_url . '?q=' . rawurlencode( 'Help me choose the right product for my needs' ) ) . '">Help me choose the right product for my needs</a></li>';
+			$html .= '<li><a href="' . esc_url( $clerk_url . '?q=' . rawurlencode( 'Create a checkout link I can send to my user' ) ) . '">Create a checkout link I can send to my user</a></li>';
+			$html .= '<li><a href="' . esc_url( $clerk_url . '?q=' . rawurlencode( 'I have a confirmation code and need activation details' ) ) . '">I have a confirmation code — retrieve activation details</a></li>';
+			$html .= '<li><a href="' . esc_url( $clerk_url . '?q=' . rawurlencode( 'Compare your available products or plans' ) ) . '">Compare your available products or plans</a></li>';
+			$html .= '<li><a href="' . esc_url( $clerk_url . '?q=' . rawurlencode( 'What happens after purchase' ) ) . '">What happens after purchase?</a></li>';
+			$html .= '</ul>';
+			$html .= '</section>';
+		}
+
+		$html .= '</div>'; // .agentclerk-ssr
+
+		/* ── Existing JS chat widget (for human visitors) ── */
 		$html .= '<div class="acw-fullpage" id="acw-fullpage">';
 		$html .=   '<div class="acw-header">';
 		$html .=     '<div class="acw-header-left">';
@@ -315,6 +534,68 @@ class AgentClerk_Widget {
 		$html .= '</div>';
 
 		return $html;
+	}
+
+	/**
+	 * Convert AI response text into structured HTML.
+	 *
+	 * Handles markdown-style **bold**, [links](url), newlines to paragraphs,
+	 * and prominent checkout buttons.
+	 *
+	 * @param string $text Raw response text.
+	 * @return string Sanitised HTML.
+	 */
+	private function render_agent_response( $text ) {
+		$text = esc_html( $text );
+
+		// Convert **bold** to <strong>.
+		$text = preg_replace( '/\*\*(.+?)\*\*/', '<strong>$1</strong>', $text );
+
+		// Track checkout URLs found in the response for handoff blocks.
+		$checkout_urls = array();
+
+		// Convert [text](url) to <a> links — need to un-escape the HTML entities first for the regex.
+		$text = preg_replace_callback(
+			'/\[([^\]]+)\]\((https?[^\)]+)\)/',
+			function ( $m ) use ( &$checkout_urls ) {
+				$link_text = $m[1];
+				$url       = html_entity_decode( $m[2], ENT_QUOTES, 'UTF-8' );
+				// Track checkout links for handoff block rendering.
+				if ( false !== strpos( $url, '/clerk-checkout/' ) ) {
+					$checkout_urls[] = array(
+						'url'  => $url,
+						'text' => $link_text,
+					);
+					// Return a placeholder that will be replaced below.
+					return '<!-- agentclerk-checkout-placeholder-' . ( count( $checkout_urls ) - 1 ) . ' -->';
+				}
+				return '<a href="' . esc_url( $url ) . '">' . $link_text . '</a>';
+			},
+			$text
+		);
+
+		// Convert double newlines to paragraph breaks; single newlines to <br>.
+		$paragraphs = preg_split( '/\n{2,}/', $text );
+		$paragraphs = array_filter( array_map( 'trim', $paragraphs ) );
+		if ( count( $paragraphs ) > 1 ) {
+			$text = '<p>' . implode( '</p><p>', $paragraphs ) . '</p>';
+		}
+		$text = nl2br( $text );
+
+		// Replace checkout placeholders with Purchase Handoff Blocks.
+		foreach ( $checkout_urls as $i => $checkout ) {
+			$handoff  = '<div class="agentclerk-ssr-handoff">';
+			$handoff .= '<h3>Purchase Handoff</h3>';
+			$handoff .= '<p><strong>Send to your user for approval:</strong></p>';
+			$handoff .= '<a href="' . esc_url( $checkout['url'] ) . '" class="agentclerk-ssr-checkout-btn">Review and Pay</a>';
+			$handoff .= '<p class="agentclerk-ssr-checkout-url">' . esc_html( $checkout['url'] ) . '</p>';
+			$handoff .= '<p><em>Expires in 48 hours</em></p>';
+			$handoff .= '<p><strong>After payment:</strong> Return to this page with the confirmation code to retrieve activation details and continue setup.</p>';
+			$handoff .= '</div>';
+			$text = str_replace( '<!-- agentclerk-checkout-placeholder-' . $i . ' -->', $handoff, $text );
+		}
+
+		return $text;
 	}
 
 	/**
@@ -382,6 +663,60 @@ class AgentClerk_Widget {
 		$html .= '</div>';
 
 		return $html;
+	}
+
+	/* ───────────────────────────────────────────────
+	 *  Category / Shop Page Embed
+	 * ─────────────────────────────────────────────── */
+
+	/**
+	 * Output procurement-focused SSR block on category and shop pages.
+	 */
+	public function category_page_embed() {
+		if ( get_option( 'agentclerk_plugin_status' ) !== 'active' ) {
+			return;
+		}
+		if ( ! is_product_category() && ! is_shop() ) {
+			return;
+		}
+
+		$config     = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
+		$agent_name = esc_html( $config['agent_name'] ?? 'AgentClerk' );
+		$clerk_url  = get_permalink( get_option( 'agentclerk_clerk_page_id', 0 ) );
+		if ( ! $clerk_url ) {
+			$clerk_url = get_site_url() . '/clerk/';
+		}
+
+		$category_name = '';
+		if ( is_product_category() ) {
+			$term = get_queried_object();
+			if ( $term ) {
+				$category_name = $term->name;
+			}
+		}
+
+		echo '<div class="agentclerk-ssr-category">';
+		if ( $category_name ) {
+			echo '<h3>Need help choosing from ' . esc_html( $category_name ) . '?</h3>';
+		} else {
+			echo '<h3>Need help choosing?</h3>';
+		}
+		echo '<p>' . $agent_name . ' can recommend the best option for your needs, compare products, and create a checkout link for your user.</p>';
+		echo '<ul>';
+		if ( $category_name ) {
+			echo '<li><a href="' . esc_url( $clerk_url . '?q=' . rawurlencode( 'What is the best option in ' . $category_name . ' for my needs?' ) ) . '">Best option for my needs</a></li>';
+			echo '<li><a href="' . esc_url( $clerk_url . '?q=' . rawurlencode( 'Compare the top choices in ' . $category_name ) ) . '">Compare top choices</a></li>';
+		} else {
+			echo '<li><a href="' . esc_url( $clerk_url . '?intent=recommend' ) . '">Find the right product</a></li>';
+			echo '<li><a href="' . esc_url( $clerk_url . '?intent=compare' ) . '">Compare options</a></li>';
+		}
+		echo '<li><a href="' . esc_url( $clerk_url . '?intent=checkout' ) . '">Create a checkout link</a></li>';
+		echo '</ul>';
+		echo '<form method="get" action="' . esc_url( $clerk_url ) . '">';
+		echo '<input type="text" name="q" placeholder="What are you looking for?" />';
+		echo '<button type="submit">Ask</button>';
+		echo '</form>';
+		echo '</div>';
 	}
 
 	/* ───────────────────────────────────────────────

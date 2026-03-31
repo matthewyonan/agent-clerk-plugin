@@ -213,10 +213,13 @@ class AgentClerk_Activator {
 			'post_status'  => 'publish',
 			'post_type'    => 'page',
 			'post_content' => '<!-- AgentClerk full-page chat -->',
+			'page_template' => 'default',
 		) );
 
 		if ( $page_id && ! is_wp_error( $page_id ) ) {
 			update_option( 'agentclerk_clerk_page_id', $page_id );
+			// Ensure default template — some themes (Elementor) auto-assign blank templates.
+			update_post_meta( $page_id, '_wp_page_template', 'default' );
 		}
 	}
 

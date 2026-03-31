@@ -684,6 +684,13 @@
                 clerk_page: $('#ac-s-pl-clerk').hasClass('on') ? 1 : 0,
                 button_label: $('#ac-s-btn-label').val(),
                 position: $('#ac-s-position').val()
+            }).then(function() {
+                // Save AAP settings to agent config.
+                return acAjax('save_agent_config', {
+                    aap_discovery: $('#ac-s-aap-discovery').val(),
+                    aap_credential_mode: $('#ac-s-aap-credential-mode').val(),
+                    aap_code_expiry: $('#ac-s-aap-code-expiry').val()
+                });
             }).then(function() { showToast('Settings saved.'); });
         });
 

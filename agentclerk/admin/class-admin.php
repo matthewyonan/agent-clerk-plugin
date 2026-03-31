@@ -404,6 +404,14 @@ class AgentClerk_Admin {
             $config['support_page_id'] = absint( wp_unslash( $_POST['support_page_id'] ) );
         }
 
+        // Agent-Assisted Purchasing settings.
+        $aap_fields = [ 'aap_discovery', 'aap_credential_mode', 'aap_code_expiry' ];
+        foreach ( $aap_fields as $aap_field ) {
+            if ( isset( $_POST[ $aap_field ] ) ) {
+                $config[ $aap_field ] = sanitize_text_field( wp_unslash( $_POST[ $aap_field ] ) );
+            }
+        }
+
         update_option( 'agentclerk_agent_config', wp_json_encode( $config ) );
         delete_transient( 'agentclerk_manifest_cache' );
 
