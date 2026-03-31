@@ -44,6 +44,8 @@ class AgentClerk_Widget {
 		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue_assets' ) );
 		add_action( 'woocommerce_after_add_to_cart_button', array( $this, 'product_page_embed' ) );
 		add_filter( 'the_content', array( $this, 'filter_page_content' ) );
+		add_action( 'wp_head', array( $this, 'output_agent_meta_tags' ) );
+		add_filter( 'robots_txt', array( $this, 'add_robots_agent_hints' ), 10, 2 );
 	}
 
 	/**
@@ -65,6 +67,46 @@ class AgentClerk_Widget {
 	/**
 	 * Conditionally enqueue public CSS and JS based on placement settings.
 	 */
+	/**
+	 * Output meta tags in <head> for AI agent discoverability.
+	 * Agents that parse HTML can find the API endpoints without prior knowledge.
+	 */
+	/**
+	 * Append AI agent discovery hints to robots.txt.
+	 *
+	 * @param string $output Existing robots.txt content.
+	 * @param bool   $public Whether the site is public.
+	 * @return string Modified robots.txt.
+	 */
+	public function add_robots_agent_hints( $output, $public ) {
+		if ( ! $public || get_option( 'agentclerk_plugin_status' ) !== 'active' ) {
+			return $output;
+		}
+		$site_url = get_site_url();
+		$output  .= "\n# AgentClerk AI Agent\n";
+		$output  .= '# Agent Card (A2A protocol): ' . $site_url . "/.well-known/agent-card.json\n";
+		$output  .= '# AI Manifest: ' . $site_url . "/ai-manifest.json\n";
+		$output  .= '# Chat endpoint: ' . $site_url . "/a2a/message:send\n";
+		return $output;
+	}
+
+	/**
+	 * Output meta tags in <head> for AI agent discoverability.
+	 * Agents that parse HTML can find the API endpoints without prior knowledge.
+	 */
+	public function output_agent_meta_tags() {
+		if ( get_option( 'agentclerk_plugin_status' ) !== 'active' ) {
+			return;
+		}
+		$site_url = get_site_url();
+		echo "\n<!-- AgentClerk: AI Agent Discovery -->\n";
+		echo '<link rel="agent-card" href="' . esc_url( $site_url . '/.well-known/agent-card.json' ) . '" type="application/json" />' . "\n";
+		echo '<link rel="ai-manifest" href="' . esc_url( $site_url . '/ai-manifest.json' ) . '" type="application/json" />' . "\n";
+		echo '<meta name="agent-protocol" content="a2a" />' . "\n";
+		echo '<meta name="agent-endpoint" content="' . esc_url( $site_url . '/a2a/message:send' ) . '" />' . "\n";
+		echo "<!-- /AgentClerk -->\n\n";
+	}
+
 	public function maybe_enqueue_assets() {
 		if ( get_option( 'agentclerk_plugin_status' ) !== 'active' ) {
 			return;
