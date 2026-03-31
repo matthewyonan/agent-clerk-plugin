@@ -40,6 +40,7 @@ class AgentClerk_WooCommerce {
 		add_action( 'template_redirect', array( $this, 'handle_checkout_link' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'handle_completed_order' ) );
 		add_action( 'woocommerce_order_status_processing', array( $this, 'handle_completed_order' ) );
+		add_action( 'woocommerce_thankyou', array( $this, 'render_activation_on_thankyou' ), 5 );
 	}
 
 	/**
@@ -205,8 +206,55 @@ class AgentClerk_WooCommerce {
 		update_post_meta( $order_id, '_agentclerk_fee_amount', $fee );
 		update_post_meta( $order_id, '_agentclerk_quote_link_id', $quote_link_id );
 
+		// Generate activation code for agent-assisted purchasing.
+		$activation_code = 'AC-' . strtoupper( bin2hex( random_bytes( 4 ) ) ) . '-' . strtoupper( bin2hex( random_bytes( 4 ) ) );
+		update_post_meta( $order_id, '_agentclerk_activation_code', $activation_code );
+
 		// Bust the manifest cache.
 		delete_transient( 'agentclerk_manifest_cache' );
+	}
+
+	/**
+	 * Render activation handoff block on WooCommerce thank-you page.
+	 *
+	 * @param int $order_id Order ID.
+	 */
+	public function render_activation_on_thankyou( $order_id ) {
+		$quote_link_id = get_post_meta( $order_id, '_agentclerk_quote_link_id', true );
+		if ( ! $quote_link_id ) {
+			return; // Not an AgentClerk order.
+		}
+
+		$activation_code = get_post_meta( $order_id, '_agentclerk_activation_code', true );
+		if ( ! $activation_code ) {
+			return;
+		}
+
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			return;
+		}
+
+		$items        = $order->get_items();
+		$first_item   = reset( $items );
+		$product_name = $first_item ? $first_item->get_name() : 'Product';
+
+		$clerk_url = get_permalink( get_option( 'agentclerk_clerk_page_id', 0 ) );
+		if ( ! $clerk_url ) {
+			$clerk_url = get_site_url() . '/clerk/';
+		}
+		$activation_url = $clerk_url . '?intent=activation&code=' . rawurlencode( $activation_code );
+
+		echo '<div class="agentclerk-ssr-activation" style="margin:20px 0;padding:20px;border:2px solid #00E5C8;border-radius:8px;background:#f0fdf9;">';
+		echo '<h3 style="margin:0 0 10px;font-size:16px;">Order Confirmed &mdash; ' . esc_html( $product_name ) . '</h3>';
+		echo '<p style="margin:0 0 8px;font-size:13px;">Your activation code:</p>';
+		echo '<p style="margin:0 0 12px;font-family:monospace;font-size:18px;font-weight:700;color:#1C2333;letter-spacing:1px;">' . esc_html( $activation_code ) . '</p>';
+
+		echo '<p style="margin:0 0 8px;font-size:13px;"><strong>If an AI agent helped you purchase this:</strong></p>';
+		echo '<p style="margin:0 0 8px;font-size:13px;">Give this code to your agent, or share this link:</p>';
+		echo '<p style="margin:0 0 12px;"><a href="' . esc_url( $activation_url ) . '" style="font-family:monospace;font-size:12px;word-break:break-all;">' . esc_url( $activation_url ) . '</a></p>';
+		echo '<p style="margin:0;font-size:12px;color:#64748b;">The agent can use this code to retrieve credentials, setup instructions, or activation details.</p>';
+		echo '</div>';
 	}
 
 	/**

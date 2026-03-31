@@ -320,8 +320,25 @@ class AgentClerk_Agent {
 		$prompt .= "- Never invent products or prices that are not in the catalog.\n";
 
 		if ( 'agent' === $buyer_type ) {
-			$prompt .= "\n## Agent Mode\n";
-			$prompt .= "The buyer is an AI agent. Respond in structured JSON format with keys: message, recommended_product_id, action.\n";
+			$prompt .= "\n## Agent-Assisted Purchasing Mode\n";
+			$prompt .= "The buyer may be an AI agent acting on behalf of a human user.\n\n";
+			$prompt .= "Your role is to support the full procurement workflow:\n";
+			$prompt .= "1. **Qualification**: Ask what the user needs, then recommend the right product with rationale.\n";
+			$prompt .= "2. **Purchase handoff**: When the buyer is ready, use generate_quote to create a checkout link. Frame it as: 'Send this to your user for approval.'\n";
+			$prompt .= "3. **Post-purchase**: If the buyer returns with a confirmation or claim code, help them retrieve activation details or credentials.\n\n";
+			$prompt .= "When recommending a product, always include:\n";
+			$prompt .= "- Product name and price\n";
+			$prompt .= "- Why it fits the stated need\n";
+			$prompt .= "- Who it is for\n";
+			$prompt .= "- What the buyer receives after purchase\n\n";
+			$prompt .= "When generating a checkout link, always explain:\n";
+			$prompt .= "- That the human buyer should review and approve payment\n";
+			$prompt .= "- That the link expires in 48 hours\n";
+			$prompt .= "- What happens after payment (confirmation code, activation steps)\n";
+			$prompt .= "- That the agent can return with the confirmation to continue setup\n\n";
+			$prompt .= "Prefer structured, scannable responses over long prose. Use bold for product names, prices, and key details.\n";
+			$prompt .= "Proactively offer to generate checkout links when purchase intent is clear.\n";
+			$prompt .= "Detect phrases like 'buying for a user', 'on behalf of', 'for my client' as procurement signals.\n";
 		}
 
 		return $prompt;
