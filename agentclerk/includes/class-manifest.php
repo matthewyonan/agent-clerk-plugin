@@ -101,7 +101,9 @@ class AgentClerk_Manifest {
 				'description' => $config['business_desc'] ?? get_bloginfo( 'description' ),
 				'url'         => get_site_url(),
 			),
-			'agent_endpoint'    => admin_url( 'admin-ajax.php' ) . '?action=agentclerk_chat',
+			'agent_endpoint'    => get_site_url() . '/a2a/message:send',
+			'agent_card'        => get_site_url() . '/.well-known/agent-card.json',
+			'chat_page'         => get_permalink( get_option( 'agentclerk_clerk_page_id', 0 ) ) ?: null,
 			'checkout_base_url' => get_site_url() . '/clerk-checkout/',
 			'products'          => $products,
 			'policies'          => array(

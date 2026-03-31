@@ -40,6 +40,34 @@ class AgentClerk_A2A {
 
 	private function __construct() {
 		add_action( 'template_redirect', array( $this, 'handle_request' ) );
+		// Serve .well-known/agent-card.json early — rewrite rules don't
+		// work for dotfile paths on most hosts (Apache/Nginx block them).
+		add_action( 'init', array( $this, 'handle_well_known' ) );
+	}
+
+	/**
+	 * Serve /.well-known/agent-card.json via early init hook.
+	 * This bypasses WordPress rewrite rules which fail for dotfile paths.
+	 */
+	public function handle_well_known() {
+		if ( ! isset( $_SERVER['REQUEST_URI'] ) ) {
+			return;
+		}
+		$uri  = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		$path = wp_parse_url( $uri, PHP_URL_PATH );
+
+		// Agent Card — dotfile paths are blocked by most server configs.
+		if ( '/.well-known/agent-card.json' === $path ) {
+			$this->serve_agent_card();
+		}
+
+		// A2A message endpoints — colons in URLs can fail on some hosts.
+		if ( '/a2a/message:send' === $path ) {
+			$this->handle_send_message( true );
+		}
+		if ( '/a2a/message:stream' === $path ) {
+			$this->handle_send_message( false );
+		}
 	}
 
 	/* =====================================================================
