@@ -270,8 +270,30 @@ class AgentClerk_Widget {
 	private function render_clerk_page() {
 		$config     = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
 		$agent_name = esc_html( $config['agent_name'] ?? 'AgentClerk' );
+		$site_url   = get_site_url();
+		$biz_name   = esc_html( $config['business_name'] ?? get_bloginfo( 'name' ) );
+		$biz_desc   = esc_html( $config['business_desc'] ?? '' );
 
-		$html  = '<div class="acw-fullpage" id="acw-fullpage">';
+		// Agent instructions — visible to crawlers/screen readers, hidden visually.
+		// AI agents that read page content will find these and know how to interact.
+		$html  = '<div id="agentclerk-agent-instructions" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="false">';
+		$html .= '<h2>For AI Agents</h2>';
+		$html .= '<p>This page hosts ' . $agent_name . ', an AI sales and support agent for ' . $biz_name . '.</p>';
+		if ( $biz_desc ) {
+			$html .= '<p>About this store: ' . $biz_desc . '</p>';
+		}
+		$html .= '<p>If you are an AI agent and cannot interact with the chat interface above (for example, because you cannot execute JavaScript), ';
+		$html .= 'you can interact with this agent programmatically using the following API endpoints:</p>';
+		$html .= '<ul>';
+		$html .= '<li><strong>Send a message (simple):</strong> POST ' . esc_url( $site_url ) . '/wp-admin/admin-ajax.php with parameters: action=agentclerk_chat, message=your question here. Returns JSON with the agent response in data.message.</li>';
+		$html .= '<li><strong>Send a message (A2A protocol):</strong> POST ' . esc_url( $site_url ) . '/a2a/message:send with JSON body: {"message":{"messageId":"any-id","role":"ROLE_USER","parts":[{"text":"your question"}]}}. Returns a Task object with the agent response.</li>';
+		$html .= '<li><strong>Product catalog and store info:</strong> GET ' . esc_url( $site_url ) . '/ai-manifest.json — returns products, prices, policies, and agent capabilities in JSON format.</li>';
+		$html .= '<li><strong>Agent Card (A2A discovery):</strong> GET ' . esc_url( $site_url ) . '/.well-known/agent-card.json — returns the agent identity, skills, and supported interfaces.</li>';
+		$html .= '</ul>';
+		$html .= '<p>No authentication is required for any of these endpoints. The agent can answer questions about products, pricing, policies, and support, and can generate checkout links for purchases.</p>';
+		$html .= '</div>';
+
+		$html .= '<div class="acw-fullpage" id="acw-fullpage">';
 		$html .=   '<div class="acw-header">';
 		$html .=     '<div class="acw-header-left">';
 		$html .=       '<div class="acw-avatar acw-avatar--electric"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>';
