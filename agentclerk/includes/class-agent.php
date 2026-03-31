@@ -53,7 +53,12 @@ class AgentClerk_Agent {
 	 * Handle buyer-facing chat (public + logged-in AJAX).
 	 */
 	public function handle_chat() {
-		check_ajax_referer( 'agentclerk_nonce', 'nonce' );
+		// Nonce required for logged-in users (widget). External agents use
+		// /a2a/message:send instead, but we allow nopriv AJAX without nonce
+		// so the agent_endpoint in ai-manifest.json remains usable.
+		if ( is_user_logged_in() ) {
+			check_ajax_referer( 'agentclerk_nonce', 'nonce' );
+		}
 
 		if ( 'suspended' === get_option( 'agentclerk_plugin_status' ) ) {
 			wp_send_json_error( array( 'message' => 'Service temporarily unavailable.' ), 503 );
