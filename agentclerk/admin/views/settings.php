@@ -145,6 +145,39 @@ $agentclerk_last_scan = get_option( 'agentclerk_last_scan_date', '' );
             </div>
             <div class="ac-co gn" style="margin-bottom:0"><span class="ac-co-i">&#10003;</span><div><?php printf( wp_kses( 'Manifest always active: <code style="font-family:\'DM Mono\',monospace;font-size:11px">%s/ai-manifest.json</code>', array( 'code' => array( 'style' => array() ) ) ), esc_html( $agentclerk_site_url ) ); ?></div></div>
         </div></div>
+
+        <div class="ac-card"><div class="ac-card-head"><h2><?php echo esc_html( 'Agent-Assisted Purchasing' ); ?></h2></div><div class="ac-card-body">
+            <div style="font-size:12px;color:var(--ac-text2);margin-bottom:12px"><?php echo esc_html( 'Controls for the server-rendered procurement surfaces that AI browsing agents use. These work without JavaScript.' ); ?></div>
+            <div class="ac-fg">
+                <label class="ac-fl"><?php echo esc_html( 'Discovery blocks' ); ?></label>
+                <select id="ac-s-aap-discovery">
+                    <option value="body_and_footer" <?php selected( $agentclerk_config['aap_discovery'] ?? 'body_and_footer', 'body_and_footer' ); ?>><?php echo esc_html( 'Body + footer (recommended)' ); ?></option>
+                    <option value="footer_only" <?php selected( $agentclerk_config['aap_discovery'] ?? 'body_and_footer', 'footer_only' ); ?>><?php echo esc_html( 'Footer only' ); ?></option>
+                    <option value="off" <?php selected( $agentclerk_config['aap_discovery'] ?? 'body_and_footer', 'off' ); ?>><?php echo esc_html( 'Off' ); ?></option>
+                </select>
+                <div class="ac-fn"><?php echo esc_html( 'Where to show "Agent-Assisted Purchasing Available" blocks for AI agents.' ); ?></div>
+            </div>
+            <div class="ac-fg">
+                <label class="ac-fl"><?php echo esc_html( 'Post-purchase credential display' ); ?></label>
+                <select id="ac-s-aap-credential-mode">
+                    <option value="retrieval_step" <?php selected( $agentclerk_config['aap_credential_mode'] ?? 'retrieval_step', 'retrieval_step' ); ?>><?php echo esc_html( 'One-time retrieval step (recommended)' ); ?></option>
+                    <option value="direct_display" <?php selected( $agentclerk_config['aap_credential_mode'] ?? 'retrieval_step', 'direct_display' ); ?>><?php echo esc_html( 'Direct display on activation page' ); ?></option>
+                </select>
+                <div class="ac-fn"><?php echo esc_html( 'How credentials are shown after purchase. Retrieval step is more secure.' ); ?></div>
+            </div>
+            <div class="ac-fg">
+                <label class="ac-fl"><?php echo esc_html( 'Activation code expiry' ); ?></label>
+                <select id="ac-s-aap-code-expiry">
+                    <option value="48" <?php selected( $agentclerk_config['aap_code_expiry'] ?? '48', '48' ); ?>><?php echo esc_html( '48 hours' ); ?></option>
+                    <option value="168" <?php selected( $agentclerk_config['aap_code_expiry'] ?? '48', '168' ); ?>><?php echo esc_html( '7 days' ); ?></option>
+                    <option value="720" <?php selected( $agentclerk_config['aap_code_expiry'] ?? '48', '720' ); ?>><?php echo esc_html( '30 days' ); ?></option>
+                    <option value="0" <?php selected( $agentclerk_config['aap_code_expiry'] ?? '48', '0' ); ?>><?php echo esc_html( 'Never expires' ); ?></option>
+                </select>
+                <div class="ac-fn"><?php echo esc_html( 'How long activation codes remain valid after purchase.' ); ?></div>
+            </div>
+            <div class="ac-co sl" style="margin-bottom:0"><span class="ac-co-i">&#8505;</span><span><?php echo esc_html( 'The /clerk page, product page blocks, and category page blocks are always active when their corresponding placement is enabled above.' ); ?></span></div>
+        </div></div>
+
         <div style="text-align:right;margin-top:8px"><button class="ac-btn ac-btn-p" id="ac-save-placement"><?php echo esc_html( 'Save' ); ?></button></div>
     </div>
 

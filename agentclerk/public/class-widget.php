@@ -88,6 +88,14 @@ class AgentClerk_Widget {
 		if ( get_option( 'agentclerk_plugin_status' ) !== 'active' ) {
 			return;
 		}
+
+		// Check merchant AAP discovery setting.
+		$config    = json_decode( get_option( 'agentclerk_agent_config', '{}' ), true );
+		$discovery = $config['aap_discovery'] ?? 'body_and_footer';
+		if ( 'off' === $discovery ) {
+			return;
+		}
+
 		// Skip pages that already have procurement surface.
 		$clerk_page_id = $this->get_clerk_page_id();
 		if ( $clerk_page_id && is_page( (int) $clerk_page_id ) ) {
