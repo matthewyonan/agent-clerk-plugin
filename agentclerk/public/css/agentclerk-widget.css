@@ -552,6 +552,12 @@
     margin-bottom: 8px;
 }
 
+.agentclerk-ssr h2 {
+    font-size: 18px;
+    margin: 24px 0 12px;
+    color: #1C2333;
+}
+
 .agentclerk-ssr form {
     display: flex;
     gap: 8px;
@@ -581,8 +587,119 @@
     background: #252E42;
 }
 
-.agentclerk-ssr-suggestions ul,
-.agentclerk-ssr-actions ul {
+/* Navigation — prominent action buttons */
+.agentclerk-ssr-nav ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 12px 0;
+}
+
+.agentclerk-ssr-nav a {
+    display: inline-block;
+    padding: 12px 22px;
+    background: #1C2333;
+    color: #00E5C8;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 6px rgba(28, 35, 51, 0.15);
+}
+
+.agentclerk-ssr-nav a:hover {
+    background: #252E42;
+    box-shadow: 0 4px 12px rgba(28, 35, 51, 0.25);
+}
+
+/* How it works — numbered steps */
+.agentclerk-ssr-how {
+    background: #f8f9fb;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 20px 0;
+}
+
+.agentclerk-ssr-how ol {
+    padding-left: 0;
+    counter-reset: steps;
+    list-style: none;
+    margin: 0;
+}
+
+.agentclerk-ssr-how li {
+    counter-increment: steps;
+    padding: 8px 0 8px 40px;
+    position: relative;
+    font-size: 14px;
+    line-height: 1.5;
+    border-bottom: 1px solid #eef1f5;
+}
+
+.agentclerk-ssr-how li:last-child {
+    border-bottom: none;
+}
+
+.agentclerk-ssr-how li::before {
+    content: counter(steps);
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 26px;
+    height: 26px;
+    background: #1C2333;
+    color: #00E5C8;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+/* Ask section */
+.agentclerk-ssr-ask {
+    margin: 20px 0;
+}
+
+/* Example tasks — clickable pills */
+.agentclerk-ssr-examples ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.agentclerk-ssr-examples a {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #f0f4f8;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    color: #1C2333;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.agentclerk-ssr-examples a:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+}
+
+/* Next action links — pills */
+.agentclerk-ssr-next {
+    margin: 20px 0;
+}
+
+.agentclerk-ssr-next ul {
     list-style: none;
     padding: 0;
     display: flex;
@@ -590,22 +707,24 @@
     gap: 8px;
 }
 
-.agentclerk-ssr-suggestions a,
-.agentclerk-ssr-actions a {
+.agentclerk-ssr-next a {
     display: inline-block;
-    padding: 6px 14px;
+    padding: 8px 16px;
     background: #f0f4f8;
-    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
     color: #1C2333;
     text-decoration: none;
     font-size: 13px;
+    transition: background 0.15s, border-color 0.15s;
 }
 
-.agentclerk-ssr-suggestions a:hover,
-.agentclerk-ssr-actions a:hover {
+.agentclerk-ssr-next a:hover {
     background: #e2e8f0;
+    border-color: #cbd5e1;
 }
 
+/* Conversation */
 .agentclerk-ssr-question {
     padding: 12px 16px;
     background: #f0f4f8;
@@ -625,19 +744,57 @@
     margin: 0 0 8px;
 }
 
+/* Purchase Handoff Block */
+.agentclerk-ssr-handoff {
+    background: #f0fdf9;
+    border: 2px solid #0D7A6B;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+}
+
+.agentclerk-ssr-handoff h3 {
+    margin: 0 0 10px;
+    font-size: 16px;
+    color: #0D7A6B;
+}
+
+.agentclerk-ssr-handoff p {
+    margin: 0 0 10px;
+    font-size: 14px;
+}
+
 .agentclerk-ssr-checkout-btn {
     display: inline-block;
-    padding: 10px 20px;
+    padding: 12px 28px;
     background: #1C2333;
     color: #00E5C8;
-    border-radius: 6px;
+    border-radius: 8px;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 15px;
     margin: 8px 0;
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(28, 35, 51, 0.2);
 }
 
 .agentclerk-ssr-checkout-btn:hover {
     background: #252E42;
+    box-shadow: 0 4px 12px rgba(28, 35, 51, 0.3);
+}
+
+/* Visible checkout URL — monospace, copyable appearance */
+.agentclerk-ssr-checkout-url {
+    font-family: 'DM Mono', 'Courier New', Consolas, monospace;
+    font-size: 12px;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    word-break: break-all;
+    user-select: all;
+    -webkit-user-select: all;
 }
 
 /* Product page SSR block */
@@ -679,6 +836,10 @@
     font-size: 12px;
 }
 
+.agentclerk-ssr-product a:hover {
+    background: #cbd5e1;
+}
+
 .agentclerk-ssr-product form {
     display: flex;
     gap: 6px;
@@ -702,6 +863,79 @@
     cursor: pointer;
 }
 
+/* Category / Shop page SSR block */
+.agentclerk-ssr-category {
+    margin-top: 20px;
+    padding: 18px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fafbfc;
+}
+
+.agentclerk-ssr-category h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    color: #1C2333;
+}
+
+.agentclerk-ssr-category p {
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.agentclerk-ssr-category ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.agentclerk-ssr-category a {
+    display: inline-block;
+    padding: 6px 14px;
+    background: #e2e8f0;
+    border-radius: 14px;
+    color: #1C2333;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background 0.15s;
+}
+
+.agentclerk-ssr-category a:hover {
+    background: #cbd5e1;
+}
+
+.agentclerk-ssr-category form {
+    display: flex;
+    gap: 6px;
+}
+
+.agentclerk-ssr-category input[type="text"] {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.agentclerk-ssr-category button {
+    padding: 8px 16px;
+    background: #1C2333;
+    color: #00E5C8;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.agentclerk-ssr-category button:hover {
+    background: #252E42;
+}
+
 /* Footer SSR block */
 .agentclerk-ssr-footer {
     margin-top: 24px;
@@ -709,6 +943,11 @@
     border-top: 1px solid #e2e8f0;
     background: #fafbfc;
     font-size: 13px;
+}
+
+.agentclerk-ssr-footer-inner {
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .agentclerk-ssr-footer p {
@@ -739,6 +978,10 @@
     cursor: pointer;
 }
 
+.agentclerk-ssr-footer button:hover {
+    background: #252E42;
+}
+
 .agentclerk-ssr-footer ul {
     list-style: none;
     padding: 0;
@@ -755,4 +998,8 @@
     color: #1C2333;
     text-decoration: none;
     font-size: 11px;
+}
+
+.agentclerk-ssr-footer a:hover {
+    background: #cbd5e1;
 }
