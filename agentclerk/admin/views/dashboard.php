@@ -47,7 +47,7 @@ $agentclerk_accrued_fees = (float) get_option( 'agentclerk_accrued_fees', 0 );
                 <?php
                 printf(
                     wp_kses(
-                        'You\'ve accrued <strong>$%s</strong> in fees. <strong style="color:var(--elec-dk)">Lifetime license &mdash; $49</strong> eliminates all per-sale fees permanently.',
+                        'Current accrued fees: <strong>$%s</strong>. A <strong style="color:var(--elec-dk)">Lifetime license ($49)</strong> is available to eliminate all per-sale fees.',
                         array( 'strong' => array( 'style' => array() ) )
                     ),
                     esc_html( number_format( $agentclerk_accrued_fees, 2 ) )

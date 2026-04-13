@@ -1,5 +1,5 @@
 === AgentClerk ===
-Contributors: matthewyonan
+Contributors: mnmatty, matthewyonan
 Tags: woocommerce, ai, sales, support, automation
 Requires at least: 6.2
 Tested up to: 6.9
@@ -48,8 +48,8 @@ This plugin connects to the following third-party services:
 
 1. **AgentClerk service** ([agentclerk.io](https://agentclerk.io))
    Used for: install registration, billing, fee tracking, TurnKey AI proxy, plugin support chat, and license management. The plugin communicates with the AgentClerk API at app.agentclerk.io during onboarding, when processing sales, and for billing operations.
-   * [Terms of Service](https://agentclerk.io/terms)
-   * [Privacy Policy](https://agentclerk.io/privacy)
+   * [Terms of Service](https://abrilliantway.com/terms/)
+   * [Privacy Policy](https://abrilliantway.com/privacy-policy/)
 
 2. **Anthropic API** ([anthropic.com](https://www.anthropic.com))
    Used for: AI-powered conversations with buyers. BYOK users connect directly to the Anthropic API using their own API key. TurnKey users connect through the AgentClerk proxy. API calls are made server-side — keys are never exposed to the browser.

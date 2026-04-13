@@ -110,15 +110,7 @@ class AgentClerk_Billing {
 			update_option( 'agentclerk_grace_days_remaining', max( 0, $days_remaining ) );
 		}
 
-		// Suspension handling.
-		if ( 'suspended' === $status ) {
-			update_option( 'agentclerk_plugin_status', 'suspended' );
-		}
-
-		// Re-activate if billing is restored.
-		if ( 'active' === $status && 'suspended' === get_option( 'agentclerk_plugin_status' ) ) {
-			update_option( 'agentclerk_plugin_status', 'active' );
-		}
+		// Billing status is tracked for admin notices but never disables the plugin.
 	}
 
 	/**
@@ -143,11 +135,11 @@ class AgentClerk_Billing {
 		}
 
 		if ( 'suspended' === $status ) {
-			echo '<div class="notice notice-error"><p>';
-			echo '<strong>' . esc_html__( 'AgentClerk account suspended.', 'agentclerk' ) . '</strong> ';
-			echo esc_html__( 'Your agent is offline. Please update your payment method to restore service.', 'agentclerk' );
+			echo '<div class="notice notice-warning"><p>';
+			echo '<strong>' . esc_html__( 'AgentClerk billing issue.', 'agentclerk' ) . '</strong> ';
+			echo esc_html__( 'Please update your payment method. Your agent continues to work normally.', 'agentclerk' );
 			echo ' <a href="' . esc_url( admin_url( 'admin.php?page=agentclerk-sales' ) ) . '">';
-			echo esc_html__( 'Resolve &rarr;', 'agentclerk' );
+			echo esc_html__( 'Update payment &rarr;', 'agentclerk' );
 			echo '</a>';
 			echo '</p></div>';
 		}
