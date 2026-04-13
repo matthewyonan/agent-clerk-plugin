@@ -32,7 +32,7 @@ $agentclerk_fee_rate = ( $agentclerk_tier === 'turnkey' ) ? '1.5% or $1.99 min' 
             <span style="flex:1;color:var(--text)" id="ac-ltm-cta-text">
                 <?php
                 echo wp_kses(
-                    'You\'ve accrued fees this month. <strong style="color:var(--elec-dk)">Lifetime license &mdash; $49</strong> eliminates all per-sale fees permanently.',
+                    'A <strong style="color:var(--elec-dk)">Lifetime license ($49)</strong> is available to eliminate all per-sale fees permanently.',
                     array( 'strong' => array( 'style' => array() ) )
                 );
                 ?>

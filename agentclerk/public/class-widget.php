@@ -85,7 +85,7 @@ class AgentClerk_Widget {
 	 * Skips /clerk and product pages (they have instructions in their own HTML).
 	 */
 	public function output_agent_instructions_footer() {
-		if ( get_option( 'agentclerk_plugin_status' ) !== 'active' ) {
+		if ( 'onboarding' === get_option( 'agentclerk_plugin_status' ) ) {
 			return;
 		}
 
@@ -138,7 +138,7 @@ class AgentClerk_Widget {
 	}
 
 	public function add_robots_agent_hints( $output, $public ) {
-		if ( ! $public || get_option( 'agentclerk_plugin_status' ) !== 'active' ) {
+		if ( ! $public || 'onboarding' === get_option( 'agentclerk_plugin_status' ) ) {
 			return $output;
 		}
 		$site_url = get_site_url();
@@ -154,7 +154,7 @@ class AgentClerk_Widget {
 	 * Agents that parse HTML can find the API endpoints without prior knowledge.
 	 */
 	public function output_agent_meta_tags() {
-		if ( get_option( 'agentclerk_plugin_status' ) !== 'active' ) {
+		if ( 'onboarding' === get_option( 'agentclerk_plugin_status' ) ) {
 			return;
 		}
 		$site_url = get_site_url();
@@ -167,7 +167,7 @@ class AgentClerk_Widget {
 	}
 
 	public function maybe_enqueue_assets() {
-		if ( get_option( 'agentclerk_plugin_status' ) !== 'active' ) {
+		if ( 'onboarding' === get_option( 'agentclerk_plugin_status' ) ) {
 			return;
 		}
 
@@ -254,7 +254,7 @@ class AgentClerk_Widget {
 	 * Output the product page chat embed after the Add to Cart button.
 	 */
 	public function product_page_embed() {
-		if ( get_option( 'agentclerk_plugin_status' ) !== 'active' ) {
+		if ( 'onboarding' === get_option( 'agentclerk_plugin_status' ) ) {
 			return;
 		}
 
@@ -333,7 +333,7 @@ class AgentClerk_Widget {
 	 * @return string Modified content.
 	 */
 	public function filter_page_content( $content ) {
-		if ( get_option( 'agentclerk_plugin_status' ) !== 'active' ) {
+		if ( 'onboarding' === get_option( 'agentclerk_plugin_status' ) ) {
 			return $content;
 		}
 
@@ -673,7 +673,7 @@ class AgentClerk_Widget {
 	 * Output procurement-focused SSR block on category and shop pages.
 	 */
 	public function category_page_embed() {
-		if ( get_option( 'agentclerk_plugin_status' ) !== 'active' ) {
+		if ( 'onboarding' === get_option( 'agentclerk_plugin_status' ) ) {
 			return;
 		}
 		if ( ! is_product_category() && ! is_shop() ) {

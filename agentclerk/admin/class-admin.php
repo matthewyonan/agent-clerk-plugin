@@ -66,19 +66,7 @@ class AgentClerk_Admin {
             return;
         }
 
-        if ( $status === 'suspended' ) {
-            remove_submenu_page( 'agentclerk', 'agentclerk' );
-            add_submenu_page(
-                'agentclerk',
-                'Suspended',
-                'Account Suspended',
-                'manage_options',
-                'agentclerk',
-                [ $this, 'render_suspended' ]
-            );
-        }
-
-        if ( $status === 'active' ) {
+        if ( $status === 'active' || $status === 'suspended' ) {
             add_submenu_page( 'agentclerk', 'Dashboard', 'Dashboard', 'manage_options', 'agentclerk' );
             add_submenu_page( 'agentclerk', 'Conversations', 'Conversations', 'manage_options', 'agentclerk-conversations', [ $this, 'render_conversations' ] );
             add_submenu_page( 'agentclerk', 'Sales', 'Sales', 'manage_options', 'agentclerk-sales', [ $this, 'render_sales' ] );
@@ -123,10 +111,6 @@ class AgentClerk_Admin {
 
     public function render_dashboard() {
         $status = get_option( 'agentclerk_plugin_status', 'onboarding' );
-        if ( $status === 'suspended' ) {
-            include AGENTCLERK_PLUGIN_DIR . 'admin/views/suspended.php';
-            return;
-        }
         if ( $status === 'onboarding' ) {
             $this->render_onboarding();
             return;
@@ -157,6 +141,7 @@ class AgentClerk_Admin {
     }
 
     public function render_suspended() {
+        // Billing notice page — non-blocking, agent continues to work.
         include AGENTCLERK_PLUGIN_DIR . 'admin/views/suspended.php';
     }
 
