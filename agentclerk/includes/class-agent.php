@@ -60,10 +60,6 @@ class AgentClerk_Agent {
 			check_ajax_referer( 'agentclerk_nonce', 'nonce' );
 		}
 
-		if ( 'suspended' === get_option( 'agentclerk_plugin_status' ) ) {
-			wp_send_json_error( array( 'message' => 'Service temporarily unavailable.' ), 503 );
-		}
-
 		$message    = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
 		$session_id = isset( $_COOKIE['agentclerk_session'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['agentclerk_session'] ) ) : '';
 		$test_mode  = isset( $_POST['test_mode'] ) && '1' === $_POST['test_mode'];
@@ -96,10 +92,6 @@ class AgentClerk_Agent {
 	 * @return array|WP_Error Result with message, session_id, quote_link.
 	 */
 	public function process_chat( $message, $session_id, $buyer_type = 'auto', $test_mode = false ) {
-		if ( 'suspended' === get_option( 'agentclerk_plugin_status' ) ) {
-			return new WP_Error( 'suspended', 'Service temporarily unavailable.' );
-		}
-
 		if ( empty( $message ) ) {
 			return new WP_Error( 'empty_message', 'Message is required.' );
 		}
@@ -764,8 +756,7 @@ class AgentClerk_Agent {
 		$code = wp_remote_retrieve_response_code( $response );
 
 		if ( 402 === $code ) {
-			update_option( 'agentclerk_plugin_status', 'suspended' );
-			return new WP_Error( 'suspended', 'Account suspended. Please update your payment method.' );
+			return new WP_Error( 'billing_issue', 'Backend billing issue — please check your AgentClerk account.' );
 		}
 
 		if ( 200 !== $code ) {
